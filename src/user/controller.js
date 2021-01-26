@@ -1,7 +1,7 @@
-var Users = require('./model')
+import { Users } from './model.js'
 
 // TODO: edit addUser, add error handling cases
-async function addUser(req, res) {
+export const addUser = async(req, res) => {
     try {
         console.log('Adding user :', req.body)
         const userID = req.body.UserID
@@ -21,10 +21,6 @@ async function addUser(req, res) {
     }
 }
 // TODO: implement getUser method
-async function getUser(req, res) {
+export const getUser = async(req, res) => {
     return res.status(200).send('TODO')
 }
-module.exports = {
-    addUser: addUser,
-    getUser: getUser
-} 

@@ -1,8 +1,10 @@
-const DataTypes = require('sequelize').DataTypes
-const db = require('../db').db
+import { Sequelize } from 'sequelize'
+import { db } from '../db/index.js'
+
+const DataTypes = Sequelize.DataTypes
 
 // TODO: @jessica edit DB schema 
-const Users = db.define('Users', {
+export const Users = db.define('Users', {
   UserID: {
     type: DataTypes.INTEGER,
     primaryKey: true,
@@ -12,5 +14,3 @@ const Users = db.define('Users', {
       allowNull: false
   }
 })
-
-module.exports = Users

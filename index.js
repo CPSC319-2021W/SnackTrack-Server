@@ -1,11 +1,11 @@
-const dotenv = require('dotenv')
+import dotenv from 'dotenv'
 dotenv.config()
 
-const app = require('./app')
-var  db = require('./src/db')
+import app from './app.js'
+import  { connect } from './src/db/index.js'
 
 const start = async () => {
-  await db.connect()
+  await connect()
   app.listen(app.get('port'), () => {
     console.log(
       '  App is running at http://localhost:%d in %s mode',

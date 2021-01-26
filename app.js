@@ -1,16 +1,16 @@
-var express = require('express')
-var bodyParser = require('body-parser')
-var userRouter = require('./src/user')
+import express from 'express'
+import userRouter from './src/user/index.js'
 
 const app = express()
 
-app.set('port', process.env.PORT)
-// app.use(bodyParser.json())
+app.set('port', '5050')
+// TODO: update .env
+// app.set('port', process.env.PORT)
 app.use(express.urlencoded({ extended: false }))
 app.use(express.json())
 app.use('/user', userRouter)
 
-module.exports = app;
+export default app
 
 // TODO: @hyunuk Add necessary features.
 // var createError = require('http-errors')

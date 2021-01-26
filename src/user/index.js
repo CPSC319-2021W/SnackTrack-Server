@@ -1,7 +1,9 @@
-var router = require('express').Router()
-var controller = require('./controller')
+import { Router } from 'express'
+import { addUser, getUser } from './controller.js'
 
-router.post('/', controller.addUser)
-router.post('/:userID', controller.getUser)
+const router = Router()
 
-module.exports = router
+router.post('/', addUser)
+router.post('/:userID', getUser)
+
+export default router

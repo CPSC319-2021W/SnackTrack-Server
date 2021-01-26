@@ -1,8 +1,13 @@
-var Sequelize = require('sequelize')
+import { Sequelize } from 'sequelize'
 
-const db = new Sequelize(process.env.DB_CONNECTION)
+//TODO: update .env
+export const db = new Sequelize('snacktrack', 'snack', 'track', {
+  host: 'localhost',
+  dialect: 'postgres'
+});
 
-async function connect() {
+
+export const connect = async () => {
   try {
     await db.authenticate()
     console.log('Connection has been established successfully.')
@@ -13,10 +18,5 @@ async function connect() {
   }
 }
 
-const disconnect = () => db.close()
+export const disconnect = () => db.close()
 
-module.exports = {
-  db: db,
-  connect : connect,
-  disconnect: disconnect
-}
