@@ -4,13 +4,7 @@ import { Users } from './model.js'
 export const addUser = async(req, res) => {
     try {
         console.log('Adding user :', req.body)
-        const userID = req.body.UserID
-        const userName = req.body.Username
-
-        const user = {
-            UserID: userID,
-            Username: userName
-          }
+        const user = req.body
     
         const result = await Users.create(user)
         console.log('Successfully added : ', result)
