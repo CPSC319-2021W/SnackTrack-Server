@@ -1,8 +1,7 @@
-var express = require('express')
-var addUser = require('./controller')
-var router = express.Router()
+var router = require('express').Router()
+var controller = require('./controller')
 
-/* GET users listing. */
-router.post('/', addUser)
+router.post('/', controller.addUser)
+router.post('/:userID', controller.getUser)
 
-module.exports = router;
+module.exports = router

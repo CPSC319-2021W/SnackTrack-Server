@@ -1,7 +1,30 @@
-var express = require('express')
+var Users = require('./model')
 
-const addUser = async (require, res, next) => {
-    return res.send('respond with a resource');
+// TODO: edit addUser, add error handling cases
+async function addUser(req, res) {
+    try {
+        console.log('Adding user :', req.body)
+        const userID = req.body.UserID
+        const userName = req.body.Username
+
+        const user = {
+            UserID: userID,
+            Username: userName
+          }
+    
+        const result = await Users.create(user)
+        console.log('Successfully added : ', result)
+        res.sendStatus(201)
+
+    } catch(err) {
+        return res.status(400).send({ Error: err })
+    }
 }
-
-module.exports = addUser
+// TODO: implement getUser method
+async function getUser(req, res) {
+    return res.status(200).send('TODO')
+}
+module.exports = {
+    addUser: addUser,
+    getUser: getUser
+} 

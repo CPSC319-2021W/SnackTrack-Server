@@ -15,6 +15,8 @@ async function connect() {
 
 const disconnect = () => db.close()
 
-exports.connect = connect
-exports.db = db
-exports.disconnect = disconnect
+module.exports = {
+  db: db,
+  connect : connect,
+  disconnect: disconnect
+}

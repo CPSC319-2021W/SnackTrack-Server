@@ -5,9 +5,9 @@ var userRouter = require('./src/user')
 const app = express()
 
 app.set('port', process.env.PORT)
-app.use(bodyParser.json())
+// app.use(bodyParser.json())
 app.use(express.urlencoded({ extended: false }))
-
+app.use(express.json())
 app.use('/user', userRouter)
 
 module.exports = app;
