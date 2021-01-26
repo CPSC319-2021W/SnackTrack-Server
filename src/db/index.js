@@ -1,7 +1,8 @@
 import { Sequelize } from 'sequelize'
+import dotenv from 'dotenv'
+dotenv.config()
 
-//TODO: update .env
-export const db = new Sequelize('snacktrack', 'snack', 'track', {
+export const db = new Sequelize(process.env.DB_TABLENAME, process.env.DB_USERID, process.env.DB_PASSWORD, {
   host: 'localhost',
   dialect: 'postgres'
 });
