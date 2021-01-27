@@ -3,7 +3,7 @@ import { db } from '../db/index.js'
 
 const DataTypes = Sequelize.DataTypes
 
-// TODO: @jessica edit DB schema 
+// TODO
 export const Users = db.define('Users', {
   UserID: {
     type: DataTypes.INTEGER,
