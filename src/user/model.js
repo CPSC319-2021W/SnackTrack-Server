@@ -9,8 +9,20 @@ export const Users = db.define('Users', {
     type: DataTypes.INTEGER,
     primaryKey: true,
   },
-  Username: {
-      type: DataTypes.STRING,
+  userName: {
+      type: DataTypes.STRING(16),
       allowNull: false
+  },
+  emailAddress:  {
+    type: DataTypes.STRING(128),
+    allowNull: false
+  },
+  balance: {
+    type: DataTypes.INTEGER,
+    allowNull: true
+  },
+  isActive: {
+    type: DataTypes.BOOLEAN,
+    allowNull: true
   }
 })

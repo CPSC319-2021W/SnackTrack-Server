@@ -11,9 +11,10 @@ export const addUser = async(req, res) => {
         res.sendStatus(201)
 
     } catch(err) {
-        return res.status(400).send({ Error: err })
+        return res.status(400).send({ Error: err.message })
     }
 }
+
 // TODO: implement getUser method
 export const getUser = async(req, res) => {
     return res.status(200).send('TODO')
