@@ -15,6 +15,9 @@ export const db = new Sequelize(
           require: true,
           rejectUnauthorized: false 
       }
+    },
+    define: {
+      timestamps: false
     }
   }
 );

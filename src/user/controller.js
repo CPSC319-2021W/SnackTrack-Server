@@ -1,16 +1,16 @@
 import { Users } from './model.js'
 
-// TODO: edit addUser, add error handling cases
+var notUniqueErrorCode = "23505" 
+
 export const addUser = async(req, res) => {
     try {
-        console.log('Adding user :', req.body)
         const user = req.body
-    
         const result = await Users.create(user)
-        console.log('Successfully added : ', result)
-        res.sendStatus(201)
-
+        res.status(201).send(result)
     } catch(err) {
+        if(err.parent.code = notUniqueErrorCode) {
+            return res.status(409).send({ Error: err.message })
+        }
         return res.status(400).send({ Error: err.message })
     }
 }
