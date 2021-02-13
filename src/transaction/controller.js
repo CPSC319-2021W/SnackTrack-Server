@@ -4,7 +4,6 @@ import { db } from "../db"
 // Return all transactions
 export const getTransactions = async(req, res) => {
     try {
-        console.log("Getting all transactions")
 
         const transactions =  await Transactions.findAll()
 
