@@ -9,7 +9,6 @@ export const getTransactions = async(req, res) => {
 
         const response = JSON.stringify(transactions)
 
-        console.log("Successfully got all transactions")
         res.status(201).json(response)
 
     } catch (err) {
