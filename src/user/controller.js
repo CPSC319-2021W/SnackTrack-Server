@@ -1,5 +1,4 @@
 import { Users } from './model.js'
-import { Admins} from '../admin/model.js'
 
 // Reference: PostgreSQL error code documentation
 // https://www.postgresql.org/docs/8.2/errcodes-appendix.html
@@ -12,8 +11,8 @@ export const addUser = async(req, res) => {
     try {
         const user = req.body
         // TODO: Auto-populate from GAuth (Ticket: SNAK-72)
-        user.firstname = "Fname"
-        user.lastname = "Lname"
+        user.first_name = "Fname"
+        user.last_name = "Lname"
 
         const result = await Users.create(user)
         res.status(201).send(result)
