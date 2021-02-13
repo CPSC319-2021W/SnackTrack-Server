@@ -1,5 +1,5 @@
 import { Users } from './model.js'
-import { Admins} from '../admin/model.js'
+import { Admins } from '../admin/model.js'
 
 // Reference: PostgreSQL error code documentation
 // https://www.postgresql.org/docs/8.2/errcodes-appendix.html
@@ -27,21 +27,22 @@ export const addUser = async(req, res) => {
 
 export const getUser = async(req, res) => {
     try {
-        // TODO : Add logic checking if the requesting user is authorized (Ticket: SANK-78)
+        // TODO : Add logic checking if the requesting user is authorized (Ticket: SNAK-78)
         const userId = req.params.userId
 
         const resultFromDB = await Users.findByPk(userId)
-        if(resultFromDB === null) throw new Error(404)
+        if (resultFromDB === null) throw new Error(404)
         const response = resultFromDB.toJSON()
 
-        const isAdmin = await Admins.findOne({where: {userid: userId}})
-        isAdmin === null ? response.isAdmin = false : response.isAdmin = true
+        const isAdmin = await Admins.findOn({ 
+            where: { userid : userId }
+        })
+        response.isAdmin = Boolean(isAdmin) ?? false
 
-        res.json(response)
-        return res.status(200)
+        return res.status(200).json(response)
         
     } catch (err) {
-        if(err.message === NOT_FOUND) return res.status(404).send({Error: "userid doesn't exist in the users table"})
+        if (err.message === NOT_FOUND) return res.status(404).send({ Error: "userid doesn't exist in the users table" })
         return res.status(500).send({ Error: err.message })
     }
 }
