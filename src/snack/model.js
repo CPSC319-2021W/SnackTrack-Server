@@ -2,30 +2,30 @@ import { db } from '../db/index.js';
 import * as DataTypes from "sequelize";
 
 const SnackTypes = db.define('snackTypes', {
-    snacktypeid: {
+    snack_type_id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
     },
-    snacktypename: {
+    snack_type_name: {
         type: DataTypes.STRING(128),
         allowNull: false
     },
-    snacktypecode: {
+    snack_type_code: {
         type: DataTypes.STRING(12),
         allowNull: false
     }
-})
+}, {underscored: true})
 
 const Snacks = db.define('snacks', {
-    snackid: {
+    snack_id: {
         type: DataTypes.INTEGER,
         primaryKey: true
     },
-    snackname: {
+    snack_name: {
         type: DataTypes.STRING(128),
         allowNull: false
     },
-    imageuri: {
+    image_uri: {
         type: DataTypes.STRING,
         allowNull: false
     },
@@ -33,22 +33,22 @@ const Snacks = db.define('snacks', {
         type: DataTypes.INTEGER,
         allowNull: false
     },
-    isactive: {
+    is_active: {
         type: DataTypes.BOOLEAN,
         allowNull: false
     },
-    orderthreshold: {
+    order_threshold: {
         type: DataTypes.INTEGER
     },
-    lastupdatedtm: {
+    last_update_dtm: {
         type: DataTypes.DATE,
         allowNull: false
     },
-    lastupdateby: {
+    last_update_by: {
         type: DataTypes.STRING(16),
         allowNull: false
     }
-})
+}, {underscored: true})
 
 Snacks.belongsTo(SnackTypes, {
     foreignKey: {
