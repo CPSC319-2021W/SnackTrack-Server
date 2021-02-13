@@ -12,6 +12,12 @@ export const Users = db.define('users', {
   username: {
       type: DataTypes.STRING,
   },
+  firstname: {
+    type: DataTypes.STRING,
+  },
+  lastname: {
+    type: DataTypes.STRING
+  },
   emailaddress:  {
     type: DataTypes.STRING,
   },
