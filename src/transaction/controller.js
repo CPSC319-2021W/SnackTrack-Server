@@ -12,7 +12,6 @@ export const getTransactions = async(req, res) => {
         res.status(201).json(response)
 
     } catch (err) {
-        console.log("Error : Not Authorized")
         return res.status(401).send({ Error: err.message })
     }
 }
