@@ -1,5 +1,5 @@
 import { Transactions } from "./model";
-import {db} from "../db";
+import { db } from "../db"
 
 // Return all transactions
 export const getTransactions = async(req, res) => {
