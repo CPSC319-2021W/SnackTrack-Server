@@ -1,6 +1,6 @@
 import { Sequelize } from 'sequelize'
 import { db } from '../db/index.js'
-import { Users } from "../user/model";
+import { Users } from "../user/model"
 
 const DataTypes = Sequelize.DataTypes
 
