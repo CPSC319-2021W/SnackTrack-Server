@@ -27,6 +27,7 @@ export const addUser = async(req, res) => {
 
 export const getUser = async(req, res) => {
     try {
+        // TODO : Add logic checking if the requesting user is authorized (Ticket: SANK-78)
         const userId = req.params.userId
 
         const resultFromDB = await Users.findByPk(userId)
