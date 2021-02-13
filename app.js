@@ -1,6 +1,5 @@
 import express from 'express'
 import userRouter from './src/user/index.js'
-import adminRouter from './src/admin/index.js'
 import dotenv from 'dotenv'
 dotenv.config()
 
