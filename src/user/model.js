@@ -4,7 +4,7 @@ import { db } from '../db/index.js'
 const DataTypes = Sequelize.DataTypes
 
 export const Users = db.define('users', {
-  userid: {
+  user_id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true
@@ -12,13 +12,19 @@ export const Users = db.define('users', {
   username: {
       type: DataTypes.STRING,
   },
-  emailaddress:  {
+  first_name: {
+    type: DataTypes.STRING,
+  },
+  last_name: {
+    type: DataTypes.STRING
+  },
+  email_address:  {
     type: DataTypes.STRING,
   },
   balance: {
     type: DataTypes.INTEGER,
   },
-  isactive: {
+  is_active: {
     type: DataTypes.BOOLEAN,
   }
 })

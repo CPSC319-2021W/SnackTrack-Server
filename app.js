@@ -10,7 +10,6 @@ app.set('port', process.env.PORT)
 app.use(express.urlencoded({ extended: false }))
 app.use(express.json())
 app.use('/users', userRouter)
-app.use('/admins', adminRouter)
 
 export default app
 
