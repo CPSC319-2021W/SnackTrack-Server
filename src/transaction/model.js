@@ -1,44 +1,45 @@
 import { Sequelize } from 'sequelize'
 import { db } from '../db/index.js'
+import { Users } from "../user/model";
 
 const DataTypes = Sequelize.DataTypes
 
 // Transactions model
 export const Transactions = db.define('transactions', {
-    transactionid: {
+    transaction_id: {
         type: DataTypes.INTEGER,
         primaryKey: true
     },
-    userid: {
+    user_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
         onDelete: 'cascade',
         references: {
-            model: Users
-            key: 'userid'
+            model: Users,
+            key: 'user_id'
         }
     },
-    transactiontypeid: {
+    transactiontype_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
             model: TransactionTypes,
-            key: transactiontypeid
+            key: transactiontype_id
         }
     },
-    paymenthistoryid: {
+    paymenthistory_id: {
         type: DataTypes.INTEGER,
         onDelete: 'cascade',
         references: {
             model: PaymentHistory,
-            key: 'paymenthistoryid'
+            key: 'paymenthistory_id'  // payment_history-id ?
         }
     },
-    snackname: {
-        type: DataTypes.STRING,
+    snack_name: {
+        type: DataTypes.STRING(128),
         allowNull: false
     },
-    transactionamount: {
+    transaction_amount: {
         type: DataTypes.INTEGER,
         allowNull: false
     },
@@ -46,7 +47,7 @@ export const Transactions = db.define('transactions', {
         type: DataTypes.INTEGER,
         allowNull: false
     },
-    transactiondtm: {
+    transaction_dtm: {
         type: 'TIMESTAMP',
         allowNull: false
     }
@@ -54,16 +55,16 @@ export const Transactions = db.define('transactions', {
 
 // TransactionTypes model
 export const TransactionTypes = db.define('transactiontypes', {
-    transactiontypeid: {
+    transactiontype_id: {
         type: DataTypes.INTEGER,
         primaryKey: true
     },
-    transactiontypename: {
-        type: DataTypes.STRING,
+    transactiontype_name: {
+        type: DataTypes.STRING(128),
         allowNull: false
     },
-    transactiontypecode: {
-        type: DataTypes.STRING,
+    transactiontype_code: {
+        type: DataTypes.STRING(2),
         allowNull: false
     }
 })
