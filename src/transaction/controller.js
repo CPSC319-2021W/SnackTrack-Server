@@ -1,4 +1,4 @@
-import { Transactions } from "./model";
+import { Transactions } from "./model"
 import { db } from "../db"
 
 // Return all transactions
