@@ -1,20 +1,48 @@
 import { Users } from './model.js'
+import { Admins } from '../admin/model.js'
 
-// TODO: edit addUser, add error handling cases
+// Reference: PostgreSQL error code documentation
+// https://www.postgresql.org/docs/8.2/errcodes-appendix.html
+// 23505 = UNIQUE_VIOLATION
+const UNIQUE_VIOLATION = "23505" 
+
+const NOT_FOUND = "404"
+
 export const addUser = async(req, res) => {
     try {
-        console.log('Adding user :', req.body)
         const user = req.body
-    
-        const result = await Users.create(user)
-        console.log('Successfully added : ', result)
-        res.sendStatus(201)
+        // TODO: Auto-populate from GAuth (Ticket: SNAK-72)
+        user.first_name = "Fname"
+        user.last_name = "Lname"
 
-    } catch(err) {
-        return res.status(400).send({ Error: err })
+        const result = await Users.create(user)
+        res.status(201).send(result)
+    } catch (err) {
+        if(err.parent.code === UNIQUE_VIOLATION) {
+            return res.status(409).send({ Error: err.message })
+        }
+        return res.status(400).send({ Error: err.message })
     }
 }
-// TODO: implement getUser method
+
 export const getUser = async(req, res) => {
-    return res.status(200).send('TODO')
+    try {
+        // TODO : Add logic checking if the requesting user is authorized (Ticket: SNAK-78)
+        const userId = req.params.userId
+
+        const resultFromDB = await Users.findByPk(userId)
+        if (resultFromDB === null) throw new Error(404)
+        const response = resultFromDB.toJSON()
+
+        const isAdmin = await Admins.findOn({ 
+            where: { userid : userId }
+        })
+        response.isAdmin = Boolean(isAdmin) ?? false
+
+        return res.status(200).json(response)
+        
+    } catch (err) {
+        if (err.message === NOT_FOUND) return res.status(404).send({ Error: "userid doesn't exist in the users table" })
+        return res.status(500).send({ Error: err.message })
+    }
 }
