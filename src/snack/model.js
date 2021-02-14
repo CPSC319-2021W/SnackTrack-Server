@@ -59,11 +59,4 @@ const Snacks = db.define('snacks', {
     }
 }, {underscored: true})
 
-// Are we not using this v?
-// Snacks.belongsTo(SnackTypes, {
-//     foreignKey: {
-//         allowNull: false
-//     }
-// })
-
 export {SnackTypes, Snacks}
