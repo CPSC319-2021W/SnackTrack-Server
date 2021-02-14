@@ -11,7 +11,7 @@ const SnackTypes = db.define('snackTypes', {
         allowNull: false
     },
     snack_type_code: {
-        type: DataTypes.STRING(12),
+        type: DataTypes.STRING(128),
         allowNull: false
     }
 }, {underscored: true})
@@ -19,9 +19,18 @@ const SnackTypes = db.define('snackTypes', {
 const Snacks = db.define('snacks', {
     snack_id: {
         type: DataTypes.INTEGER,
-        primaryKey: true
+        primaryKey: true,
+        autoIncrement: true
+    },
+    snack_type_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false
     },
     snack_name: {
+        type: DataTypes.STRING(128),
+        allowNull: false
+    },
+    description: {
         type: DataTypes.STRING(128),
         allowNull: false
     },
@@ -45,16 +54,16 @@ const Snacks = db.define('snacks', {
         allowNull: false
     },
     last_update_by: {
-        type: DataTypes.STRING(16),
+        type: DataTypes.STRING(128),
         allowNull: false
     }
 }, {underscored: true})
 
-Snacks.belongsTo(SnackTypes, {
-    foreignKey: {
-        allowNull: false
-    }
-})
+// Are we not using this v?
+// Snacks.belongsTo(SnackTypes, {
+//     foreignKey: {
+//         allowNull: false
+//     }
+// })
 
 export {SnackTypes, Snacks};
-
