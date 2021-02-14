@@ -24,7 +24,7 @@ export const Transactions = db.define('transactions', {
         allowNull: false,
         references: {
             model: TransactionTypes,
-            key: transaction_type_id
+            key: 'transaction_type_id'
         }
     },
     payment_history_id: {
