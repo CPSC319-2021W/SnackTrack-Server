@@ -6,10 +6,9 @@ export const getTransactions = async(req, res) => {
     try {
 
         const transactions =  await Transactions.findAll()
-
         const response = JSON.stringify(transactions)
 
-        res.status(201).json(response)
+        return res.status(201).send(response)
 
     } catch (err) {
         return res.status(401).send({ Error: err.message })
