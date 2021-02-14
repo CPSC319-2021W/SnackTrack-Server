@@ -34,10 +34,10 @@ export const getUser = async(req, res) => {
         if (resultFromDB === null) throw new Error(404)
         const response = resultFromDB.toJSON()
 
-        const isAdmin = await Admins.findOn({ 
-            where: { userid : userId }
+        const isAdmin = await Admins.findOne({ 
+            where: { user_id : userId }
         })
-        response.isAdmin = Boolean(isAdmin) ?? false
+        response.is_admin = Boolean(isAdmin) ?? false
 
         return res.status(200).json(response)
         
