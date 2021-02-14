@@ -1,5 +1,8 @@
 import { Transactions } from "./model.js"
 
+const BAD_REQUEST = "400"
+const NOT_AUTHORIZED = "401"
+
 // Return all transactions
 export const getTransactions = async(req, res) => {
     try {
@@ -14,20 +17,20 @@ export const getTransactions = async(req, res) => {
     }
 }
 
-// export const addTransaction = async(req, res) => {
-//     try {
-//         console.log("Adding a new transaction")
-//         const transaction = req.body
-//
-//         const result = await Transactions.create(transaction)
-//         console.log('Successfully added : ', result)
-//         res.sendStatus(201)
-//         // 201 Created
-//
-//         console.log("Successfully added a new transaction")
-//     } catch (err) {
-//         // 400 Bad Request
-//         // 401 Not Authorized
-//         // 409 Conflict
-//     }
-// }
+export const addTransaction = async(req, res) => {
+    try {
+        const transaction = req.body
+
+        // Transaction date in ISO standard format
+        transaction.transaction_dtm = new Date().toISOString()
+
+        const result = await Transactions.create(transaction)
+
+        return res.status(201).send(result)
+
+    } catch (err) {
+        if (err.message === BAD_REQUEST) return res.status(400).send({ Error: "Bad Request" })
+        else if (err.message === NOT_AUTHORIZED) return res.status(401).send({ Error: "Not Authorized" })
+        else return res.status(409).send({ Error: "Conflict" })
+    }
+}

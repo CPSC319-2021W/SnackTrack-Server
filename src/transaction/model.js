@@ -8,7 +8,8 @@ const DataTypes = Sequelize.DataTypes
 export const Transactions = db.define('transactions', {
     transaction_id: {
         type: DataTypes.INTEGER,
-        primaryKey: true
+        primaryKey: true,
+        autoIncrement: true
     },
     user_id: {
         type: DataTypes.INTEGER,
