@@ -1,6 +1,6 @@
 import { Sequelize } from 'sequelize'
 import { db } from '../db/index.js'
-import { Users } from "../user/model"
+import { Users } from "../user/model.js"
 
 const DataTypes = Sequelize.DataTypes
 
@@ -13,27 +13,27 @@ export const Transactions = db.define('transactions', {
     user_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        onDelete: 'cascade',
-        references: {
-            model: 'users',
-            key: 'user_id'
-        }
+        // onDelete: 'cascade',
+        // references: {
+        //     model: 'users',
+        //     key: 'user_id'
+        // }
     },
     transaction_type_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        references: {
-            model: 'transactionTypes',
-            key: 'transaction_type_id'
-        }
+        // references: {
+        //     model: 'transactionTypes',
+        //     key: 'transaction_type_id'
+        // }
     },
     payment_history_id: {
         type: DataTypes.INTEGER,
-        onDelete: 'cascade',
-        references: {
-            model: 'paymentHistory',
-            key: 'payment_history_id'
-        }
+        // onDelete: 'cascade',
+        // references: {
+        //     model: 'paymentHistory',
+        //     key: 'payment_history_id'
+        // }
     },
     snack_name: {
         type: DataTypes.STRING(128),

@@ -1,5 +1,5 @@
 import { Users } from './model.js'
-import { Admins } from '../admin/model.js'
+// import { Admins } from '../admin/model.js'
 
 // Reference: PostgreSQL error code documentation
 // https://www.postgresql.org/docs/8.2/errcodes-appendix.html
