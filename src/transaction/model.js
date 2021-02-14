@@ -19,20 +19,20 @@ export const Transactions = db.define('transactions', {
             key: 'user_id'
         }
     },
-    transactiontype_id: {
+    transaction_type_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
             model: TransactionTypes,
-            key: transactiontype_id
+            key: transaction_type_id
         }
     },
-    paymenthistory_id: {
+    payment_history_id: {
         type: DataTypes.INTEGER,
         onDelete: 'cascade',
         references: {
             model: PaymentHistory,
-            key: 'paymenthistory_id'  // payment_history-id ?
+            key: 'payment_history_id'
         }
     },
     snack_name: {
@@ -55,15 +55,15 @@ export const Transactions = db.define('transactions', {
 
 // TransactionTypes model
 export const TransactionTypes = db.define('transactiontypes', {
-    transactiontype_id: {
+    transaction_type_id: {
         type: DataTypes.INTEGER,
         primaryKey: true
     },
-    transactiontype_name: {
+    transaction_type_name: {
         type: DataTypes.STRING(128),
         allowNull: false
     },
-    transactiontype_code: {
+    transaction_type_code: {
         type: DataTypes.STRING(2),
         allowNull: false
     }
