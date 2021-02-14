@@ -15,7 +15,7 @@ export const Transactions = db.define('transactions', {
         allowNull: false,
         onDelete: 'cascade',
         references: {
-            model: Users,
+            model: 'users',
             key: 'user_id'
         }
     },
@@ -23,7 +23,7 @@ export const Transactions = db.define('transactions', {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
-            model: TransactionTypes,
+            model: 'transactionTypes',
             key: 'transaction_type_id'
         }
     },
@@ -31,7 +31,7 @@ export const Transactions = db.define('transactions', {
         type: DataTypes.INTEGER,
         onDelete: 'cascade',
         references: {
-            model: PaymentHistory,
+            model: 'paymentHistory',
             key: 'payment_history_id'
         }
     },
@@ -54,7 +54,7 @@ export const Transactions = db.define('transactions', {
 })
 
 // TransactionTypes model
-export const TransactionTypes = db.define('transactiontypes', {
+export const TransactionTypes = db.define('transactionTypes', {
     transaction_type_id: {
         type: DataTypes.INTEGER,
         primaryKey: true
