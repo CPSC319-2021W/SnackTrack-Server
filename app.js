@@ -9,7 +9,7 @@ const app = express()
 app.set('port', process.env.PORT)
 app.use(express.urlencoded({ extended: false }))
 app.use(express.json())
-app.use('/user', userRouter)
+app.use('/users', userRouter)
 app.use('/snack', snackRouter)
 
 export default app
