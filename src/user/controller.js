@@ -40,7 +40,6 @@ export const getUser = async(req, res) => {
         response.is_admin = Boolean(isAdmin) ?? false
 
         return res.status(200).json(response)
-        
     } catch (err) {
         if (err.message === NOT_FOUND) return res.status(404).send({ Error: "userid doesn't exist in the users table" })
         return res.status(500).send({ Error: err.message })
