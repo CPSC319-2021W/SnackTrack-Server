@@ -1,6 +1,6 @@
 import express from 'express'
 import userRouter from './src/user/index.js'
-// import snackRouter from './src/snack/index.js'
+import snackRouter from './src/snack/index.js'
 import dotenv from 'dotenv'
 dotenv.config()
 

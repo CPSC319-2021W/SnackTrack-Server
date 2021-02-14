@@ -1,9 +1,9 @@
-import { Router } from 'express';
-import { addSnack, getSnacks } from "./controller.js";
+import { Router } from 'express'
+import { addSnack, getSnacks } from "./controller.js"
 
-const router = Router();
+const router = Router()
 
-router.post('/', addSnack);
-router.get('/', getSnacks);
+router.post('/', addSnack)
+router.get('/', getSnacks)
 
-export default router;
+export default router

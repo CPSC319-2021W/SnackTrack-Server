@@ -1,5 +1,5 @@
-import { db } from '../db/index.js';
-import * as DataTypes from "sequelize";
+import { db } from '../db/index.js'
+import * as DataTypes from "sequelize"
 
 const SnackTypes = db.define('snackTypes', {
     snack_type_id: {
@@ -66,4 +66,4 @@ const Snacks = db.define('snacks', {
 //     }
 // })
 
-export {SnackTypes, Snacks};
+export {SnackTypes, Snacks}
