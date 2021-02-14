@@ -7,7 +7,6 @@ export const getTransactions = async(req, res) => {
         const response = JSON.stringify(transactions)
 
         return res.status(200).send(response)
-
     } catch (err) {
         return res.status(401).send({ Error: err.message })
     }
