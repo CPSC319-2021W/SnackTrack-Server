@@ -6,7 +6,6 @@ const NOT_AUTHORIZED = "401"
 // Return all transactions
 export const getTransactions = async(req, res) => {
     try {
-
         const transactions =  await Transactions.findAll()
         const response = JSON.stringify(transactions)
 
