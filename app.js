@@ -11,6 +11,3 @@ app.use(express.json())
 app.use('/users', userRouter)
 
 export default app
-
-
-
