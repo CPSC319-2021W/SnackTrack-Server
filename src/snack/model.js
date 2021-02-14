@@ -1,30 +1,12 @@
 import { db } from '../db/index.js'
 import * as DataTypes from "sequelize"
-
-const SnackTypes = db.define('snackTypes', {
-    snack_type_id: {
-        type: DataTypes.INTEGER,
-        primaryKey: true,
-    },
-    snack_type_name: {
-        type: DataTypes.STRING(128),
-        allowNull: false
-    },
-    snack_type_code: {
-        type: DataTypes.STRING(128),
-        allowNull: false
-    }
-}, {underscored: true})
+import {SnackTypes} from "./snackTypes";
 
 const Snacks = db.define('snacks', {
     snack_id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true
-    },
-    snack_type_id: {
-        type: DataTypes.INTEGER,
-        allowNull: false
     },
     snack_name: {
         type: DataTypes.STRING(128),
@@ -59,4 +41,10 @@ const Snacks = db.define('snacks', {
     }
 }, {underscored: true})
 
-export {SnackTypes, Snacks}
+Snacks.belongsTo(SnackTypes, {
+    foreignKey: {
+        allowNull: false
+    }
+})
+
+export { Snacks }
