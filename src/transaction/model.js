@@ -1,7 +1,7 @@
 import { Sequelize } from 'sequelize'
 import { db } from '../db/index.js'
-import { Users } from "../user/model.js"
-import { PaymentHistory } from "../payment/model.js"
+import { Users } from '../user/model.js'
+import PaymentHistory from '../payment/model.js'
 
 const DataTypes = Sequelize.DataTypes
 
@@ -21,7 +21,7 @@ export const Transactions = db.define('transactions', {
         type: DataTypes.INTEGER
     },
     transaction_dtm: {
-        type: 'TIMESTAMP'
+        type: DataTypes.DATE
     }
 })
 

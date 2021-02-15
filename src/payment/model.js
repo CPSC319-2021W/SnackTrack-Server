@@ -4,7 +4,7 @@ import { Users } from '../user/model.js'
 
 const DataTypes = Sequelize.DataTypes
 
-export const PaymentHistory = db.define('payment_history', {
+const PaymentHistory = db.define('payment_history', {
   payment_history_id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
@@ -22,3 +22,5 @@ export const PaymentHistory = db.define('payment_history', {
 })
 
 PaymentHistory.belongsTo(Users, {foreignKey: 'user_id'});
+
+export default PaymentHistory
