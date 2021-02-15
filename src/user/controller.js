@@ -30,6 +30,7 @@ export const getUser = async(req, res) => {
         // TODO : Add logic checking if the requesting user is authorized (Ticket: SNAK-78)
         const userId = req.params.userId
 
+        // TODO: Optimization (Ticket: SNAK-93)
         const resultFromDB = await Users.findByPk(userId)
         if (resultFromDB === null) throw new Error(404)
         const response = resultFromDB.toJSON()
