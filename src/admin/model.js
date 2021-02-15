@@ -12,4 +12,4 @@ export const Admins = db.define('admins', {
   }
 })
 
-Admins.belongsTo(Users, {foreignKey: 'user_id'});
+Admins.belongsTo(Users, {foreignKey: 'user_id'})
