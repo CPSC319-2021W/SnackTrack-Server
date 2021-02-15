@@ -11,31 +11,6 @@ export const Transactions = db.define('transactions', {
         type: DataTypes.INTEGER,
         primaryKey: true
     },
-    user_id: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        onDelete: 'cascade',
-        references: {
-            model: 'users',
-            key: 'user_id'
-        }
-    },
-    transaction_type_id: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        references: {
-            model: 'transaction_types',
-            key: 'transaction_type_id'
-        }
-    },
-    payment_history_id: {
-        type: DataTypes.INTEGER,
-        onDelete: 'cascade',
-        references: {
-            model: 'payment_history',
-            key: 'payment_history_id'
-        }
-    },
     snack_name: {
         type: DataTypes.STRING(128),
         allowNull: false
