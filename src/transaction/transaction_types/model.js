@@ -1,4 +1,4 @@
-import {db} from "../../db";
+import { db } from "../../db"
 
 // TransactionTypes model
 export const TransactionTypes = db.define('transaction_types', {
