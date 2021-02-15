@@ -1,6 +1,6 @@
 import { db } from '../db/index.js'
-import * as DataTypes from "sequelize"
-import {SnackTypes} from "./snackTypes";
+import * as DataTypes from 'sequelize'
+import SnackTypes from './snackTypes'
 
 const Snacks = db.define('snacks', {
     snack_id: {
@@ -31,7 +31,7 @@ const Snacks = db.define('snacks', {
     order_threshold: {
         type: DataTypes.INTEGER
     },
-    last_update_dtm: {
+    last_updated_dtm: {
         type: DataTypes.DATE,
         allowNull: false
     },
@@ -47,4 +47,4 @@ Snacks.belongsTo(SnackTypes, {
     }
 })
 
-export { Snacks }
+export default Snacks
