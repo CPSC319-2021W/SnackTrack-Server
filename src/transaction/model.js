@@ -6,7 +6,7 @@ import { TransactionTypes } from './transaction_types/model'
 const DataTypes = Sequelize.DataTypes
 
 // Transactions model
-export const Transactions = db.define('transactions', {
+const Transactions = db.define('transactions', {
     transaction_id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
