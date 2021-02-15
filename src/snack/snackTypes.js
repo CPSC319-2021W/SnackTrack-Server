@@ -1,5 +1,7 @@
 import { db } from '../db/index.js'
-import * as DataTypes from 'sequelize'
+import { Sequelize } from 'sequelize'
+
+const { DataTypes } = Sequelize
 
 const SnackTypes = db.define('snack_types', {
     snack_type_id: {
