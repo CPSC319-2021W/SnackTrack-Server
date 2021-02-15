@@ -9,7 +9,8 @@ const DataTypes = Sequelize.DataTypes
 export const Transactions = db.define('transactions', {
     transaction_id: {
         type: DataTypes.INTEGER,
-        primaryKey: true
+        primaryKey: true,
+        autoIncrement: true
     },
     snack_name: {
         type: DataTypes.STRING(128),
@@ -32,3 +33,5 @@ export const Transactions = db.define('transactions', {
 Transactions.hasOne(Users)
 Transactions.hasOne(TransactionTypes)
 Transactions.hasOne(PaymentHistory)
+
+export default Transactions
