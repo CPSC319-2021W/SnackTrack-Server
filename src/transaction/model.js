@@ -49,7 +49,7 @@ export const Transactions = db.define('transactions', {
         allowNull: false
     },
     transaction_dtm: {
-        type: 'TIMESTAMP',
+        type: DataTypes.DATE,
         allowNull: false
     }
 })
