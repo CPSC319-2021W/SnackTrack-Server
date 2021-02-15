@@ -34,10 +34,9 @@ const Snacks = db.define('snacks', {
         type: DataTypes.INTEGER
     },
     last_updated_dtm: {
-        type: DataTypes.DATE,
-        allowNull: false
+        type: DataTypes.DATE
     },
-    last_update_by: {
+    last_updated_by: {
         type: DataTypes.STRING(128),
         allowNull: false
     }
@@ -45,6 +44,8 @@ const Snacks = db.define('snacks', {
 
 Snacks.belongsTo(SnackTypes, {
     foreignKey: {
+        // TODO: SNAK-107 Investigate Passing snack_type_name Instead of snack_type_id
+        name: 'snack_type_id',
         allowNull: false
     }
 })
