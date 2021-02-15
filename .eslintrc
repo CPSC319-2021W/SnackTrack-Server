@@ -1,0 +1,31 @@
+{
+  "parser": "babel-eslint",
+  "extends": ["eslint:recommended", "prettier"],
+  "env": {
+    "browser": true,
+    "node": true,
+    "jest": true,
+    "es6": true
+  },
+  "parserOptions": {
+    "ecmaVersion": 6,
+    "sourceType": "module",
+    "ecmaFeatures": {
+      "legacyDecorators": true
+    }
+  },
+  "rules": {
+    "semi": [1, "never"],
+    "semi-spacing": [
+      2,
+      {
+        "before": false,
+        "after": true
+      }
+    ],
+    "quotes": [1, "single", { "avoidEscape": true }],
+    "arrow-spacing": [1, { "before": true, "after": true }],
+    "prefer-template": [1],
+    "prefer-destructuring": [1, { "object": true, "array": false }]
+  }
+}
