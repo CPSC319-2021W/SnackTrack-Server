@@ -1,5 +1,5 @@
 import app from './app.js'
-import  { connect } from './src/db/index.js'
+import { connect } from './src/db/index.js'
 
 const start = async () => {
   await connect()
