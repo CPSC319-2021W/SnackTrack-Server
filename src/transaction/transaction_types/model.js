@@ -1,7 +1,7 @@
 import { db } from '../../db'
 
 // TransactionTypes model
-export const TransactionTypes = db.define('transaction_types', {
+const TransactionTypes = db.define('transaction_types', {
     transaction_type_id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
