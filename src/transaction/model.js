@@ -1,6 +1,7 @@
 import { Sequelize } from 'sequelize'
 import { db } from '../db/index.js'
 import { Users } from "../user/model.js"
+import { TransactionTypes } from "./transaction_types/model"
 
 const DataTypes = Sequelize.DataTypes
 
@@ -56,19 +57,3 @@ export const Transactions = db.define('transactions', {
 Transactions.hasOne(Users)
 Transactions.hasOne(TransactionTypes)
 Transactions.hasOne(PaymentHistory)
-
-// TransactionTypes model
-export const TransactionTypes = db.define('transaction_types', {
-    transaction_type_id: {
-        type: DataTypes.INTEGER,
-        primaryKey: true
-    },
-    transaction_type_name: {
-        type: DataTypes.STRING(128),
-        allowNull: false
-    },
-    transaction_type_code: {
-        type: DataTypes.STRING(2),
-        allowNull: false
-    }
-})
