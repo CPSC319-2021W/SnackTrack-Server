@@ -2,7 +2,7 @@ import { Sequelize } from 'sequelize'
 import { db } from '../db/index.js'
 import { Users } from '../user/model.js'
 
-const DataTypes = Sequelize.DataTypes
+const { DataTypes } = Sequelize
 
 const PaymentHistory = db.define('payment_history', {
   payment_history_id: {
@@ -11,16 +11,16 @@ const PaymentHistory = db.define('payment_history', {
     autoIncrement: true
   },
   payment_amount: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.INTEGER
   },
-  paymenet_dtm : {
-    type: DataTypes.DATE, 
+  payment_dtm: {
+    type: DataTypes.DATE
   },
   created_by: {
     type: DataTypes.STRING
   }
 })
 
-PaymentHistory.belongsTo(Users, {foreignKey: 'user_id'});
+PaymentHistory.belongsTo(Users, { foreignKey: 'user_id' })
 
 export default PaymentHistory
