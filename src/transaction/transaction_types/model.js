@@ -1,10 +1,11 @@
-import { db } from "../../db"
+import { db } from '../../db'
 
 // TransactionTypes model
 export const TransactionTypes = db.define('transaction_types', {
     transaction_type_id: {
         type: DataTypes.INTEGER,
-        primaryKey: true
+        primaryKey: true,
+        autoIncrement: true
     },
     transaction_type_name: {
         type: DataTypes.STRING(128),
@@ -15,3 +16,5 @@ export const TransactionTypes = db.define('transaction_types', {
         allowNull: false
     }
 })
+
+export default TransactionTypes
