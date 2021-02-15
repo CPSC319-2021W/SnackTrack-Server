@@ -11,4 +11,5 @@ app.use(express.urlencoded({ extended: false }))
 app.use(express.json())
 app.use('/admins', adminRouter)
 app.use('/users', userRouter)
+
 export default app

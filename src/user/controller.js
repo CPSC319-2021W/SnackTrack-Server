@@ -32,7 +32,7 @@ export const getUser = async(req, res) => {
 
         // TODO: Optimization (Ticket: SNAK-93)
         const resultFromDB = await Users.findByPk(userId)
-        if (resultFromDB === null) throw new Error(404)
+        if (resultFromDB == null) throw new Error(404)
         const response = resultFromDB.toJSON()
 
         const isAdmin = await Admins.findOne({ 

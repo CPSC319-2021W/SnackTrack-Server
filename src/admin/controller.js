@@ -4,7 +4,6 @@ const BAD_REQUEST = "400"
 const NOT_AUTHORIZED = "401"
 const CONFLICT = "409"
 
-
 export const addAdmin = async(req, res) => {
     try {
         // TODO : Add logic checking if the requesting user is authorized (Ticket: SNAK-78)
