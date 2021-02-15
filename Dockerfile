@@ -5,7 +5,7 @@ LABEL description="This is Dockerfile for the backend of SnackTrack app."
 
 ENV APP_HOME /backend
 ENV PATH ${APP_HOME}/node_modules/.bin:$PATH
-ENV PORT 3000
+ENV PORT 5050
 ENV NODE_ENV dev
 
 WORKDIR ${APP_HOME}
