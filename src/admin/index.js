@@ -1,8 +1,8 @@
 import { Router } from 'express'
-import { addTransaction } from './controller.js'
+import { addAdmin } from './controller.js'
 
 const router = Router()
 
-router.post('/', addTransaction)
+router.post('/', addAdmin)
 
 export default router

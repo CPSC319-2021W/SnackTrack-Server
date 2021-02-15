@@ -1,0 +1,51 @@
+version: 2.1
+
+orbs:
+  heroku: circleci/heroku@1.2.5
+
+jobs:
+  build_and_test:
+    working_directory: ~/backend
+
+    docker:
+      - image: circleci/node:14.15.4
+
+    steps:
+      - checkout
+      - restore_cache:
+          key: dependency-cache-{{ checksum "package.json" }}
+      - run:
+          name: yarn-install
+          command: yarn install
+      - save_cache:
+          key: dependency-cache-{{ checksum "package.json" }}
+          paths:
+            - ./node_modules
+      - run:
+          name: yarn-set-version
+          command: yarn set version 1.22.10 && yarn --version
+  #      - run:
+  #          name: yarn-test
+  #          command: yarn test
+
+  deploy:
+    executor: heroku/default
+    steps:
+      - checkout
+      - heroku/install
+      - heroku/deploy-via-git
+
+workflows:
+  version: 2
+  build-deploy:
+    jobs:
+      - build_and_test
+      - deploy:
+          requires:
+            - build_and_test
+          filters:
+            branches:
+              only:
+                - main
+                - dev
+                - SNAK-66
