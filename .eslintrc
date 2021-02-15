@@ -1,6 +1,6 @@
 {
   "parser": "babel-eslint",
-  "extends": ["eslint:recommended", "prettier"],
+  "extends": ["eslint:recommended"],
   "env": {
     "browser": true,
     "node": true,
@@ -15,7 +15,7 @@
     }
   },
   "rules": {
-    "semi": [1, "never"],
+    "semi": [2, "never"],
     "semi-spacing": [
       2,
       {
@@ -23,9 +23,6 @@
         "after": true
       }
     ],
-    "quotes": [1, "single", { "avoidEscape": true }],
-    "arrow-spacing": [1, { "before": true, "after": true }],
-    "prefer-template": [1],
-    "prefer-destructuring": [1, { "object": true, "array": false }]
+    "quotes": [1, "single", { "avoidEscape": true }]
   }
 }
