@@ -25,26 +25,24 @@ export const addUser = async (req, res) => {
   }
 }
 
-export const getUser = async (req, res) => {
-  try {
-    // TODO : Add logic checking if the requesting user is authorized (Ticket: SNAK-78)
-    const { userId } = req.params
+export const getUser = async(req, res) => {
+    try {
+        // TODO : Add logic checking if the requesting user is authorized (Ticket: SNAK-78)
+        const userId = req.params.userId
 
-    const resultFromDB = await Users.findByPk(userId)
-    if (resultFromDB === null) throw new Error(404)
-    const response = resultFromDB.toJSON()
+        // TODO: Optimization (Ticket: SNAK-93)
+        const resultFromDB = await Users.findByPk(userId)
+        if (resultFromDB == null) throw new Error(404)
+        const response = resultFromDB.toJSON()
 
-    const isAdmin = await Admins.findOn({
-      where: { userid: userId }
-    })
-    response.isAdmin = Boolean(isAdmin) ?? false
+        const isAdmin = await Admins.findOne({ 
+            where: { user_id : userId }
+        })
+        response.is_admin = Boolean(isAdmin) ?? false
 
-    return res.status(200).json(response)
-  } catch (err) {
-    if (err.message === NOT_FOUND)
-      return res
-        .status(404)
-        .send({ Error: "userid doesn't exist in the users table" })
-    return res.status(500).send({ Error: err.message })
-  }
+        return res.status(200).json(response)
+    } catch (err) {
+        if (err.message === NOT_FOUND) return res.status(404).send({ Error: "userid doesn't exist in the users table" })
+        return res.status(500).send({ Error: err.message })
+    }
 }
