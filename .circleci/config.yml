@@ -48,4 +48,4 @@ workflows:
               only:
                 - main
                 - dev
-                - SNAK-66
+                - cicd
