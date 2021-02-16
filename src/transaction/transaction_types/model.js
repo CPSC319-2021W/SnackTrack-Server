@@ -1,4 +1,7 @@
+import { Sequelize } from 'sequelize'
 import { db } from '../../db/index.js'
+
+const { DataTypes } = Sequelize
 
 // TransactionTypes model
 const TransactionTypes = db.define('transaction_types', {
