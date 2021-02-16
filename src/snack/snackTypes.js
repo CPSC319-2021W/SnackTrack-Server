@@ -1,7 +1,9 @@
 import { db } from '../db/index.js'
-import * as DataTypes from "sequelize"
+import { Sequelize } from 'sequelize'
 
-export const SnackTypes = db.define('snack_types', {
+const { DataTypes } = Sequelize
+
+const SnackTypes = db.define('snack_types', {
     snack_type_id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
@@ -15,3 +17,5 @@ export const SnackTypes = db.define('snack_types', {
         allowNull: false
     }
 }, {underscored: true})
+
+export default SnackTypes

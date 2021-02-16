@@ -1,6 +1,8 @@
 import { db } from '../db/index.js'
-import * as DataTypes from "sequelize"
-import {SnackTypes} from "./snackTypes";
+import { Sequelize } from 'sequelize'
+import SnackTypes from './snackTypes.js'
+
+const { DataTypes } = Sequelize
 
 const Snacks = db.define('snacks', {
     snack_id: {
@@ -31,11 +33,10 @@ const Snacks = db.define('snacks', {
     order_threshold: {
         type: DataTypes.INTEGER
     },
-    last_update_dtm: {
-        type: DataTypes.DATE,
-        allowNull: false
+    last_updated_dtm: {
+        type: DataTypes.DATE
     },
-    last_update_by: {
+    last_updated_by: {
         type: DataTypes.STRING(128),
         allowNull: false
     }
@@ -43,8 +44,10 @@ const Snacks = db.define('snacks', {
 
 Snacks.belongsTo(SnackTypes, {
     foreignKey: {
+        // TODO: SNAK-107 Investigate Passing snack_type_name Instead of snack_type_id
+        name: 'snack_type_id',
         allowNull: false
     }
 })
 
-export { Snacks }
+export default Snacks
