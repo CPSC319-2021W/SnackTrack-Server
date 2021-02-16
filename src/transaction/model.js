@@ -31,6 +31,7 @@ const Transactions = db.define('transactions', {
 })
 
 Transactions.hasOne(Users)
+// TODO: Uncomment when PaymentHistory model is implemented
 Transactions.hasOne(TransactionTypes)
 Transactions.hasOne(PaymentHistory)
 
