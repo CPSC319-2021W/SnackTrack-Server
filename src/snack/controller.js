@@ -16,7 +16,7 @@ export const addSnack = async(req, res) => {
         } else if (err.message === NOT_AUTHORIZED) { // TODO: wait for authentication to be implemented
             return res.status(401).send({ Error: 'Not Authorized' })
         } else if (err.message === CONFLICT) {
-            return res.status(409).send({ Error: 'This snack is already in the database' })
+            return res.status(409).send({ Error: 'This snack already exists.' })
         } else {
             return res.status(500).send({ Error: err.message })
         }
