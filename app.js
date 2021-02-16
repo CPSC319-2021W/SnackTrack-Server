@@ -13,9 +13,9 @@ app.set('port', process.env.PORT)
 app.use(cors())
 app.use(express.urlencoded({ extended: false }))
 app.use(express.json())
-app.use('/admins', adminRouter)
-app.use('/users', userRouter)
-app.use('/transactions', transactionRouter)
-app.use('/snacks', snackRouter)
+app.use('/api/v1/admins', adminRouter)
+app.use('/api/v1/users', userRouter)
+app.use('/api/v1/transactions', transactionRouter)
+app.use('/api/v1/snacks', snackRouter)
 
 export default app
