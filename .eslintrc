@@ -1,0 +1,28 @@
+{
+  "parser": "babel-eslint",
+  "extends": ["eslint:recommended"],
+  "env": {
+    "browser": true,
+    "node": true,
+    "jest": true,
+    "es6": true
+  },
+  "parserOptions": {
+    "ecmaVersion": 6,
+    "sourceType": "module",
+    "ecmaFeatures": {
+      "legacyDecorators": true
+    }
+  },
+  "rules": {
+    "semi": [2, "never"],
+    "semi-spacing": [
+      2,
+      {
+        "before": false,
+        "after": true
+      }
+    ],
+    "quotes": [1, "single", { "avoidEscape": true }]
+  }
+}
