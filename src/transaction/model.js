@@ -3,7 +3,7 @@ import { db } from '../db/index.js'
 import { Users } from '../user/model.js'
 import TransactionTypes from './transaction_types/model.js'
 
-const DataTypes = Sequelize.DataTypes
+const { DataTypes } = Sequelize
 
 // Transactions model
 const Transactions = db.define('transactions', {
