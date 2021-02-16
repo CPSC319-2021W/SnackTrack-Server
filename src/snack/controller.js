@@ -4,8 +4,7 @@ import Snacks from './model.js'
 export const getSnacks = async(req, res) => {
     try {
         const snacks =  await Snacks.findAll()
-        const snackList = JSON.stringify(snacks)
-        const response = {'snacks': snackList}
+        const response = {'snacks': snacks}
 
         return res.status(200).send(response)
     } catch (err) {
