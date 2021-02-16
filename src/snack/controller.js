@@ -4,6 +4,7 @@ const BAD_REQUEST = '400'
 const NOT_AUTHORIZED = '401'
 const CONFLICT = 'Validation error'
 
+//TODO: Create snack_batches record (SNAK-110)
 export const addSnack = async(req, res) => {
     try {
         const snack = req.body
