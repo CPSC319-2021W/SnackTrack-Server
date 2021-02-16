@@ -1,5 +1,6 @@
 import Snacks from './model.js'
 
+// TODO: Create snack_batches record (SNAK-110)
 export const getSnacks = async(req, res) => {
     try {
         const snacks =  await Snacks.findAll()
