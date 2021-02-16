@@ -9,12 +9,10 @@ const SnackTypes = db.define('snack_types', {
         primaryKey: true,
     },
     snack_type_name: {
-        type: DataTypes.STRING(128),
-        allowNull: false
+        type: DataTypes.STRING(128)
     },
     snack_type_code: {
-        type: DataTypes.STRING(128),
-        allowNull: false
+        type: DataTypes.STRING(128)
     }
 }, {underscored: true})
 
