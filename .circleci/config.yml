@@ -48,3 +48,4 @@ workflows:
               only:
                 - main
                 - dev
+                - SNAK-135
