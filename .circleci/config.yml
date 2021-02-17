@@ -4,7 +4,6 @@ orbs:
   heroku: circleci/heroku@1.2.5
 
 jobs:
-
   build_and_test:
     working_directory: ~/backend
 
