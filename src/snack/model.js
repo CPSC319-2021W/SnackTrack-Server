@@ -1,6 +1,7 @@
 import { db } from '../db/index.js'
 import { Sequelize } from 'sequelize'
 import SnackTypes from './snackTypes.js'
+import SnackBatches from './snackBatches.js'
 
 const { DataTypes } = Sequelize
 
@@ -41,6 +42,13 @@ Snacks.belongsTo(SnackTypes, {
         // TODO: SNAK-107 Investigate Passing snack_type_name Instead of snack_type_id
         name: 'snack_type_id'
     }
+})
+
+Snacks.hasMany(SnackBatches, {
+    foreignKey: {
+        name: 'snack_id'
+    },
+    onDelete: 'cascade'
 })
 
 export default Snacks
