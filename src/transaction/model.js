@@ -2,7 +2,7 @@ import { Sequelize } from 'sequelize'
 import { db } from '../db/index.js'
 import { Users } from '../user/model.js'
 import { TransactionTypes } from './transactionTypes.js'
-import Payments from '../payment/model.js'
+import { Payments } from '../payment/model.js'
 
 const { DataTypes } = Sequelize
 

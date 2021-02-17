@@ -4,7 +4,7 @@ import { Users } from '../user/model.js'
 
 const { DataTypes } = Sequelize
 
-const Payments = db.define('payments', {
+export const Payments = db.define('payments', {
   payment_id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
@@ -22,5 +22,3 @@ const Payments = db.define('payments', {
 })
 
 Payments.belongsTo(Users, { foreignKey: 'user_id' })
-
-export default Payments
