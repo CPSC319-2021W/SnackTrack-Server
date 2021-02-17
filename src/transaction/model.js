@@ -2,7 +2,7 @@ import { Sequelize } from 'sequelize'
 import { db } from '../db/index.js'
 import { Users } from '../user/model.js'
 import { TransactionTypes } from './transactionTypes.js'
-import PaymentHistory from '../payment/model.js'
+import Payments from '../payment/model.js'
 
 const { DataTypes } = Sequelize
 
@@ -27,5 +27,5 @@ export const Transactions = db.define('transactions', {
 })
 
 Transactions.belongsTo(Users, { foreignKey: 'user_id' })
-Transactions.belongsTo(PaymentHistory, { foreignKey: 'payment_history_id' })
+Transactions.belongsTo(Payments, { foreignKey: 'payment_id' })
 Transactions.belongsTo(TransactionTypes, { foreignKey: 'transaction_type_id' })
