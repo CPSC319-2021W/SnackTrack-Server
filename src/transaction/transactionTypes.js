@@ -3,7 +3,7 @@ import { db } from '../db/index.js'
 
 const { DataTypes } = Sequelize
 
-export const TransactionTypes = db.define('transactionTypes', {
+export const TransactionTypes = db.define('transaction_types', {
     transaction_type_id: {
       type: DataTypes.INTEGER
     },
