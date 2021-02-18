@@ -1,6 +1,7 @@
 import { Users } from './model.js'
 import { Admins } from '../admin/model.js'
 import { Transactions } from '../transaction/model.js'
+import { getPagination, getPagingData } from '../util/pagination.js'
 
 // Reference: PostgreSQL error code documentation
 // https://www.postgresql.org/docs/8.2/errcodes-appendix.html
@@ -59,26 +60,10 @@ export const getTransactions = async(req, res) => {
       where: { user_id : userId }
     })
 
-    let response = getPagingData(userTransactions, page, limit)
+    let response = getPagingData(userTransactions, page, limit, 'user_transactions')
     res.status(200).send(response)
   } catch (err) {
     if (err.message === NOT_FOUND) return res.status(404).send({ Error : 'Transactions with the user_id not found'})
     return res.status(500).send({ Error : 'Not authorized'})
   }
-}
-
-// TODO : move to utils.js?
-const getPagination = (page, size) => {
-  const limit = size ? +size : 8
-  const offset = page ? page * limit : 0
-  return { limit, offset }
-}
-
-// TODO : move to utils.js?
-const getPagingData = (data, page, limit) => {
-  const { count: totalRows, rows: transactions } = data
-  const currentPage = page ? +page : 0
-  let totalPages = Math.ceil(totalRows / limit)
-  if (totalPages === 0) totalPages = 1
-  return { totalRows, transactions, totalPages, currentPage }
 }
