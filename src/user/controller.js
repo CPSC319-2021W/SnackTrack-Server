@@ -52,6 +52,9 @@ export const getUser = async(req, res) => {
 export const getUserTransactions = async(req, res) => {
   try {
     const userId = req.params.userId
+    const user = await Users.findByPk(userId)
+    if (user == null) throw new Error(404)
+
     const { page, size } = req.query
     const { limit, offset } = getPagination(page, size) 
     const userTransactions = await Transactions.findAndCountAll({
@@ -63,7 +66,8 @@ export const getUserTransactions = async(req, res) => {
     const response = getPagingData(userTransactions, page, limit, 'user_transactions')
     res.status(200).send(response)
   } catch (err) {
-    if (err.message === NOT_FOUND) return res.status(404).send({ Error : 'Transactions with the user_id not found'})
-    return res.status(500).send({ Error : 'Not authorized'})
+    // TODO : handle 401 (Not authorized) case in SNAK-123
+    if (err.message === NOT_FOUND) return res.status(404).send({ Error : "user_id doesn't exist in the users table" })
+    return res.status(500).send({ Error : 'Internal Server Error'})
   }
 }
