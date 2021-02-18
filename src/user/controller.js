@@ -49,7 +49,7 @@ export const getUser = async(req, res) => {
     }
 }
 
-export const getTransactions = async(req, res) => {
+export const getUserTransactions = async(req, res) => {
   try {
     const userId = req.params.userId
     const { page, size } = req.query
