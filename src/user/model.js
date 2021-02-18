@@ -5,23 +5,26 @@ export default (db, DataTypes) => {
      primaryKey: true,
       autoIncrement: true
     },
-   username: {
+    username: {
       type: DataTypes.STRING
     },
     first_name: {
      type: DataTypes.STRING
-   },
+    },
     last_name: {
      type: DataTypes.STRING
-   },
-   email_address: {
+    },
+    email_address: {
       type: DataTypes.STRING
-   },
+    },
     balance: {
       type: DataTypes.INTEGER
-   },
-   is_active: {
+    },
+    is_active: {
      type: DataTypes.BOOLEAN
+    },
+    image_uri: {
+      type: DataTypes.STRING
     }
   }, {underscored: true})
   return Users

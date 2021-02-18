@@ -1,8 +1,10 @@
-import Snacks from './model.js'
+import { db } from '../db/index.js'
 
 const BAD_REQUEST = '400'
 const NOT_AUTHORIZED = '401'
 const CONFLICT = 'Validation error'
+
+const Snacks = db.snacks
 
 //TODO: Create snack_batches record (SNAK-110)
 export const addSnack = async(req, res) => {

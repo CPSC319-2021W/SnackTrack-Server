@@ -7,8 +7,8 @@ const ERROR_CODES = {
   409: 'Conflict'
 }
 
-const Payments = db.Payments
-const Transactions = db.Transactions
+const Payments = db.payments
+const Transactions = db.transactions
 
 export const addPayment = async (req, res) => {
   try {
