@@ -1,8 +1,10 @@
-import { Admins } from './model.js'
+import { db } from '../db/index.js'
 
 const BAD_REQUEST = '400'
 const NOT_AUTHORIZED = '401'
 const CONFLICT = '409'
+
+const Admins = db.admins
 
 export const addAdmin = async(req, res) => {
     try {

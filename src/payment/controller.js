@@ -1,5 +1,4 @@
-import { Payments } from './model.js'
-import { Transactions } from '../transaction/model.js'
+import { db } from '../db/index.js'
 import { getPagination, getPagingData } from '../util/pagination.js'
 
 const ERROR_CODES = {
@@ -7,6 +6,9 @@ const ERROR_CODES = {
   401: 'Not Authorized',
   409: 'Conflict'
 }
+
+const Payments = db.Payments
+const Transactions = db.Transactions
 
 export const addPayment = async (req, res) => {
   try {

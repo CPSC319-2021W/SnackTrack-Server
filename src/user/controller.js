@@ -1,14 +1,15 @@
-import { Users } from './model.js'
-import { Admins } from '../admin/model.js'
-import { Transactions } from '../transaction/model.js'
+import { db } from '../db/index.js'
 import { getPagination, getPagingData } from '../util/pagination.js'
 
 // Reference: PostgreSQL error code documentation
 // https://www.postgresql.org/docs/8.2/errcodes-appendix.html
 // 23505 = UNIQUE_VIOLATION
 const UNIQUE_VIOLATION = '23505'
-
 const NOT_FOUND = '404'
+
+const Users = db.users 
+const Admins = db.admins
+const Transactions = db.transactions
 
 export const addUser = async (req, res) => {
   try {
