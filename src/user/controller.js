@@ -60,7 +60,7 @@ export const getTransactions = async(req, res) => {
       where: { user_id : userId }
     })
 
-    let response = getPagingData(userTransactions, page, limit, 'user_transactions')
+    const response = getPagingData(userTransactions, page, limit, 'user_transactions')
     res.status(200).send(response)
   } catch (err) {
     if (err.message === NOT_FOUND) return res.status(404).send({ Error : 'Transactions with the user_id not found'})
