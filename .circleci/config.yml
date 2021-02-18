@@ -37,6 +37,7 @@ jobs:
 
 workflows:
   version: 2
+  
   build-deploy:
     jobs:
       - build_and_test
@@ -48,4 +49,3 @@ workflows:
               only:
                 - main
                 - dev
-                - SNAK-66

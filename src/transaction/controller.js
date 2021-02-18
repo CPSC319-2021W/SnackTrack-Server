@@ -1,4 +1,5 @@
 import { Transactions } from './model.js'
+import { getPagination, getPagingData } from '../util/pagination.js'
 
 const ERROR_CODES = {
   400: 'Bad Request',
@@ -18,5 +19,19 @@ export const addTransaction = async (req, res) => {
     } else {
       return res.status(500).send({ Error: 'Internal Server Error' })
     }
+  }
+}
+
+export const getTransactions = async (req, res) => {
+  try {
+    const { page, size } = req.query
+    const { limit, offset } = getPagination(page, size)
+  
+    const allTransactions = await Transactions.findAndCountAll({ limit, offset })
+    const response = getPagingData(allTransactions, page, limit, 'transactions')
+    res.status(200).send(response)
+  } catch (err) {
+    // TODO: Handling 401 NOT AUTHORIZED SNAK-123
+    res.status(500).send({ Error: err.message })
   }
 }

@@ -1,5 +1,7 @@
 import { Users } from './model.js'
 import { Admins } from '../admin/model.js'
+import { Transactions } from '../transaction/model.js'
+import { getPagination, getPagingData } from '../util/pagination.js'
 
 // Reference: PostgreSQL error code documentation
 // https://www.postgresql.org/docs/8.2/errcodes-appendix.html
@@ -45,4 +47,27 @@ export const getUser = async(req, res) => {
         if (err.message === NOT_FOUND) return res.status(404).send({ Error: "userid doesn't exist in the users table" })
         return res.status(500).send({ Error: err.message })
     }
+}
+
+export const getUserTransactions = async(req, res) => {
+  try {
+    const userId = req.params.userId
+    const user = await Users.findByPk(userId)
+    if (user == null) throw new Error(404)
+
+    const { page, size } = req.query
+    const { limit, offset } = getPagination(page, size) 
+    const userTransactions = await Transactions.findAndCountAll({
+      limit,
+      offset,
+      where: { user_id : userId }
+    })
+
+    const response = getPagingData(userTransactions, page, limit, 'user_transactions')
+    res.status(200).send(response)
+  } catch (err) {
+    // TODO : handle 401 (Not authorized) case in SNAK-123
+    if (err.message === NOT_FOUND) return res.status(404).send({ Error : "user_id doesn't exist in the users table" })
+    return res.status(500).send({ Error : 'Internal Server Error'})
+  }
 }
