@@ -4,10 +4,10 @@ export const getPagination = (page, size) => {
   return { limit, offset }
 }
   
-export const getPagingData = (data, page, limit) => {
-  const { count: totalRows, rows: transactions } = data
+export const getPagingData = (data, page, limit, kind) => {
+  const { count: totalRows, rows } = data
   const currentPage = page ? +page : 0
   let totalPages = Math.ceil(totalRows / limit)
   if (totalPages === 0) totalPages = 1
-  return { totalRows, transactions, totalPages, currentPage }
+  return { totalRows, [kind]: rows, totalPages, currentPage }
 }
