@@ -10,8 +10,21 @@ export const addSnack = async(req, res) => {
     try {
         const snack = req.body
         const result = await Snacks.create(snack)
+        let returnVal
+        if (snack.quantity !== null || snack.quantity > 0) {
+            returnVal = addPropertyQuantity(result, snack.quantity)
+            const snackBatch = {
+                'snack_id': result.snack_id,
+                'quantity': snack.quantity,
+                'expiration_dtm': new Date().toISOString()
+            }
+            const snackBatchLog = await SnackBatches.create(snackBatch)
+            console.log('New snack_batch added: \n' + JSON.stringify(snackBatchLog.toJSON()))
+        } else {
+            returnVal = addPropertyQuantity(result, 0)
+        }
 
-        return res.status(201).send(result)
+        return res.status(201).send(returnVal)
     } catch (err) {
         if (err.message === BAD_REQUEST) {
             return res.status(400).send({ Error: 'Bad Request' })
@@ -23,6 +36,12 @@ export const addSnack = async(req, res) => {
             return res.status(500).send({ Error: err.message })
         }
     }
+}
+
+function addPropertyQuantity (sequelizeInstance, quantity) {
+    const returnVal = sequelizeInstance.toJSON()
+    returnVal.quantity = quantity
+    return returnVal
 }
 
 export const addSnackBatches = async(req, res) => {
