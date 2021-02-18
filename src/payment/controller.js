@@ -35,7 +35,7 @@ export const getPayments = async (req, res) => {
     const { limit, offset } = getPagination(page, size)
   
     const allPayments = await Payments.findAndCountAll({ limit, offset })
-    let response = getPagingData(allPayments, page, limit, 'payments')
+    const response = getPagingData(allPayments, page, limit, 'payments')
     res.status(200).send(response)
   } catch (err) {
     // TODO: Handling 401 NOT AUTHORIZED SNAK-123
