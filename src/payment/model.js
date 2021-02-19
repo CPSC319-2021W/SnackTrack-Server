@@ -1,24 +1,20 @@
-import { Sequelize } from 'sequelize'
-import { db } from '../db/index.js'
-import { Users } from '../user/model.js'
+export default (db, DataTypes) => {
+  const Payments = db.define('payments', {
+    payment_id: {
+     type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true
+    },
+    payment_amount: {
+      type: DataTypes.INTEGER
+   },
+    payment_dtm: {
+      type: DataTypes.DATE
+   },
+    created_by: {
+      type: DataTypes.STRING
+    }, 
+  }, {underscored: true})
+  return Payments
+}
 
-const { DataTypes } = Sequelize
-
-export const Payments = db.define('payments', {
-  payment_id: {
-    type: DataTypes.INTEGER,
-    primaryKey: true,
-    autoIncrement: true
-  },
-  payment_amount: {
-    type: DataTypes.INTEGER
-  },
-  payment_dtm: {
-    type: DataTypes.DATE
-  },
-  created_by: {
-    type: DataTypes.STRING
-  }
-})
-
-Payments.belongsTo(Users, { foreignKey: 'user_id' })
