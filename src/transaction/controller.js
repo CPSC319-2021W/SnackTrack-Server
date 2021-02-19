@@ -1,10 +1,13 @@
-import { Transactions } from './model.js'
+import { db } from '../db/index.js'
+import { getPagination, getPagingData } from '../util/pagination.js'
 
 const ERROR_CODES = {
   400: 'Bad Request',
   401: 'Not Authorized',
   409: 'Conflict'
 }
+
+const Transactions = db.transactions
 
 export const addTransaction = async (req, res) => {
   try {
@@ -27,24 +30,10 @@ export const getTransactions = async (req, res) => {
     const { limit, offset } = getPagination(page, size)
   
     const allTransactions = await Transactions.findAndCountAll({ limit, offset })
-    let response = getPagingData(allTransactions, page, limit)
+    const response = getPagingData(allTransactions, page, limit, 'transactions')
     res.status(200).send(response)
   } catch (err) {
     // TODO: Handling 401 NOT AUTHORIZED SNAK-123
     res.status(500).send({ Error: err.message })
   }
-}
-
-const getPagination = (page, size) => {
-  const limit = size ? +size : 8
-  const offset = page ? page * limit : 0
-  return { limit, offset }
-}
-
-const getPagingData = (data, page, limit) => {
-  const { count: totalRows, rows: transactions } = data
-  const currentPage = page ? +page : 0
-  let totalPages = Math.ceil(totalRows / limit)
-  if (totalPages === 0) totalPages = 1
-  return { totalRows, transactions, totalPages, currentPage }
 }

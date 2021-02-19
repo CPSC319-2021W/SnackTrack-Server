@@ -1,11 +1,14 @@
-import { Payments } from './model.js'
-import { Transactions } from '../transaction/model.js'
+import { db } from '../db/index.js'
+import { getPagination, getPagingData } from '../util/pagination.js'
 
 const ERROR_CODES = {
   400: 'Bad Request',
   401: 'Not Authorized',
   409: 'Conflict'
 }
+
+const Payments = db.payments
+const Transactions = db.transactions
 
 export const addPayment = async (req, res) => {
   try {
@@ -25,5 +28,19 @@ export const addPayment = async (req, res) => {
     } else {
       return res.status(500).send({ Error: err.message })
     }
+  }
+}
+
+export const getPayments = async (req, res) => {
+  try {
+    const { page, size } = req.query
+    const { limit, offset } = getPagination(page, size)
+  
+    const allPayments = await Payments.findAndCountAll({ limit, offset })
+    const response = getPagingData(allPayments, page, limit, 'payments')
+    res.status(200).send(response)
+  } catch (err) {
+    // TODO: Handling 401 NOT AUTHORIZED SNAK-123
+    res.status(500).send({ Error: err.message })
   }
 }
