@@ -1,5 +1,5 @@
 export default (db, DataTypes) => {
-    const SnackTypes = db.define('snack_types', {
+    return db.define('snack_types', {
         snack_type_id: {
             type: DataTypes.INTEGER,
             primaryKey: true,
@@ -11,5 +11,4 @@ export default (db, DataTypes) => {
             type: DataTypes.STRING(128)
         }
     }, {underscored: true})
-    return SnackTypes
 }

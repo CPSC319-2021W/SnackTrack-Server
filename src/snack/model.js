@@ -1,18 +1,18 @@
 export default (db, DataTypes) => {
-    const Snacks = db.define('snacks', {
+    return db.define('snacks', {
         snack_id: {
-           type: DataTypes.INTEGER,
-           primaryKey: true,
-          autoIncrement: true
+            type: DataTypes.INTEGER,
+            primaryKey: true,
+            autoIncrement: true
         },
-     snack_name: {
+        snack_name: {
             type: DataTypes.STRING(128)
         },
         description: {
-           type: DataTypes.STRING(128)
+            type: DataTypes.STRING(128)
         },
         image_uri: {
-          type: DataTypes.STRING
+            type: DataTypes.STRING
         },
         price: {
             type: DataTypes.INTEGER
@@ -21,15 +21,13 @@ export default (db, DataTypes) => {
             type: DataTypes.BOOLEAN
         },
         order_threshold: {
-        type: DataTypes.INTEGER
+            type: DataTypes.INTEGER
         },
         last_updated_dtm: {
-           type: DataTypes.DATE
+            type: DataTypes.DATE
         },
         last_updated_by: {
-           type: DataTypes.STRING(128)
+            type: DataTypes.STRING(128)
         }
     }, {underscored: true})
-    return Snacks
 }
-
