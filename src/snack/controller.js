@@ -19,8 +19,7 @@ export const addSnack = async(req, res) => {
                 quantity: snack.quantity,
                 expiration_dtm: snack.expiration_dtm
             }
-            const snackBatchLog = await SnackBatches.create(snackBatch)
-            console.log('New snack_batch added: \n' + JSON.stringify(snackBatchLog.toJSON()))
+            await SnackBatches.create(snackBatch)
         } else {
             returnVal = addPropertyQuantity(result, 0)
         }
