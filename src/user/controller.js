@@ -10,6 +10,7 @@ const NOT_FOUND = '404'
 const Users = db.users 
 const Admins = db.admins
 const Transactions = db.transactions
+const Payments = db.payments
 
 export const addUser = async (req, res) => {
   try {
@@ -86,6 +87,29 @@ export const getUserTransaction = async(req, res) => {
   } catch (err) {
     // TODO : handle 401 (Not authorized) case in SNAK-123
     if (err.message === NOT_FOUND) return res.status(404).send({ Error : " a transaction with this user_id doesn't exist in the users table" })
+    return res.status(500).send({ Error : 'Internal Server Error'})
+  }
+}
+
+export const getUserPayments = async(req, res) => {
+  try {
+    const userId = req.params.userId
+    const user = await Users.findByPk(userId)
+    if (user == null) throw new Error(404)
+
+    const { page, size } = req.query
+    const { limit, offset } = getPagination(page, size)
+    const userPayments = await Payments.findAndCountAll({
+      limit,
+      offset,
+      where: { user_id : userId }
+    })
+
+    const response = getPagingData(userPayments, page, limit, 'user_payments')
+    res.status(200).send(response)
+  } catch (err) {
+    // TODO : handle 401 (Not authorized) case in SNAK-123
+    if (err.message === NOT_FOUND) return res.status(404).send({ Error : "user_id doesn't exist in the users table" })
     return res.status(500).send({ Error : 'Internal Server Error'})
   }
 }
