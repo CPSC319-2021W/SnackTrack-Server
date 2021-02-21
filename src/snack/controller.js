@@ -61,14 +61,25 @@ export const addSnackBatches = async(req, res) => {
     }
 }
 
-// TODO: Implement snack_batches for GET /snacks (SNAK-121)
 export const getSnacks = async(req, res) => {
     try {
-        const snacks =  await Snacks.findAll()
-        const response = {'snacks': snacks}
+        let { active } = req.query
+        let is_active = parseQueryParams(active)
 
+        const snacks =  await Snacks.findAll({
+            where: { is_active : is_active }
+        })
+        const response = {'snacks': snacks}
+        
         return res.status(200).send(response)
     } catch (err) {
             return res.status(400).send({ Error: err.message })
     }
+}
+
+function parseQueryParams(active) {
+    if( active === undefined || active != 'false') {
+        return true
+    }
+    return false 
 }
