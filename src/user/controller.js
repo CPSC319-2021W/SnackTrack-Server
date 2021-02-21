@@ -105,7 +105,7 @@ export const getUserPayments = async(req, res) => {
       where: { user_id : userId }
     })
 
-    const response = getPagingData(userPayments, page, limit, 'user_payments')
+    const response = getPagingData(userPayments, page, limit, 'payments')
     res.status(200).send(response)
   } catch (err) {
     // TODO : handle 401 (Not authorized) case in SNAK-123
