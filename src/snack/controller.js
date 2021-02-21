@@ -84,7 +84,20 @@ export const addSnackBatches = async(req, res) => {
 
 export const getSnacks = async(req, res) => {
     try {
-        const snacks =  await Snacks.findAll()
+        let snacks
+        const { active } = req.query
+        console.log(active)
+
+        if (active === undefined) {
+            snacks = await Snacks.findAll()
+        } else {
+            const isActive = active !== 'false'
+            snacks = await Snacks.findAll({
+                where: {
+                    is_active: isActive
+                }
+            })
+        }
         let responseArray = []
         for (let index in snacks) {
             let quantity = await findQuantity(snacks[index])
