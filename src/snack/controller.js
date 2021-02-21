@@ -64,13 +64,12 @@ export const addSnackBatches = async(req, res) => {
 export const getSnacks = async(req, res) => {
     try {
         const { active } = req.query
+        if (!active) return res.status(200).send({ snacks: await Snacks.findAll() })
         const is_active = active !== 'false'
-
         const snacks =  await Snacks.findAll({
             where: { is_active }
         })
         const response = { snacks }
-        
         return res.status(200).send(response)
     } catch (err) {
             return res.status(400).send({ Error: err.message })
