@@ -63,13 +63,13 @@ export const addSnackBatches = async(req, res) => {
 
 export const getSnacks = async(req, res) => {
     try {
-        let { active } = req.query
-        let is_active = parseQueryParams(active)
+        const { active } = req.query
+        const is_active = active !== 'false'
 
         const snacks =  await Snacks.findAll({
-            where: { is_active : is_active }
+            where: { is_active }
         })
-        const response = {'snacks': snacks}
+        const response = { snacks }
         
         return res.status(200).send(response)
     } catch (err) {
@@ -77,9 +77,3 @@ export const getSnacks = async(req, res) => {
     }
 }
 
-function parseQueryParams(active) {
-    if( active === undefined || active != 'false') {
-        return true
-    }
-    return false 
-}
