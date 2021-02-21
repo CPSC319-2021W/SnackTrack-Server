@@ -13,7 +13,7 @@ export const addSnack = async(req, res) => {
         const result = await Snacks.create(snack)
         let returnVal
         if (snack.quantity > 0) {
-            returnVal = await addPropertyQuantity(result, snack.quantity)
+            returnVal = addPropertyQuantity(result, snack.quantity)
             const snackBatch = {
                 snack_id: result.snack_id,
                 quantity: snack.quantity,
@@ -21,7 +21,7 @@ export const addSnack = async(req, res) => {
             }
             await SnackBatches.create(snackBatch)
         } else {
-            returnVal = await addPropertyQuantity(result, 0)
+            returnVal = addPropertyQuantity(result, 0)
         }
 
         return res.status(201).send(returnVal)
@@ -38,27 +38,27 @@ export const addSnack = async(req, res) => {
     }
 }
 
-async function addPropertyQuantity(snackInstance, quantity = null) {
-    const returnVal = snackInstance.toJSON()
-    if (quantity !== null) {
-        returnVal.quantity = quantity
-        return returnVal
-    } else {
-        let desiredBatches = await findSnackBatchesWithSnackId(returnVal.snack_id)
-        quantity = 0
+async function findQuantity(snackInstance) {
+    const instanceJson = snackInstance.toJSON()
+    let desiredBatches = await findSnackBatchesWithSnackId(instanceJson.snack_id)
+    let quantity = 0
 
-        if (desiredBatches.length !== 0) {
-            for (let index in desiredBatches) {
-                quantity += desiredBatches[index].toJSON().quantity
-            }
+    if (desiredBatches.length !== 0) {
+        for (let index in desiredBatches) {
+            quantity += desiredBatches[index].toJSON().quantity
         }
-        returnVal.quantity = quantity
-        return returnVal
     }
+    return quantity
 }
 
-async function findSnackBatchesWithSnackId(snackID) {
-    return await SnackBatches.findAll({
+function addPropertyQuantity(snackInstance, quantity) {
+    const returnVal = snackInstance.toJSON()
+    returnVal.quantity = quantity
+    return returnVal
+}
+
+function findSnackBatchesWithSnackId(snackID) {
+    return SnackBatches.findAll({
         where: {
             snack_id: snackID
         }
@@ -87,7 +87,8 @@ export const getSnacks = async(req, res) => {
         const snacks =  await Snacks.findAll()
         let responseArray = []
         for (let index in snacks) {
-            responseArray[index] = await addPropertyQuantity(snacks[index])
+            let quantity = await findQuantity(snacks[index])
+            responseArray[index] = addPropertyQuantity(snacks[index], quantity)
         }
 
         const response = {'snacks': responseArray}
