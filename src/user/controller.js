@@ -61,7 +61,7 @@ export const getUserTransactions = async(req, res) => {
       where: { user_id : userId }
     })
 
-    const response = getPagingData(userTransactions, page, limit, 'user_transactions')
+    const response = getPagingData(userTransactions, page, limit, 'transactions')
     res.status(200).send(response)
   } catch (err) {
     // TODO : handle 401 (Not authorized) case in SNAK-123
