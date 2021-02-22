@@ -38,10 +38,26 @@ export const addSnack = async(req, res) => {
     }
 }
 
-function addPropertyQuantity (sequelizeInstance, quantity) {
-    const returnVal = sequelizeInstance.toJSON()
+async function findQuantity(snackInstance) {
+    const instanceJson = snackInstance.toJSON()
+    let desiredBatches = await findSnackBatchesWithSnackId(instanceJson.snack_id)
+    let quantity = 0
+
+    for (let batch of desiredBatches) {
+        quantity += batch.toJSON().quantity
+    }
+
+    return quantity
+}
+
+function addPropertyQuantity(snackInstance, quantity) {
+    const returnVal = snackInstance.toJSON()
     returnVal.quantity = quantity
     return returnVal
+}
+
+function findSnackBatchesWithSnackId(snack_id) {
+    return SnackBatches.findAll({ where: { snack_id }})
 }
 
 export const addSnackBatches = async(req, res) => {
@@ -61,14 +77,29 @@ export const addSnackBatches = async(req, res) => {
     }
 }
 
-// TODO: Implement snack_batches for GET /snacks (SNAK-121)
 export const getSnacks = async(req, res) => {
     try {
-        const snacks =  await Snacks.findAll()
-        const response = {'snacks': snacks}
+        let snacks
+        let responseArray = []
+        const { active } = req.query
+
+        if (active === undefined) {
+            snacks = await Snacks.findAll()
+        } else {
+            snacks = await Snacks.findAll({
+                where: {
+                    is_active: active !== 'false'
+                }
+            })
+        }
+        for (let snack of snacks) {
+            let quantity = await findQuantity(snack)
+            responseArray.push(addPropertyQuantity(snack, quantity))
+        }
+        const response = { snacks: responseArray }
 
         return res.status(200).send(response)
     } catch (err) {
-            return res.status(400).send({ Error: err.message })
+        return res.status(400).send({ Error: err.message })
     }
 }
