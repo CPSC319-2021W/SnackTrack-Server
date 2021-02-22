@@ -43,11 +43,10 @@ async function findQuantity(snackInstance) {
     let desiredBatches = await findSnackBatchesWithSnackId(instanceJson.snack_id)
     let quantity = 0
 
-    if (desiredBatches.length !== 0) {
-        for (let index in desiredBatches) {
-            quantity += desiredBatches[index].toJSON().quantity
-        }
+    for (let batch of desiredBatches) {
+        quantity += batch.toJSON().quantity
     }
+
     return quantity
 }
 
@@ -57,12 +56,8 @@ function addPropertyQuantity(snackInstance, quantity) {
     return returnVal
 }
 
-function findSnackBatchesWithSnackId(snackID) {
-    return SnackBatches.findAll({
-        where: {
-            snack_id: snackID
-        }
-    })
+function findSnackBatchesWithSnackId(snack_id) {
+    return SnackBatches.findAll({ where: { snack_id }})
 }
 
 export const addSnackBatches = async(req, res) => {
@@ -85,29 +80,26 @@ export const addSnackBatches = async(req, res) => {
 export const getSnacks = async(req, res) => {
     try {
         let snacks
+        let responseArray = []
         const { active } = req.query
-        console.log(active)
 
         if (active === undefined) {
             snacks = await Snacks.findAll()
         } else {
-            const isActive = active !== 'false'
             snacks = await Snacks.findAll({
                 where: {
-                    is_active: isActive
+                    is_active: active !== 'false'
                 }
             })
         }
-        let responseArray = []
-        for (let index in snacks) {
-            let quantity = await findQuantity(snacks[index])
-            responseArray[index] = addPropertyQuantity(snacks[index], quantity)
+        for (let snack of snacks) {
+            let quantity = await findQuantity(snack)
+            responseArray.push(addPropertyQuantity(snack, quantity))
         }
-
-        const response = {'snacks': responseArray}
+        const response = { snacks: responseArray }
 
         return res.status(200).send(response)
     } catch (err) {
-            return res.status(400).send({ Error: err.message })
+        return res.status(400).send({ Error: err.message })
     }
 }
