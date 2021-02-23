@@ -8,10 +8,30 @@ const ERROR_CODES = {
 }
 
 const Transactions = db.transactions
+const Users = db.users
+const Snacks = db.snacks
 
 export const addTransaction = async (req, res) => {
   try {
     const transaction = req.body
+    const transactionTypeId = transaction.transaction_type_id
+    const userId = transaction.user_id
+    const snackId = transaction.snack_id
+    const user = await Users.findByPk(userId)
+    const snack = await Snacks.findByPk(snackId)
+    if (user == null || snack == null) throw new Error(400)
+
+    if (transactionTypeId == 2) throw new Error(400)
+    else if (transactionTypeId == 1) {
+      const updatedBalance = user.balance + transaction.transaction_amount
+      console.log(updatedBalance)
+      await user.update({ balance: updatedBalance })
+    }
+
+    delete transaction.snack_id
+    transaction.payment_id = null
+    transaction.snack_name = snack.snack_name
+
     const result = await Transactions.create(transaction)
     return res.status(201).send(result)
   } catch (err) {
