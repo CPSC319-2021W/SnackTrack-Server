@@ -9,10 +9,19 @@ const ERROR_CODES = {
 
 const Payments = db.payments
 const Transactions = db.transactions
+const Users = db.users
 
 export const addPayment = async (req, res) => {
   try {
     const payment = req.body
+    const userId = payment.user_id
+    const user = await Users.findByPk(userId)
+    if (user == null) throw new Error(400)
+
+    const updatedBalance = user.balance - payment.payment_amount
+    if (updatedBalance < 0) throw new Error(400)
+    await user.update({ balance: updatedBalance })
+
     const result = await Payments.create(payment)
     const transactions = req.body.transaction_ids
     const paymentId = result.payment_id
