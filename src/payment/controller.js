@@ -9,10 +9,27 @@ const ERROR_CODES = {
 
 const Payments = db.payments
 const Transactions = db.transactions
+const Users = db.users
 
 export const addPayment = async (req, res) => {
   try {
     const payment = req.body
+    const userId = payment.user_id
+    const user = await Users.findByPk(userId)
+    if (user == null) {
+      let err = new Error(404)
+      err.name = "userid doesn't exist in the users table"
+      throw err
+    }
+
+    const updatedBalance = user.balance - payment.payment_amount
+    if (updatedBalance < 0) {
+      let err = new Error(400)
+      err.name = 'Unable to carry a balance less than 0.'
+      throw err
+    }
+    await user.update({ balance: updatedBalance })
+
     const result = await Payments.create(payment)
     const transactions = req.body.transaction_ids
     const paymentId = result.payment_id
@@ -23,7 +40,10 @@ export const addPayment = async (req, res) => {
     return res.status(201).send(result)
   } catch (err) {
     const code = Number(err.message)
-    if (code in ERROR_CODES) {
+    if (err.name) {
+      return res.status(code).send({ Error: err.name })
+    }
+    else if (code in ERROR_CODES) {
       return res.status(code).send({ Error: ERROR_CODES[code] })
     } else {
       return res.status(500).send({ Error: err.message })
