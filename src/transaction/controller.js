@@ -24,7 +24,6 @@ export const addTransaction = async (req, res) => {
     if (transactionTypeId == 2) throw new Error(400)
     else if (transactionTypeId == 1) {
       const updatedBalance = user.balance + transaction.transaction_amount
-      console.log(updatedBalance)
       await user.update({ balance: updatedBalance })
     }
 
