@@ -13,28 +13,51 @@ const Op = Sequelize.Op
 
 const Transactions = db.transactions
 const SnackBatches = db.snackBatches
+const Users = db.users
 const Snacks = db.snacks
 
 export const addTransaction = async (req, res) => {
   try {
     const transaction = req.body
-    if (transaction.transaction_type_id == 2) throw new Error(400)
-
-    // Edit quantity property in Snack_Batches
+    const transactionTypeId = transaction.transaction_type_id
+    const userId = transaction.user_id
     const snackId = transaction.snack_id
+    const user = await Users.findByPk(userId)
+    if (user == null) {
+      let err = Error(404)
+      err.name = "userid doesn't exist in the users table"
+      throw err
+    }
     const snack = await Snacks.findByPk(snackId)
-    if (snack == null) throw new Error(400) 
+    if (snack == null) {
+      let err = Error(404)
+      err.name = "snackid doesn't exist in the snacks table"
+      throw err
+    }
+
+    if (transactionTypeId == 2) {
+      let err = Error(400)
+      err.name = 'New transactions cannot be processed as cancelled'
+      throw err
+    }
+    else if (transactionTypeId == 1) {
+      const updatedBalance = user.balance + transaction.transaction_amount
+      await user.update({ balance: updatedBalance })
+    }
 
     await updateSnackBatches(transaction, snackId)
 
     delete transaction.snack_id
     transaction.payment_id = null
     transaction.snack_name = snack.snack_name
-    
+
     const result = await Transactions.create(transaction)
     return res.status(201).send(result)
   } catch (err) {
     const code = Number(err.message)
+    if (err.name) {
+      return res.status(code).send({ Error: err.name })
+    }
     if (code in ERROR_CODES) {
       return res.status(code).send({ Error: ERROR_CODES[code] })
     } else {
