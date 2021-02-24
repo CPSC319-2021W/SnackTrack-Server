@@ -1,5 +1,7 @@
 import { db } from '../db/index.js'
 import { getPagination, getPagingData } from '../util/pagination.js'
+import sequelize from 'sequelize'
+const { Op } = sequelize
 
 const ERROR_CODES = {
   400: 'Bad Request',
@@ -64,7 +66,14 @@ export const getTransactions = async (req, res) => {
     const { page, size } = req.query
     const { limit, offset } = getPagination(page, size)
   
-    const allTransactions = await Transactions.findAndCountAll({ limit, offset })
+    const allTransactions = await Transactions.findAndCountAll({
+      where: {
+        transaction_type_id: { [Op.ne]: 3 }
+      },
+      limit,
+      offset,
+      order: [['transaction_dtm', 'DESC']]
+     })
     const response = getPagingData(allTransactions, page, limit, 'transactions')
     res.status(200).send(response)
   } catch (err) {
