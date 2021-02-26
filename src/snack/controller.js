@@ -10,9 +10,9 @@ const SnackBatches = db.snackBatches
 export const addSnack = async(req, res) => {
     try {
         const snack = req.body
+        if (snack.quantity < 0) throw Error(400)
         const result = await Snacks.create(snack)
         let quantity = 0
-        if (snack.quantity < 0) throw Error(400)
         if (snack.quantity > 0) {
             quantity = snack.quantity
             const snackBatch = {
