@@ -1,9 +1,10 @@
 import { db } from '../db/index.js'
-import { getPagination, getPagingData } from '../util/pagination.js'
+import { getPaginatedData } from '../util/pagination.js'
 
 const ERROR_CODES = {
   400: 'Bad Request',
   401: 'Not Authorized',
+  404: 'Not Found',
   409: 'Conflict'
 }
 
@@ -53,14 +54,40 @@ export const addPayment = async (req, res) => {
 
 export const getPayments = async (req, res) => {
   try {
-    const { page, size } = req.query
-    const { limit, offset } = getPagination(page, size)
-  
-    const allPayments = await Payments.findAndCountAll({ limit, offset })
-    const response = getPagingData(allPayments, page, limit, 'payments')
+    const response = await getPaginatedData(req.query, {}, Payments, 'payment_dtm')
     res.status(200).send(response)
   } catch (err) {
     // TODO: Handling 401 NOT AUTHORIZED SNAK-123
-    res.status(500).send({ Error: err.message })
+    const code = Number(err.message)
+    if (err.name) {
+      return res.status(code).send({ Error: err.name })
+    }
+    if (code in ERROR_CODES) {
+      return res.status(code).send({ Error: ERROR_CODES[code] })
+    } else {
+      return res.status(500).send({ Error: 'Internal Server Error' })
+    }
+  }
+}
+
+export const getUserPayments = async(req, res) => {
+  try {
+    const user_id = req.params.userId
+    const user = await Users.findByPk(user_id)
+    if (!user) throw new Error(404)
+    const where = { user_id }
+    const response = await getPaginatedData(req.query, where, Payments, 'payment_dtm')
+    res.status(200).send(response)
+  } catch (err) {
+    // TODO : handle 401 (Not authorized) case in SNAK-123
+    const code = Number(err.message)
+    if (err.name) {
+      return res.status(code).send({ Error: err.name })
+    }
+    if (code in ERROR_CODES) {
+      return res.status(code).send({ Error: ERROR_CODES[code] })
+    } else {
+      return res.status(500).send({ Error: 'Internal Server Error' })
+    }
   }
 }
