@@ -1,5 +1,7 @@
 import { Router } from 'express'
-import { addUser, getUser, getUserTransaction, getUserTransactions, getUserPayments } from './controller.js'
+import { addUser, getUser } from './controller.js'
+import { getUserTransaction, getUserTransactions } from '../transaction/controller.js'
+import { getUserPayments } from '../payment/controller.js'
 
 const router = Router()
 
