@@ -11,20 +11,17 @@ export const addSnack = async(req, res) => {
     try {
         const snack = req.body
         const result = await Snacks.create(snack)
-        let returnVal
+        let quantity = 0
         if (snack.quantity > 0) {
-            returnVal = addPropertyQuantity(result, snack.quantity)
+            quantity = snack.quantity
             const snackBatch = {
                 snack_id: result.snack_id,
-                quantity: snack.quantity,
+                quantity,
                 expiration_dtm: snack.expiration_dtm
             }
             await SnackBatches.create(snackBatch)
-        } else {
-            returnVal = addPropertyQuantity(result, 0)
         }
-
-        return res.status(201).send(returnVal)
+        return res.status(201).send({ quantity, ...result.toJSON() })
     } catch (err) {
         if (err.message === BAD_REQUEST) {
             return res.status(400).send({ Error: 'Bad Request' })
@@ -38,33 +35,10 @@ export const addSnack = async(req, res) => {
     }
 }
 
-async function findQuantity(snackInstance) {
-    const instanceJson = snackInstance.toJSON()
-    let desiredBatches = await findSnackBatchesWithSnackId(instanceJson.snack_id)
-    let quantity = 0
-
-    for (let batch of desiredBatches) {
-        quantity += batch.toJSON().quantity
-    }
-
-    return quantity
-}
-
-function addPropertyQuantity(snackInstance, quantity) {
-    const returnVal = snackInstance.toJSON()
-    returnVal.quantity = quantity
-    return returnVal
-}
-
-function findSnackBatchesWithSnackId(snack_id) {
-    return SnackBatches.findAll({ where: { snack_id }})
-}
-
 export const addSnackBatches = async(req, res) => {
     try {
         const snackBatch = req.body
         const result = await SnackBatches.create(snackBatch)
-
         return res.status(201).send(result)
     } catch (err) {
         if (err.message === BAD_REQUEST) {
@@ -79,27 +53,23 @@ export const addSnackBatches = async(req, res) => {
 
 export const getSnacks = async(req, res) => {
     try {
-        let snacks
-        let responseArray = []
-        const { active } = req.query
-
-        if (active === undefined) {
-            snacks = await Snacks.findAll()
-        } else {
-            snacks = await Snacks.findAll({
-                where: {
-                    is_active: active !== 'false'
-                }
-            })
-        }
-        for (let snack of snacks) {
-            let quantity = await findQuantity(snack)
-            responseArray.push(addPropertyQuantity(snack, quantity))
-        }
-        const response = { snacks: responseArray }
-
-        return res.status(200).send(response)
+        const isFetchAll = req.query.active === undefined
+        const is_active = req.query.active === 'true'
+        const where = isFetchAll ? {} : { is_active }
+        const data = await Snacks.findAll({
+            where, order: [['snack_type_id', 'ASC']]
+        })
+        const snacks = await Promise.all(data.map(snack => addQuantityFromBatch(snack)))
+        return res.status(200).send({ snacks })
     } catch (err) {
         return res.status(400).send({ Error: err.message })
     }
+}
+
+async function addQuantityFromBatch(snack) {
+    const desiredBatches = await SnackBatches.findAll({
+        where: { snack_id: snack.snack_id }
+    })
+    const quantity = desiredBatches.reduce((total, batch) => total + batch.quantity, 0)
+    return { quantity, ...snack.toJSON() }
 }
