@@ -12,6 +12,7 @@ export const addSnack = async(req, res) => {
         const snack = req.body
         const result = await Snacks.create(snack)
         let quantity = 0
+        if (snack.quantity < 0) throw Error(400)
         if (snack.quantity > 0) {
             quantity = snack.quantity
             const snackBatch = {
