@@ -84,7 +84,11 @@ async function updateSnackBatches(transaction, snackId) {
     return prev + cur.quantity
   }, 0)
 
-  if (requestedQuantity > totalQuantity) throw new Error(400)
+  if (requestedQuantity > totalQuantity) {
+    let err = Error(400)
+    err.name = 'Requested quantity exceeds the total stock'
+    throw err
+  }
   
   for (const snackBatch of snackBatches) {
     if (requestedQuantity > snackBatch.quantity) {
