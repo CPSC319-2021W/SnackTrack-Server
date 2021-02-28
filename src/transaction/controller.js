@@ -35,12 +35,11 @@ export const addTransaction = async (req, res) => {
       throw err
     }
 
+    const balance = user.balance + transaction.transaction_amount 
     switch (transactionTypeId) {
-      case 1: {
-        const updatedBalance = user.balance + transaction.transaction_amount
-        await user.update({ balance: updatedBalance })
+      case 1:
+        await user.update({ balance })
         break
-      }
       case 2:
         err = Error(400)
         err.name = 'New transactions cannot be processed as cancelled'
