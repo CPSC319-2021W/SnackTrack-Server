@@ -88,7 +88,7 @@ export const updateSnackBatches = async (transaction, snackId) => {
           }
         }
       },
-      order: sequelize.literal('expiration_dtm DESC')
+      order: [['expiration_dtm', 'DESC']]
     })
     
     let requestedQuantity = transaction.quantity
