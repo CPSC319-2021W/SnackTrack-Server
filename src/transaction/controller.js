@@ -81,7 +81,7 @@ async function updateSnackBatches(transaction, snackId) {
         }
       }
     },
-    order: ['expiration_dtm']
+    order: sequelize.literal('expiration_dtm DESC')
   })
   
   let requestedQuantity = transaction.quantity
@@ -96,16 +96,17 @@ async function updateSnackBatches(transaction, snackId) {
   }
   
   // need to be tested :D 
-  while (requestedQuantity > 0) {
-    const currBatch = snackBatches.pop() // snackBatches should be descending order to pop out the oldest dtm
+  while (requestedQuantity > 0) { 
+    const currBatch = snackBatches.pop()
     if (requestedQuantity >= currBatch.quantity) {
       requestedQuantity -= currBatch.quantity
-      await snackBatch.destroy()
+      await currBatch.destroy()
     } else {
       const quantity = currBatch.quantity - requestedQuantity
       requestedQuantity = 0
-      await snackBatch.update({ quantity })
+      await currBatch.update({ quantity })
     }
+  }
 }
 
 export const getTransactions = async (req, res) => {
