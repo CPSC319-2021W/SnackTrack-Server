@@ -39,6 +39,11 @@ export const addTransaction = async (req, res) => {
       err.name = 'New transactions cannot be processed as cancelled'
       throw err
     }
+    else if (transactionTypeId == 4) {
+      let err = Error(400)
+      err.name = 'New transactions cannot be processed as pendingCancelled'
+      throw err
+    }
     else if (transactionTypeId === 1) {
       const updatedBalance = user.balance + transaction.transaction_amount
       await user.update({ balance: updatedBalance })
