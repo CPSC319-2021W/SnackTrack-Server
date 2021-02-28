@@ -7,7 +7,6 @@ const UNIQUE_VIOLATION = '23505'
 const NOT_FOUND = '404'
 
 const Users = db.users 
-const Admins = db.admins
 
 export const addUser = async (req, res) => {
   try {
@@ -31,11 +30,6 @@ export const getUser = async(req, res) => {
         const resultFromDB = await Users.findByPk(userId)
         if (resultFromDB == null) throw new Error(404)
         const response = resultFromDB.toJSON()
-
-        const isAdmin = await Admins.findOne({ 
-            where: { user_id : userId }
-        })
-        response.is_admin = Boolean(isAdmin) ?? false
 
         return res.status(200).json(response)
     } catch (err) {

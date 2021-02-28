@@ -5,9 +5,6 @@ export default (db, DataTypes) => {
         },
         transaction_type_name: {
         type: DataTypes.STRING(128)
-        },
-        transaction_type_code: {
-        type: DataTypes.STRING(2)
         }
     })
     return TransactionTypes
