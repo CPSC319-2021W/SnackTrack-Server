@@ -39,7 +39,7 @@ export const addTransaction = async (req, res) => {
       err.name = 'New transactions cannot be processed as cancelled'
       throw err
     }
-    else if (transactionTypeId == 4) {
+    else if (transactionTypeId === 4) {
       let err = Error(400)
       err.name = 'New transactions cannot be processed as pendingCancelled'
       throw err
