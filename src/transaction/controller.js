@@ -95,21 +95,17 @@ async function updateSnackBatches(transaction, snackId) {
     throw err
   }
   
-  for (const snackBatch of snackBatches) {
-    if (requestedQuantity > snackBatch.quantity) {
-      requestedQuantity -= snackBatch.quantity
-      await snackBatch.destroy()
-      continue
-    }
-
-    const updatedQuantity = snackBatch.quantity - requestedQuantity
-    if (updatedQuantity == 0) {
+  // need to be tested :D 
+  while (requestedQuantity > 0) {
+    const currBatch = snackBatches.pop() // snackBatches should be descending order to pop out the oldest dtm
+    if (requestedQuantity >= currBatch.quantity) {
+      requestedQuantity -= currBatch.quantity
       await snackBatch.destroy()
     } else {
-      await snackBatch.update({ quantity: updatedQuantity })
+      const quantity = currBatch.quantity - requestedQuantity
+      requestedQuantity = 0
+      await snackBatch.update({ quantity })
     }
-    break
-  }
 }
 
 export const getTransactions = async (req, res) => {
