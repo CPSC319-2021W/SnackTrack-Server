@@ -1,5 +1,6 @@
 import { db } from '../db/index.js'
 import { getPaginatedData } from '../util/pagination.js'
+import { updateSnackBatches } from '../snack/controller.js'
 import sequelize from 'sequelize'
 const { Op } = sequelize
 
@@ -21,27 +22,41 @@ export const addTransaction = async (req, res) => {
     const userId = transaction.user_id
     const snackId = transaction.snack_id
     const user = await Users.findByPk(userId)
+    let err = null
     if (!user) {
-      let err = Error(404)
+      err = Error(404)
       err.name = "userid doesn't exist in the users table"
       throw err
     }
     const snack = await Snacks.findByPk(snackId)
     if (!snack) {
-      let err = Error(404)
+      err = Error(404)
       err.name = "snackid doesn't exist in the snacks table"
       throw err
     }
 
-    if (transactionTypeId === 2) {
-      let err = Error(400)
-      err.name = 'New transactions cannot be processed as cancelled'
-      throw err
+    const balance = user.balance + transaction.transaction_amount 
+    switch (transactionTypeId) {
+      case 1:
+        await user.update({ balance })
+        break
+      case 2:
+        err = Error(400)
+        err.name = 'New transactions cannot be processed as cancelled'
+        break
+      case 3: break
+      case 4:
+        err = Error(400)
+        err.name = 'New transactions cannot be processed as pendingCancelled'
+        break
+      default:
+        err = Error(400)
+        err.name = 'Unknown transaction_type_id'
     }
-    else if (transactionTypeId === 1) {
-      const updatedBalance = user.balance + transaction.transaction_amount
-      await user.update({ balance: updatedBalance })
-    }
+
+    if (err) throw err
+
+    await updateSnackBatches(transaction, snackId)
 
     delete transaction.snack_id
     transaction.payment_id = null
