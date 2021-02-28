@@ -1,5 +1,6 @@
 import { db } from '../db/index.js'
 import { getPaginatedData } from '../util/pagination.js'
+import { updateSnackBatches } from '../snack/controller.js'
 import sequelize from 'sequelize'
 const { Op } = sequelize
 
@@ -11,7 +12,6 @@ const ERROR_CODES = {
 }
 
 const Transactions = db.transactions
-const SnackBatches = db.snackBatches
 const Users = db.users
 const Snacks = db.snacks
 
@@ -66,45 +66,6 @@ export const addTransaction = async (req, res) => {
       return res.status(code).send({ Error: ERROR_CODES[code] })
     } else {
       return res.status(500).send({ Error: 'Internal Server Error' })
-    }
-  }
-}
-
-async function updateSnackBatches(transaction, snackId) {
-  const snackBatches = await SnackBatches.findAll({
-    where: {
-      snack_id: snackId,
-      expiration_dtm: {
-        [Op.or]: {
-          [Op.gt]: new Date(),
-          [Op.eq]: null
-        }
-      }
-    },
-    order: sequelize.literal('expiration_dtm DESC')
-  })
-  
-  let requestedQuantity = transaction.quantity
-  const totalQuantity = snackBatches.reduce((prev, cur) => {
-    return prev + cur.quantity
-  }, 0)
-
-  if (requestedQuantity > totalQuantity) {
-    let err = Error(400)
-    err.name = 'Requested quantity exceeds the total stock'
-    throw err
-  }
-  
-  // need to be tested :D 
-  while (requestedQuantity > 0) { 
-    const currBatch = snackBatches.pop()
-    if (requestedQuantity >= currBatch.quantity) {
-      requestedQuantity -= currBatch.quantity
-      await currBatch.destroy()
-    } else {
-      const quantity = currBatch.quantity - requestedQuantity
-      requestedQuantity = 0
-      await currBatch.update({ quantity })
     }
   }
 }
