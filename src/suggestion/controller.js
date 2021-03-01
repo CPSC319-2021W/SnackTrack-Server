@@ -9,7 +9,7 @@ const Suggestions = db.suggestions
 export const getSuggestions = async (req, res) => {
     try {
         const response = await Suggestions.findAll()
-        res.status(200).send(response)
+        res.status(200).send({ 'suggestions': response })
     } catch (err) {
         // TODO: Handling 401 NOT AUTHORIZED SNAK-123
         const code = Number(err.message)
