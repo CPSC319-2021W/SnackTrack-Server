@@ -12,7 +12,7 @@ export default (db, DataTypes) => {
             type: DataTypes.STRING
         },
         suggestion_dtm: {
-            type: DataTypes.Date
+            type: DataTypes.DATE
         }
     }, {underscored: true})
     return Suggestions
