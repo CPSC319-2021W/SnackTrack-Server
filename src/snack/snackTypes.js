@@ -6,9 +6,6 @@ export default (db, DataTypes) => {
         },
         snack_type_name: {
             type: DataTypes.STRING(128)
-        },
-        snack_type_code: {
-            type: DataTypes.STRING(128)
         }
     }, {underscored: true})
 }

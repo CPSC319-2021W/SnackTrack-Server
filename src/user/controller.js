@@ -7,7 +7,6 @@ const UNIQUE_VIOLATION = '23505'
 const NOT_FOUND = '404'
 
 const Users = db.users 
-const Admins = db.admins
 
 export const addUser = async (req, res) => {
   try {
@@ -24,18 +23,17 @@ export const addUser = async (req, res) => {
 
 export const getUser = async(req, res) => {
     try {
-        // TODO : Add logic checking if the requesting user is authorized (Ticket: SNAK-78)
         const userId = req.params.userId
-
+        const { user_id, is_admin } = req.user
+       
+        if(!is_admin && user_id !== parseInt(userId)) {
+          return res.sendStatus(403)
+        } 
+        
         // TODO: Optimization (Ticket: SNAK-93)
         const resultFromDB = await Users.findByPk(userId)
         if (resultFromDB == null) throw new Error(404)
         const response = resultFromDB.toJSON()
-
-        const isAdmin = await Admins.findOne({ 
-            where: { user_id : userId }
-        })
-        response.is_admin = Boolean(isAdmin) ?? false
 
         return res.status(200).json(response)
     } catch (err) {

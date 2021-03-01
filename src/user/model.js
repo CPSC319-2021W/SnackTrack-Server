@@ -25,6 +25,9 @@ export default (db, DataTypes) => {
     },
     image_uri: {
       type: DataTypes.STRING
+    },
+    is_admin: {
+      type: DataTypes.BOOLEAN
     }
   }, {underscored: true})
   return Users

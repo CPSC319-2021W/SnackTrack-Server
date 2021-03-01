@@ -1,8 +1,8 @@
 import { Router } from 'express'
-import { addAdmin } from './controller.js'
+import { verifyGAuth } from './controller.js'
 
 const router = Router()
 
-router.post('/', addAdmin)
+router.post('/', verifyGAuth)
 
 export default router
