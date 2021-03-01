@@ -50,6 +50,6 @@ export const authenticateJWT = (req, res, next) => {
             next()
         })
     } else {
-        res.sendStatus.send({ Error: 'Not authorized' })
+        res.sendStatus(401).send({ Error: 'Not authorized' })
     }
 }

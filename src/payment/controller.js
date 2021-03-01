@@ -16,6 +16,12 @@ export const addPayment = async (req, res) => {
   try {
     const payment = req.body
     const userId = payment.user_id
+    const { user_id, is_admin } = req.user
+       
+    if(!is_admin && user_id !== parseInt(userId)) {
+      return res.sendStatus(403)        
+    } 
+    
     const user = await Users.findByPk(userId)
     if (user == null) {
       let err = new Error(404)
@@ -54,6 +60,11 @@ export const addPayment = async (req, res) => {
 
 export const getPayments = async (req, res) => {
   try {
+    const { is_admin } = req.user
+    if(!is_admin) {
+          return res.sendStatus(403)
+    }
+
     const response = await getPaginatedData(req.query, {}, Payments, 'payment_dtm')
     res.status(200).send(response)
   } catch (err) {
@@ -73,6 +84,13 @@ export const getPayments = async (req, res) => {
 export const getUserPayments = async(req, res) => {
   try {
     const user_id = req.params.userId
+    const requested_user_id = req.user.user_id
+    const is_admin = req.user.is_admin
+       
+    if(!is_admin && requested_user_id !== parseInt(user_id)) {
+          return res.sendStatus(403)
+    } 
+
     const user = await Users.findByPk(user_id)
     if (!user) throw new Error(404)
     const where = { user_id }
