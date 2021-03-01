@@ -12,6 +12,7 @@ export const getSuggestions = async (req, res) => {
         res.status(200).send({ 'suggestions': response })
     } catch (err) {
         // TODO: Handling 401 NOT AUTHORIZED SNAK-123
+        // TODO: Handleing a custom error SNAK-237
         const code = Number(err.message)
         if (code in ERROR_CODES) {
             return res.status(code).send({ Error: ERROR_CODES[code] })
