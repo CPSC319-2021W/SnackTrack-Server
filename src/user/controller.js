@@ -1,20 +1,16 @@
-import { Users } from './model.js'
-import { Admins } from '../admin/model.js'
+import { db } from '../db/index.js'
 
 // Reference: PostgreSQL error code documentation
 // https://www.postgresql.org/docs/8.2/errcodes-appendix.html
 // 23505 = UNIQUE_VIOLATION
 const UNIQUE_VIOLATION = '23505'
-
 const NOT_FOUND = '404'
+
+const Users = db.users 
 
 export const addUser = async (req, res) => {
   try {
     const user = req.body
-    // TODO: Auto-populate from GAuth (Ticket: SNAK-72)
-    user.first_name = 'Fname'
-    user.last_name = 'Lname'
-
     const result = await Users.create(user)
     res.status(201).send(result)
   } catch (err) {
@@ -34,11 +30,6 @@ export const getUser = async(req, res) => {
         const resultFromDB = await Users.findByPk(userId)
         if (resultFromDB == null) throw new Error(404)
         const response = resultFromDB.toJSON()
-
-        const isAdmin = await Admins.findOne({ 
-            where: { user_id : userId }
-        })
-        response.is_admin = Boolean(isAdmin) ?? false
 
         return res.status(200).json(response)
     } catch (err) {
