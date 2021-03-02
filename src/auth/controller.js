@@ -34,7 +34,8 @@ export const verifyGAuth = async (req, res) => {
       accessTokenSecret, 
       { expiresIn: '30 days' })
     res.json({
-      accessToken
+      accessToken,
+      user
     })
   } catch (err) {
     return res.status(403).send({ Error: err.message })
