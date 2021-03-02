@@ -15,17 +15,29 @@ export const verifyGAuth = async (req, res) => {
     audience: clientId,
     })
     const payload = ticket.getPayload()
-    const user = await Users.findAll({ where: { email_address: payload.email }})
-    if (user === null || user.length > 1) throw new Error(404)
+    let user = await Users.findOne({ where: { email_address: payload.email }})
+    if (!user){
+      const randomInt = Math.floor((Math.random() * 1000) + 1)
+      const username = payload.given_name + payload.family_name + randomInt.toString()
+      const newUser = {
+        username: username,
+        first_name: payload.given_name,
+        last_name: payload.family_name,
+        email_address: payload.email,
+        image_uri: payload.picture,
+      }
+      const result = await Users.create(newUser)
+      user = result.toJSON()
+    }
     const accessToken = sign(
-      { user_id: user[0].user_id,  is_admin: user[0].is_admin }, 
+      { user_id: user.user_id,  is_admin: user.is_admin }, 
       accessTokenSecret, 
       { expiresIn: '30 days' })
     res.json({
       accessToken
     })
   } catch (err) {
-    return res.status(403).send({ Error: 'Unable to create JWT token' })
+    return res.status(403).send({ Error: err.message })
   }   
 }
 
@@ -50,7 +62,6 @@ export const isAdmin = (req, res, next) => {
   if(!is_admin) {
     return res.sendStatus(403)
   }
-  
   next()
 }
 
