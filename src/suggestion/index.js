@@ -1,8 +1,9 @@
 import { Router } from 'express'
-import { getSuggestions } from './controller.js'
+import { addSuggestion, getSuggestions } from './controller.js'
 
 const router = Router()
 
+router.post('/', addSuggestion)
 router.get('/', getSuggestions)
 
 export default router
