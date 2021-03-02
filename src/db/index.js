@@ -6,6 +6,7 @@ import SnackTypes from '../snack/snackTypes.js'
 import SnackBatches from '../snack/snackBatches.js'
 import Transactions from '../transaction/model.js'
 import TransactionTypes from '../transaction/transactionTypes.js'
+import Suggestions from '../suggestion/model.js'
 
 import dotenv from 'dotenv'
 dotenv.config()
@@ -42,6 +43,7 @@ db.snackBatches = SnackBatches(dbInstance, Sequelize)
 db.transactions = Transactions(dbInstance, Sequelize)
 db.transactionTypes = TransactionTypes(dbInstance, Sequelize)
 db.users = Users(dbInstance, Sequelize)
+db.suggestions = Suggestions(dbInstance, Sequelize)
 
 db.payments.belongsTo(db.users, { foreignKey: 'user_id' })
 db.snacks.belongsTo(db.snackTypes, { foreignKey: { name: 'snack_type_id' }})
