@@ -11,10 +11,6 @@ const SnackBatches = db.snackBatches
 
 export const addSnack = async(req, res) => {
     try {
-        const { is_admin } = req.user
-        if(!is_admin) {
-              return res.sendStatus(403)
-        }
         const snack = req.body
         if (snack.quantity < 0) throw Error(400)
         const result = await Snacks.create(snack)

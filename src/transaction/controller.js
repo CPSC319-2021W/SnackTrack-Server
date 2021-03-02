@@ -79,11 +79,6 @@ export const addTransaction = async (req, res) => {
 
 export const getTransactions = async (req, res) => {
   try {
-    const { is_admin } = req.user
-    if(!is_admin) {
-          return res.sendStatus(403)
-    }
-
     const where = { transaction_type_id: { [Op.ne]: 3 } }
     const response = await getPaginatedData(req.query, where, Transactions, 'transaction_dtm')
     res.status(200).send(response)
@@ -104,13 +99,6 @@ export const getTransactions = async (req, res) => {
 export const getUserTransactions = async (req, res) => {
   try {
     const user_id = req.params.userId
-    const requested_user_id = req.user.user_id
-    const is_admin = req.user.is_admin
-       
-    if(!is_admin && requested_user_id !== parseInt(user_id)) {
-          return res.sendStatus(403)
-    } 
-
     const user = await Users.findByPk(user_id)
     if (!user) throw new Error(404)
     const where = { user_id, transaction_type_id: { [Op.ne]: 3 } }
@@ -133,13 +121,6 @@ export const getUserTransactions = async (req, res) => {
 export const getUserTransaction = async (req, res) => {
   try {
     const { user_id, transaction_id } = req.params
-    const requested_user_id = req.user.user_id
-    const is_admin = req.user.is_admin
-       
-    if(!is_admin && requested_user_id !== parseInt(user_id)) {
-          return res.sendStatus(403)
-    }
-    
     const transaction = await Transactions.findOne({
       where: { transaction_id, user_id }
     })

@@ -24,12 +24,6 @@ export const addUser = async (req, res) => {
 export const getUser = async(req, res) => {
     try {
         const userId = req.params.userId
-        const { user_id, is_admin } = req.user
-       
-        if(!is_admin && user_id !== parseInt(userId)) {
-          return res.sendStatus(403)
-        } 
-        
         // TODO: Optimization (Ticket: SNAK-93)
         const resultFromDB = await Users.findByPk(userId)
         if (resultFromDB == null) throw new Error(404)
