@@ -69,7 +69,7 @@ export const getSnacks = async(req, res) => {
     }
 }
 
-export const getSnackBatches = async(req, res) => { // 27, 36
+export const getSnackBatches = async(req, res) => {
     try {
         const isFetchAll = req.query.snack_id === undefined
         const snack_id = req.query.snack_id
