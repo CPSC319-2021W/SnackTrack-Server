@@ -57,7 +57,7 @@ export const addSnackBatches = async(req, res) => {
 export const getSnacks = async(req, res) => {
     try {
         const isFetchAll = req.query.active === undefined
-        const is_active = req.query.active === 'true'
+        const is_active = req.query.active !== 'false'
         const where = isFetchAll ? {} : { is_active }
         const data = await Snacks.findAll({
             where, order: [['snack_type_id', 'ASC']]
@@ -69,9 +69,14 @@ export const getSnacks = async(req, res) => {
     }
 }
 
-export const getSnackBatches = async(req, res) => {
+export const getSnackBatches = async(req, res) => { // 27, 36
     try {
-        const snack_batches = await SnackBatches.findAll()
+        const isFetchAll = req.query.snack_id === undefined
+        const snack_id = req.query.snack_id
+        const where = isFetchAll ? {} : { snack_id }
+        const snack_batches = await SnackBatches.findAll({
+            where, order: [['snack_batch_id', 'ASC']]
+        })
         return res.status(200).send({ snack_batches })
     } catch (err) {
         return res.status(400).send({ Error: err.message })
