@@ -4,6 +4,7 @@ const { Op } = sequelize
 
 const BAD_REQUEST = '400'
 const NOT_AUTHORIZED = '401'
+const NOT_FOUND = '404'
 const CONFLICT = 'Validation error'
 
 const Snacks = db.snacks
@@ -66,6 +67,26 @@ export const getSnacks = async(req, res) => {
         return res.status(200).send({ snacks })
     } catch (err) {
         return res.status(400).send({ Error: err.message })
+    }
+}
+
+export const deleteSnacks = async(req, res) => {
+    try {
+        const snackID = req.params.snack_id
+        const snackInstance = await Snacks.findByPk(snackID)
+        if (snackInstance === null) throw new Error(404)
+
+        await snackInstance.destroy()
+
+        return res.status(204).send()
+    } catch (err) {
+        if (err.message === NOT_AUTHORIZED) { // TODO: wait for authentication to be implemented
+            return res.status(401).send({ Error: 'Not Authorized' })
+        } else if (err.message === NOT_FOUND) {
+            return res.status(401).send({ Error: 'Not Found' })
+        } else {
+            return res.status(500).send({ Error: err.message })
+        }
     }
 }
 
