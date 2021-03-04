@@ -59,7 +59,7 @@ export const putSnacks = async(req, res) => {
     try {
         const snackID = req.params.snack_id
         const snackInstance = await Snacks.findByPk(snackID)
-        if (snackInstance == null) throw new Error(404)
+        if (snackInstance === null) throw new Error(404)
 
         snackInstance.snack_name = req.body.snack_name
         snackInstance.snack_type_id = req.body.snack_type_id
