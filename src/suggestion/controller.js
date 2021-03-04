@@ -18,7 +18,7 @@ export const addSuggestion = async (req, res) => {
     if (!user) throw new Error(404)
 
     const suggestionText = suggestion.suggestion_text
-    if (typeof suggestionText !== 'string' || suggestionText.length == 0) throw new Error(400)    // Change the condition depending on frontend validation check
+    if (!suggestionText || !suggestionText.trim()) throw new Error(400)
 
     const result = await Suggestions.create(suggestion)
     return res.status(201).send(result)
