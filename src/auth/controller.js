@@ -8,11 +8,11 @@ const clientId = process.env.CLIENT
 const client = new OAuth2Client(clientId)
 const Users = db.users 
 
-export const verifyGAuth = async (req, res) => {
+export const verifyAndCreateToken = async (req, res) => {
   try {
     const ticket = await client.verifyIdToken({
-    idToken: req.headers.authorization.split(' ')[1],
-    audience: clientId,
+      idToken: req.headers.authorization.split(' ')[1],
+      audience: clientId,
     })
     const payload = ticket.getPayload()
     let user = await Users.findOne({ where: { email_address: payload.email }})
@@ -33,10 +33,7 @@ export const verifyGAuth = async (req, res) => {
       { user_id: user.user_id,  is_admin: user.is_admin }, 
       accessTokenSecret, 
       { expiresIn: '30 days' })
-    res.json({
-      accessToken,
-      user
-    })
+    res.json({ accessToken, user })
   } catch (err) {
     return res.status(403).send({ Error: err.message })
   }   
@@ -69,7 +66,7 @@ export const isAdmin = (req, res, next) => {
 export const checkPermission = (req, res, next) => {
   const userId = req.params.userId
   const { user_id, is_admin } = req.user
-  if(!is_admin && user_id !== parseInt(userId)) {
+  if (!is_admin && user_id !== parseInt(userId)) {
     return res.sendStatus(403)
   }
   next()

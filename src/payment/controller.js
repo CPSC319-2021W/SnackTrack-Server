@@ -17,7 +17,7 @@ export const addPayment = async (req, res) => {
     const payment = req.body
     const userId = payment.user_id
     const { user_id, is_admin } = req.user
-    if(!is_admin && user_id !== parseInt(userId)) {
+    if (!is_admin && user_id !== parseInt(userId)) {
       return res.sendStatus(403)
     }
     const user = await Users.findByPk(userId)

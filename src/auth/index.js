@@ -1,8 +1,8 @@
 import { Router } from 'express'
-import { verifyGAuth } from './controller.js'
+import { verifyAndCreateToken } from './controller.js'
 
 const router = Router()
 
-router.post('/', verifyGAuth)
+router.post('/', verifyAndCreateToken)
 
 export default router
