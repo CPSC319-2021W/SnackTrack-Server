@@ -61,16 +61,7 @@ export const putSnacks = async(req, res) => {
         const snackInstance = await Snacks.findByPk(snackID)
         if (snackInstance === null) throw new Error(404)
 
-        snackInstance.snack_name = req.body.snack_name
-        snackInstance.snack_type_id = req.body.snack_type_id
-        snackInstance.description = req.body.description
-        snackInstance.image_uri = req.body.image_uri
-        snackInstance.price = req.body.price
-        snackInstance.is_active = req.body.is_active
-        snackInstance.order_threshold = req.body.order_threshold
-        snackInstance.last_updated_by = req.body.last_updated_by
-
-        await snackInstance.save()
+        await snackInstance.update(req.body)
 
         return res.status(200).send(snackInstance)
     } catch (err) {
