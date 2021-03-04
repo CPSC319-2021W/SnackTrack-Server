@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import {addSnackBatches, getSnackBatches} from './controller.js'
+import { addSnackBatches, getSnackBatches } from './controller.js'
 
 const router = Router()
 
