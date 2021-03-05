@@ -29,7 +29,7 @@ export const addSnack = async(req, res) => {
     } catch (err) {
         if (err.message === BAD_REQUEST) {
             return res.status(400).send({ Error: 'Bad Request' })
-        } else if (err.message === NOT_AUTHORIZED) { // TODO: wait for authentication to be implemented
+        } else if (err.message === NOT_AUTHORIZED) {
             return res.status(401).send({ Error: 'Not Authorized' })
         } else if (err.message === CONFLICT) {
             return res.status(409).send({ Error: 'This snack already exists.' })
@@ -47,7 +47,7 @@ export const addSnackBatches = async(req, res) => {
     } catch (err) {
         if (err.message === BAD_REQUEST) {
             return res.status(400).send({ Error: 'Bad Request' })
-        } else if (err.message === NOT_AUTHORIZED) { // TODO: wait for authentication to be implemented
+        } else if (err.message === NOT_AUTHORIZED) {
             return res.status(401).send({ Error: 'Not Authorized' })
         } else {
             return res.status(500).send({ Error: err.message })
@@ -74,15 +74,12 @@ export const deleteSnacks = async(req, res) => {
     try {
         const snack_id = req.params.snack_id
 
-        await Snacks.destroy({
-            where: { snack_id }
-        }).then(result => {
-            if (!result) throw new Error(404)
-        })
+        const rows = await Snacks.destroy({ where: { snack_id } })
+        if (!rows) throw new Error(404)
 
         return res.status(204).send()
     } catch (err) {
-        if (err.message === NOT_AUTHORIZED) { // TODO: wait for authentication to be implemented
+        if (err.message === NOT_AUTHORIZED) {
             return res.status(401).send({ Error: 'Not Authorized' })
         } else if (err.message === NOT_FOUND) {
             return res.status(404).send({ Error: 'Not Found' })
