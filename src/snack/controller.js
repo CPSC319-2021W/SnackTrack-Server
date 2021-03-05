@@ -72,18 +72,20 @@ export const getSnacks = async(req, res) => {
 
 export const deleteSnacks = async(req, res) => {
     try {
-        const snackID = req.params.snack_id
-        const snackInstance = await Snacks.findByPk(snackID)
-        if (snackInstance === null) throw new Error(404)
+        const snack_id = req.params.snack_id
 
-        await snackInstance.destroy()
+        await Snacks.destroy({
+            where: { snack_id }
+        }).then(result => {
+            if (!result) throw new Error(404)
+        })
 
         return res.status(204).send()
     } catch (err) {
         if (err.message === NOT_AUTHORIZED) { // TODO: wait for authentication to be implemented
             return res.status(401).send({ Error: 'Not Authorized' })
         } else if (err.message === NOT_FOUND) {
-            return res.status(401).send({ Error: 'Not Found' })
+            return res.status(404).send({ Error: 'Not Found' })
         } else {
             return res.status(500).send({ Error: err.message })
         }
