@@ -92,6 +92,20 @@ export const getSnacks = async(req, res) => {
     }
 }
 
+export const getSnackBatches = async(req, res) => {
+    try {
+        const isFetchAll = req.query.snack_id === undefined
+        const snack_id = req.query.snack_id
+        const where = isFetchAll ? {} : { snack_id }
+        const snack_batches = await SnackBatches.findAll({
+            where, order: [['snack_batch_id', 'ASC']]
+        })
+        return res.status(200).send({ snack_batches })
+    } catch (err) {
+        return res.status(400).send({ Error: err.message })
+    }
+}
+
 async function addQuantityFromBatch(snack) {
     const desiredBatches = await SnackBatches.findAll({
         where: { snack_id: snack.snack_id }
