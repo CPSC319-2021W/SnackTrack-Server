@@ -1,8 +1,10 @@
 import { Router } from 'express'
-import { addSnackBatches } from './controller.js'
+import { addSnackBatches, getSnackBatches } from './controller.js'
+import { authenticateJWT, isAdmin } from '../auth/controller.js'
 
 const router = Router()
 
-router.post('/', addSnackBatches)
+router.post('/', authenticateJWT, isAdmin, addSnackBatches)
+router.get('/', getSnackBatches)
 
 export default router
