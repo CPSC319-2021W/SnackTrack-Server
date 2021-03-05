@@ -29,7 +29,7 @@ export const addSnack = async(req, res) => {
     } catch (err) {
         if (err.message === BAD_REQUEST) {
             return res.status(400).send({ Error: 'Bad Request' })
-        } else if (err.message === NOT_AUTHORIZED) { // TODO: wait for authentication to be implemented
+        } else if (err.message === NOT_AUTHORIZED) {
             return res.status(401).send({ Error: 'Not Authorized' })
         } else if (err.message === CONFLICT) {
             return res.status(409).send({ Error: 'This snack already exists.' })
@@ -47,7 +47,7 @@ export const addSnackBatches = async(req, res) => {
     } catch (err) {
         if (err.message === BAD_REQUEST) {
             return res.status(400).send({ Error: 'Bad Request' })
-        } else if (err.message === NOT_AUTHORIZED) { // TODO: wait for authentication to be implemented
+        } else if (err.message === NOT_AUTHORIZED) {
             return res.status(401).send({ Error: 'Not Authorized' })
         } else {
             return res.status(500).send({ Error: err.message })
@@ -67,7 +67,7 @@ export const putSnacks = async(req, res) => {
     } catch (err) {
         if (err.message === BAD_REQUEST) {
             return res.status(400).send({ Error: 'Bad Request' })
-        } else if (err.message === NOT_AUTHORIZED) { // TODO: wait for authentication to be implemented
+        } else if (err.message === NOT_AUTHORIZED) {
             return res.status(401).send({ Error: 'Not Authorized' })
         } else if (err.message === NOT_FOUND) {
             return res.status(404).send({ ERROR: 'Not Found' })
