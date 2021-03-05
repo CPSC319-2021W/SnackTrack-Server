@@ -6,7 +6,7 @@ const router = Router()
 
 
 router.post('/', authenticateJWT, isAdmin, addSnack)
-router.put('/:snack_id', putSnacks)
+router.put('/:snack_id', authenticateJWT, isAdmin, putSnacks)
 router.get('/', getSnacks)
 
 export default router
