@@ -8,6 +8,6 @@ const router = Router()
 router.post('/', authenticateJWT, isAdmin, addSnack)
 router.put('/:snack_id', authenticateJWT, isAdmin, putSnacks)
 router.get('/', getSnacks)
-router.delete('/:snack_id', deleteSnacks)
+router.delete('/:snack_id', authenticateJWT, isAdmin, deleteSnacks)
 
 export default router
