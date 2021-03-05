@@ -139,3 +139,25 @@ export const getUserTransaction = async (req, res) => {
     }
   }
 }
+
+export const getPendingOrders = async (req, res) => {
+  try {
+    const user_id = req.params.userId
+    const user = await Users.findByPk(user_id)
+    if (!user) throw new Error(404)
+    const where = { user_id, transaction_type_id: { [Op.eq]: 3 } }
+    const response = await getPaginatedData(req.query, where, Transactions, 'transaction_dtm')
+    res.status(200).send(response)
+  } catch (err) {
+    // TODO : handle 401 (Not authorized) case in SNAK-123
+    const code = Number(err.message)
+    if (err.name) {
+      return res.status(code).send({ Error: err.name })
+    }
+    if (code in ERROR_CODES) {
+      return res.status(code).send({ Error: ERROR_CODES[code] })
+    } else {
+      return res.status(500).send({ Error: 'Internal Server Error' })
+    }
+  }
+}
