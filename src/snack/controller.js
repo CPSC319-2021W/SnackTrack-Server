@@ -92,6 +92,7 @@ export const getSnacks = async(req, res) => {
     }
 }
 
+
 export const getSnackBatches = async(req, res) => {
     try {
         const isFetchAll = req.query.snack_id === undefined
@@ -103,6 +104,25 @@ export const getSnackBatches = async(req, res) => {
         return res.status(200).send({ snack_batches })
     } catch (err) {
         return res.status(400).send({ Error: err.message })
+    }
+}
+
+export const deleteSnacks = async(req, res) => {
+    try {
+        const snack_id = req.params.snack_id
+
+        const rows = await Snacks.destroy({ where: { snack_id } })
+        if (!rows) throw new Error(404)
+
+        return res.status(204).send()
+    } catch (err) {
+        if (err.message === NOT_AUTHORIZED) {
+            return res.status(401).send({ Error: 'Not Authorized' })
+        } else if (err.message === NOT_FOUND) {
+            return res.status(404).send({ Error: 'Not Found' })
+        } else {
+            return res.status(500).send({ Error: err.message })
+        }
     }
 }
 
