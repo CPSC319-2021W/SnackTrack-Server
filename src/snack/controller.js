@@ -4,6 +4,7 @@ const { Op } = sequelize
 
 const BAD_REQUEST = '400'
 const NOT_AUTHORIZED = '401'
+const NOT_FOUND = '404'
 const CONFLICT = 'Validation error'
 
 const Snacks = db.snacks
@@ -28,7 +29,7 @@ export const addSnack = async(req, res) => {
     } catch (err) {
         if (err.message === BAD_REQUEST) {
             return res.status(400).send({ Error: 'Bad Request' })
-        } else if (err.message === NOT_AUTHORIZED) { // TODO: wait for authentication to be implemented
+        } else if (err.message === NOT_AUTHORIZED) {
             return res.status(401).send({ Error: 'Not Authorized' })
         } else if (err.message === CONFLICT) {
             return res.status(409).send({ Error: 'This snack already exists.' })
@@ -46,8 +47,30 @@ export const addSnackBatches = async(req, res) => {
     } catch (err) {
         if (err.message === BAD_REQUEST) {
             return res.status(400).send({ Error: 'Bad Request' })
-        } else if (err.message === NOT_AUTHORIZED) { // TODO: wait for authentication to be implemented
+        } else if (err.message === NOT_AUTHORIZED) {
             return res.status(401).send({ Error: 'Not Authorized' })
+        } else {
+            return res.status(500).send({ Error: err.message })
+        }
+    }
+}
+
+export const putSnacks = async(req, res) => {
+    try {
+        const snackID = req.params.snack_id
+        const snackInstance = await Snacks.findByPk(snackID)
+        if (snackInstance === null) throw new Error(404)
+
+        await snackInstance.update(req.body)
+
+        return res.status(200).send(snackInstance)
+    } catch (err) {
+        if (err.message === BAD_REQUEST) {
+            return res.status(400).send({ Error: 'Bad Request' })
+        } else if (err.message === NOT_AUTHORIZED) {
+            return res.status(401).send({ Error: 'Not Authorized' })
+        } else if (err.message === NOT_FOUND) {
+            return res.status(404).send({ ERROR: 'Not Found' })
         } else {
             return res.status(500).send({ Error: err.message })
         }
@@ -57,13 +80,27 @@ export const addSnackBatches = async(req, res) => {
 export const getSnacks = async(req, res) => {
     try {
         const isFetchAll = req.query.active === undefined
-        const is_active = req.query.active === 'true'
+        const is_active = req.query.active !== 'false'
         const where = isFetchAll ? {} : { is_active }
         const data = await Snacks.findAll({
             where, order: [['snack_type_id', 'ASC']]
         })
         const snacks = await Promise.all(data.map(snack => addQuantityFromBatch(snack)))
         return res.status(200).send({ snacks })
+    } catch (err) {
+        return res.status(400).send({ Error: err.message })
+    }
+}
+
+export const getSnackBatches = async(req, res) => {
+    try {
+        const isFetchAll = req.query.snack_id === undefined
+        const snack_id = req.query.snack_id
+        const where = isFetchAll ? {} : { snack_id }
+        const snack_batches = await SnackBatches.findAll({
+            where, order: [['snack_batch_id', 'ASC']]
+        })
+        return res.status(200).send({ snack_batches })
     } catch (err) {
         return res.status(400).send({ Error: err.message })
     }
