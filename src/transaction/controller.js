@@ -23,7 +23,7 @@ export const addTransaction = async (req, res) => {
     if (!snack) {
       return res.status(404).json({ error: 'snack_id does not exist in the snacks table' })
     }
-    await updateSnackBatches(transaction, snack_id)
+    await updateSnackBatches(quantity, snack_id)
     if (transaction_type_id === 1) {
       const balance = user.balance + transaction_amount
       await user.update({ balance })
@@ -35,6 +35,9 @@ export const addTransaction = async (req, res) => {
     })
     return res.status(201).json(result)
   } catch (err) {
+    if (err.message === 'Bad Request: Requested quantity exceeds the total stock.') {
+      res.status(400).json({ error: err.message })
+    }
     return res.status(500).json({ error: err.message })
   }
 }
@@ -78,7 +81,7 @@ export const getPendingOrders = async (req, res) => {
     const where = { user_id, transaction_type_id: { [Op.eq]: 3 } }
     const order = [['transaction_dtm', 'DESC']]
     const response = await getPaginatedData(req.query, where, Transactions, order)
-    return res.status(200).send(response)
+    return res.status(200).json(response)
   } catch (err) {
     return res.status(500).json({ error: err.message })
   }
