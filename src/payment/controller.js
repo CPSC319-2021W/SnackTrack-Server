@@ -58,7 +58,8 @@ export const addPayment = async (req, res) => {
 
 export const getPayments = async (req, res) => {
   try {
-    const response = await getPaginatedData(req.query, {}, Payments, 'payment_dtm')
+    const order = [['payment_dtm', 'DESC']]
+    const response = await getPaginatedData(req.query, {}, Payments, order)
     res.status(200).send(response)
   } catch (err) {
     // TODO: Handling 401 NOT AUTHORIZED SNAK-123
@@ -80,7 +81,8 @@ export const getUserPayments = async(req, res) => {
     const user = await Users.findByPk(user_id)
     if (!user) throw new Error(404)
     const where = { user_id }
-    const response = await getPaginatedData(req.query, where, Payments, 'payment_dtm')
+    const order = [['payment_dtm', 'DESC']]
+    const response = await getPaginatedData(req.query, where, Payments, order)
     res.status(200).send(response)
   } catch (err) {
     // TODO : handle 401 (Not authorized) case in SNAK-123
