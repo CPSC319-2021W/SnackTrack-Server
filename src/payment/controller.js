@@ -35,16 +35,6 @@ export const addPayment = async (req, res) => {
   }
 }
 
-export const getPayments = async (req, res) => {
-  try {
-    const order = [['payment_dtm', 'DESC']]
-    const response = await getPaginatedData(req.query, {}, Payments, order)
-    return res.status(200).json(response)
-  } catch (err) {
-    return res.status(500).json({ error: err.message })
-  }
-}
-
 export const getUserPayments = async(req, res) => {
   try {
     const user_id = req.params.user_id

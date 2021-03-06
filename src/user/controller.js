@@ -22,7 +22,6 @@ export const addUser = async (req, res) => {
 export const getUser = async (req, res) => {
   try {
     const user_id = req.params.user_id
-    // TODO: Optimization (Ticket: SNAK-93)
     const response = await Users.findByPk(user_id)
     if (!response) {
       return res.status(404).json({ error: 'user_id does not exist in the users table' })

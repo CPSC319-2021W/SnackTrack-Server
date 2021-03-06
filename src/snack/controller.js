@@ -2,6 +2,7 @@ import { db } from '../db/index.js'
 import sequelize from 'sequelize'
 const { Op } = sequelize
 
+const UNIQUE_VIOLATION = '23505'
 const Snacks = db.snacks
 const SnackBatches = db.snackBatches
 
@@ -24,6 +25,9 @@ export const addSnack = async(req, res) => {
     }
     return res.status(201).json({ quantity, ...result.toJSON() })
   } catch (err) {
+    if (err.parent.code === UNIQUE_VIOLATION) {
+      return res.status(409).json({ error: 'User is already exist.' })
+    }
     return res.status(500).json({ error: err.message })
   }
 }
@@ -43,7 +47,7 @@ export const putSnacks = async(req, res) => {
     const snack = req.body
     const snack_id = req.params.snack_id
     const result = await Snacks.update(snack, { where: { snack_id } })
-    if (result === 0) {
+    if (result[0] === 0) {
       return res.status(404).json({ Error: 'snack_id is not found on the snack table.' })
     }
     return res.status(204).json()
