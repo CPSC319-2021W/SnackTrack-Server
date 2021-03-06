@@ -106,7 +106,7 @@ async function addQuantityFromBatch(snack) {
   return { quantity, ...snack.toJSON() }
 }
 
-export const updateSnackBatches = async (quantity, snackId) => {
+export const updateSnackBatches = async (changeInQuantity, snackId) => {
   const snackBatches = await SnackBatches.findAll({
     where: {
       snack_id: snackId,
@@ -119,25 +119,41 @@ export const updateSnackBatches = async (quantity, snackId) => {
     },
     order: [['expiration_dtm', 'DESC']]
   })
-    
-  let requestedQuantity = quantity
-  const totalQuantity = snackBatches.reduce((prev, cur) => {
-    return prev + cur.quantity
-  }, 0)
-  if (requestedQuantity > totalQuantity) {
-    throw Error('Bad Request: Requested quantity exceeds the total stock.')
-  }
-  const tasks = []
-  while (requestedQuantity > 0) { 
-    const currBatch = snackBatches.pop()
-    if (requestedQuantity >= currBatch.quantity) {
-      requestedQuantity -= currBatch.quantity
-      tasks.push(currBatch.destroy())
+
+  if (changeInQuantity > 0) {
+    const snackBatch = snackBatches.pop()
+    if (snackBatch) {
+      const updatedQuantity = snackBatch.quantity + changeInQuantity
+      await snackBatch.update({ quantity: updatedQuantity })
     } else {
-      const quantity = currBatch.quantity - requestedQuantity
-      requestedQuantity = 0
-      tasks.push(currBatch.update({ quantity }))
+      const newExpirationDTM = new Date(new Date().setFullYear(new Date().getFullYear() + 1))
+      const newSnackBatch = {
+        snack_id: snackId,
+        quantity: changeInQuantity,
+        expiration_dtm: newExpirationDTM
+      }
+      await SnackBatches.create(newSnackBatch)
     }
+  } else {
+    let requestedQuantity = -changeInQuantity
+    const totalQuantity = snackBatches.reduce((prev, cur) => {
+      return prev + cur.quantity
+    }, 0)
+    if (requestedQuantity > totalQuantity) {
+      throw Error('Bad Request: Requested quantity exceeds the total stock.')
+    }
+    const tasks = []
+    while (requestedQuantity > 0) { 
+      const currBatch = snackBatches.pop()
+      if (requestedQuantity >= currBatch.quantity) {
+        requestedQuantity -= currBatch.quantity
+        tasks.push(currBatch.destroy())
+      } else {
+        const quantity = currBatch.quantity - requestedQuantity
+        requestedQuantity = 0
+        tasks.push(currBatch.update({ quantity }))
+      }
+    }
+    await Promise.all(tasks)
   }
-  await Promise.all(tasks)
 }

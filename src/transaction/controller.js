@@ -23,7 +23,7 @@ export const addTransaction = async (req, res) => {
     if (!snack) {
       return res.status(404).json({ error: 'snack_id does not exist in the snacks table' })
     }
-    await updateSnackBatches(quantity, snack_id)
+    await updateSnackBatches(-quantity, snack_id)
     if (transaction_type_id === 1) {
       const balance = user.balance + transaction_amount
       await user.update({ balance })
