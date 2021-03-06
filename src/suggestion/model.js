@@ -14,6 +14,6 @@ export default (db, DataTypes) => {
     suggestion_dtm: {
       type: DataTypes.DATE
     }
-  }, {underscored: true})
+  }, { underscored: true })
   return Suggestions
 }
