@@ -35,28 +35,24 @@ export const addTransaction = async (req, res) => {
       throw err
     }
 
-    const balance = user.balance + transaction.transaction_amount 
-    switch (transactionTypeId) {
-      case 1:
-        await user.update({ balance })
-        break
-      case 2:
-        err = Error(400)
-        err.name = 'New transactions cannot be processed as cancelled'
-        break
-      case 3: break
-      case 4:
-        err = Error(400)
-        err.name = 'New transactions cannot be processed as pendingCancelled'
-        break
-      default:
-        err = Error(400)
-        err.name = 'Unknown transaction_type_id'
+    if (transactionTypeId === 2) {
+      err = Error(400)
+      err.name = 'New transactions cannot be processed as cancelled'
+    } else if (transactionTypeId === 4) {
+      err = Error(400)
+      err.name = 'New transactions cannot be processed as pendingCancelled'
+    } else if (transactionTypeId < 1 || transactionTypeId > 4) {
+      err = Error(400)
+      err.name = 'Unknown transaction_type_id'
     }
-
     if (err) throw err
 
     await updateSnackBatches(transaction, snackId)
+
+    if (transactionTypeId === 1) {
+      const balance = user.balance + transaction.transaction_amount
+      await user.update({ balance })
+    }
 
     delete transaction.snack_id
     transaction.payment_id = null
