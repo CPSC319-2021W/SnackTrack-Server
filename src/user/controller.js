@@ -22,16 +22,16 @@ export const addUser = async (req, res) => {
 }
 
 export const getUser = async(req, res) => {
-    try {
-        const userId = req.params.userId
-        // TODO: Optimization (Ticket: SNAK-93)
-        const resultFromDB = await Users.findByPk(userId)
-        if (resultFromDB == null) throw new Error(404)
-        const response = resultFromDB.toJSON()
+  try {
+    const userId = req.params.userId
+    // TODO: Optimization (Ticket: SNAK-93)
+    const resultFromDB = await Users.findByPk(userId)
+    if (resultFromDB === null) throw new Error(404)
+    const response = resultFromDB.toJSON()
 
-        return res.status(200).json(response)
-    } catch (err) {
-        if (err.message === NOT_FOUND) return res.status(404).send({ Error: "userid doesn't exist in the users table" })
-        return res.status(500).send({ Error: err.message })
-    }
+    return res.status(200).json(response)
+  } catch (err) {
+    if (err.message === NOT_FOUND) return res.status(404).send({ Error: "userid doesn't exist in the users table" })
+    return res.status(500).send({ Error: err.message })
+  }
 }

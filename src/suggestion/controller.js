@@ -43,9 +43,9 @@ export const getSuggestions = async (req, res) => {
     // TODO: Handleing a custom error SNAK-237
     const code = Number(err.message)
     if (code in ERROR_CODES) {
-        return res.status(code).send({ Error: ERROR_CODES[code] })
+      return res.status(code).send({ Error: ERROR_CODES[code] })
     } else {
-        return res.status(500).send({ Error: 'Internal Server Error' })
+      return res.status(500).send({ Error: 'Internal Server Error' })
     }
   }
 }

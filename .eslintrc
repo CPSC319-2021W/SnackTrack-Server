@@ -23,6 +23,13 @@
         "after": true
       }
     ],
-    "quotes": [1, "single", { "avoidEscape": true }]
+    "indent": [2, 2],
+    "eol-last": [2, "always"],
+    "object-curly-spacing": [2, "always"],
+    "array-bracket-spacing": [2, "never"],
+    "prefer-const": "error",
+    "no-await-in-loop": "error",
+    "eqeqeq": [2, "always"],
+    "quotes": [2, "single", { "avoidEscape": true, "allowTemplateLiterals": true }]
   }
 }
