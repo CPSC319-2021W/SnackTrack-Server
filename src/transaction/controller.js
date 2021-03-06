@@ -48,7 +48,8 @@ export const addTransaction = async (req, res) => {
     transaction.payment_id = null
     transaction.snack_name = snack.snack_name
 
-    await Transactions.create(transaction)
+    const result = await Transactions.create(transaction)
+    return res.status(201).send(result)
   } catch (err) {
     const code = Number(err.message)
     if (err.name) {
