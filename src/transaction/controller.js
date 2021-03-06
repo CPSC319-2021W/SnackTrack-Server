@@ -102,17 +102,15 @@ export const getUserTransactions = async (req, res) => {
     const user_id = req.params.userId
     const user = await Users.findByPk(user_id)
     if (!user) throw new Error(404)
-    const where = { user_id, transaction_type_id: { [Op.ne]: 3 } }
-    const order = [
-      ['transaction_type_id', 'ASC'],
-      ['transaction_dtm', 'DESC'],
-    ]
+    const where = { user_id, transaction_type_id: { [Op.ne]: [3, 4] } }
+    const order = [['transaction_dtm', 'DESC']]
     const response = await getPaginatedData(req.query, where, Transactions, order)
     res.status(200).send(response)
   } catch (err) {
     // TODO : handle 401 (Not authorized) case in SNAK-123
     const code = Number(err.message)
     if (err.name) {
+      console.log(err)
       return res.status(code).send({ Error: err.name })
     }
     if (code in ERROR_CODES) {
@@ -151,7 +149,8 @@ export const getPendingOrders = async (req, res) => {
     const user = await Users.findByPk(user_id)
     if (!user) throw new Error(404)
     const where = { user_id, transaction_type_id: { [Op.eq]: 3 } }
-    const response = await getPaginatedData(req.query, where, Transactions, 'transaction_dtm')
+    const order = [['transaction_dtm', 'DESC']]
+    const response = await getPaginatedData(req.query, where, Transactions, order)
     res.status(200).send(response)
   } catch (err) {
     // TODO : handle 401 (Not authorized) case in SNAK-123
