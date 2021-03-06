@@ -21,15 +21,15 @@ export const addPayment = async (req, res) => {
       return res.sendStatus(403)
     }
     const user = await Users.findByPk(userId)
-    if (user == null) {
-      let err = new Error(404)
+    if (user === null) {
+      const err = new Error(404)
       err.name = "userid doesn't exist in the users table"
       throw err
     }
 
     const updatedBalance = user.balance - payment.payment_amount
     if (updatedBalance < 0) {
-      let err = new Error(400)
+      const err = new Error(400)
       err.name = 'Unable to carry a balance less than 0.'
       throw err
     }
@@ -39,8 +39,8 @@ export const addPayment = async (req, res) => {
     const transactions = req.body.transaction_ids
     const paymentId = result.payment_id
     transactions.forEach(async id => {
-        const transaction = await Transactions.findByPk(id)
-        transaction.update({ payment_id: paymentId })
+      const transaction = await Transactions.findByPk(id)
+      transaction.update({ payment_id: paymentId })
     })
     return res.status(201).send(result)
   } catch (err) {
@@ -58,7 +58,8 @@ export const addPayment = async (req, res) => {
 
 export const getPayments = async (req, res) => {
   try {
-    const response = await getPaginatedData(req.query, {}, Payments, 'payment_dtm')
+    const order = [['payment_dtm', 'DESC']]
+    const response = await getPaginatedData(req.query, {}, Payments, order)
     res.status(200).send(response)
   } catch (err) {
     // TODO: Handling 401 NOT AUTHORIZED SNAK-123
@@ -80,7 +81,8 @@ export const getUserPayments = async(req, res) => {
     const user = await Users.findByPk(user_id)
     if (!user) throw new Error(404)
     const where = { user_id }
-    const response = await getPaginatedData(req.query, where, Payments, 'payment_dtm')
+    const order = [['payment_dtm', 'DESC']]
+    const response = await getPaginatedData(req.query, where, Payments, order)
     res.status(200).send(response)
   } catch (err) {
     // TODO : handle 401 (Not authorized) case in SNAK-123
