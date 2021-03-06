@@ -87,7 +87,7 @@ export const getUserTransactions = async (req, res) => {
     const user_id = req.params.userId
     const user = await Users.findByPk(user_id)
     if (!user) throw new Error(404)
-    const where = { user_id, transaction_type_id: { [Op.ne]: [3, 4] } }
+    const where = { user_id, transaction_type_id: { [Op.lt]: 3 } }
     const order = [['transaction_dtm', 'DESC']]
     const response = await getPaginatedData(req.query, where, Transactions, order)
     res.status(200).send(response)
