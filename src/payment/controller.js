@@ -77,7 +77,7 @@ export const getPayments = async (req, res) => {
 
 export const getUserPayments = async(req, res) => {
   try {
-    const user_id = req.params.userId
+    const user_id = req.params.user_id
     const user = await Users.findByPk(user_id)
     if (!user) throw new Error(404)
     const where = { user_id }

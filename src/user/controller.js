@@ -21,11 +21,11 @@ export const addUser = async (req, res) => {
 
 export const getUser = async (req, res) => {
   try {
-    const userId = req.params.userId
+    const user_id = req.params.user_id
     // TODO: Optimization (Ticket: SNAK-93)
-    const response = await Users.findByPk(userId)
+    const response = await Users.findByPk(user_id)
     if (!response) {
-      return res.status(404).json({ error: 'userid does not exist in the users table' })
+      return res.status(404).json({ error: 'user_id does not exist in the users table' })
     }
     return res.status(200).json(response)
   } catch (err) {
