@@ -43,7 +43,7 @@ export const putSnacks = async(req, res) => {
     const snack = req.body
     const snack_id = req.params.snack_id
     const result = await Snacks.update(snack, { where: { snack_id } })
-    if (result === 0) {
+    if (result[0] === 0) {
       return res.status(404).json({ Error: 'snack_id is not found on the snack table.' })
     }
     return res.status(204).json()
