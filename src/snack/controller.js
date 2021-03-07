@@ -26,7 +26,7 @@ export const addSnack = async(req, res) => {
     return res.status(201).json({ quantity, ...result.toJSON() })
   } catch (err) {
     if (err.parent.code === UNIQUE_VIOLATION) {
-      return res.status(409).json({ error: 'User is already exist.' })
+      return res.status(409).json({ error: 'snack is already exist.' })
     }
     return res.status(500).json({ error: err.message })
   }
