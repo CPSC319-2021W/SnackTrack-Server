@@ -66,7 +66,7 @@ export const isAdmin = (req, res, next) => {
 export const checkPermission = (req, res, next) => {
   const user_id = req.params.user_id
   const { user_id: currUserId, is_admin } = req.user
-  if (!is_admin && user_id !== parseInt(currUserId)) {
+  if (!is_admin && parseInt(user_id) !== currUserId) {
     return res.status(403).json({ error: 'You are not an admin nor yourself.' })
   }
   next()
