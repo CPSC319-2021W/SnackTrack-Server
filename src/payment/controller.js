@@ -12,7 +12,7 @@ export const addPayment = async (req, res) => {
     const payment = req.body
     const { user_id, payment_amount, transaction_ids } = payment
     const { user_id: currUserId, is_admin } = req.user
-    if (!is_admin && user_id !== currUserId) {
+    if (!is_admin && user_id !== parseInt(currUserId)) {
       return res.status(403).json({ error: 'Not authorized.' })
     }
     const user = await Users.findByPk(user_id)
