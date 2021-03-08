@@ -7,10 +7,10 @@ import { checkPermission } from '../auth/controller.js'
 const router = Router()
 
 router.post('/', addUser)
-router.get('/:userId', checkPermission, getUser)
-router.get('/:userId/transactions', checkPermission, getUserTransactions)
-router.get('/:userId/transactions/:transactionId', checkPermission, getUserTransaction)
-router.get('/:userId/payments/', checkPermission, getUserPayments)
-router.get('/:userId/pendingOrders/', checkPermission, getPendingOrders)
+router.get('/:user_id', checkPermission, getUser)
+router.get('/:user_id/transactions', checkPermission, getUserTransactions)
+router.get('/:user_id/transactions/:transaction_id', checkPermission, getUserTransaction)
+router.get('/:user_id/payments/', checkPermission, getUserPayments)
+router.get('/:user_id/pendingOrders/', checkPermission, getPendingOrders)
 
 export default router

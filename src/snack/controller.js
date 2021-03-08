@@ -2,18 +2,16 @@ import { db } from '../db/index.js'
 import sequelize from 'sequelize'
 const { Op } = sequelize
 
-const BAD_REQUEST = '400'
-const NOT_AUTHORIZED = '401'
-const NOT_FOUND = '404'
-const CONFLICT = 'Validation error'
-
+const UNIQUE_VIOLATION = '23505'
 const Snacks = db.snacks
 const SnackBatches = db.snackBatches
 
 export const addSnack = async(req, res) => {
   try {
     const snack = req.body
-    if (snack.quantity < 0) throw Error(400)
+    if (snack.quantity < 0) {
+      return res.status(400).json({ Error: 'Bad Request: quantity must be greater than 0!' })
+    }
     const result = await Snacks.create(snack)
     let quantity = 0
     if (snack.quantity > 0) {
@@ -25,17 +23,12 @@ export const addSnack = async(req, res) => {
       }
       await SnackBatches.create(snackBatch)
     }
-    return res.status(201).send({ quantity, ...result.toJSON() })
+    return res.status(201).json({ quantity, ...result.toJSON() })
   } catch (err) {
-    if (err.message === BAD_REQUEST) {
-      return res.status(400).send({ Error: 'Bad Request' })
-    } else if (err.message === NOT_AUTHORIZED) {
-      return res.status(401).send({ Error: 'Not Authorized' })
-    } else if (err.message === CONFLICT) {
-      return res.status(409).send({ Error: 'This snack already exists.' })
-    } else {
-      return res.status(500).send({ Error: err.message })
+    if (err.parent.code === UNIQUE_VIOLATION) {
+      return res.status(409).json({ error: 'snack is already exist.' })
     }
+    return res.status(500).json({ error: err.message })
   }
 }
 
@@ -43,37 +36,23 @@ export const addSnackBatches = async(req, res) => {
   try {
     const snackBatch = req.body
     const result = await SnackBatches.create(snackBatch)
-    return res.status(201).send(result)
+    return res.status(201).json(result)
   } catch (err) {
-    if (err.message === BAD_REQUEST) {
-      return res.status(400).send({ Error: 'Bad Request' })
-    } else if (err.message === NOT_AUTHORIZED) {
-      return res.status(401).send({ Error: 'Not Authorized' })
-    } else {
-      return res.status(500).send({ Error: err.message })
-    }
+    return res.status(500).json({ error: err.message })
   }
 }
 
 export const putSnacks = async(req, res) => {
   try {
-    const snackID = req.params.snack_id
-    const snackInstance = await Snacks.findByPk(snackID)
-    if (snackInstance === null) throw new Error(404)
-
-    await snackInstance.update(req.body)
-
-    return res.status(200).send(snackInstance)
-  } catch (err) {
-    if (err.message === BAD_REQUEST) {
-      return res.status(400).send({ Error: 'Bad Request' })
-    } else if (err.message === NOT_AUTHORIZED) {
-      return res.status(401).send({ Error: 'Not Authorized' })
-    } else if (err.message === NOT_FOUND) {
-      return res.status(404).send({ ERROR: 'Not Found' })
-    } else {
-      return res.status(500).send({ Error: err.message })
+    const snack = req.body
+    const snack_id = req.params.snack_id
+    const result = await Snacks.update(snack, { where: { snack_id } })
+    if (result[0] === 0) {
+      return res.status(404).json({ Error: 'snack_id is not found on the snack table.' })
     }
+    return res.status(204).json()
+  } catch (err) {
+    return res.status(500).json({ error: err.message })
   }
 }
 
@@ -86,12 +65,11 @@ export const getSnacks = async(req, res) => {
       where, order: [['snack_type_id', 'ASC']]
     })
     const snacks = await Promise.all(data.map(snack => addQuantityFromBatch(snack)))
-    return res.status(200).send({ snacks })
+    return res.status(200).json({ snacks })
   } catch (err) {
-    return res.status(400).send({ Error: err.message })
+    return res.status(500).json({ error: err.message })
   }
 }
-
 
 export const getSnackBatches = async(req, res) => {
   try {
@@ -101,28 +79,22 @@ export const getSnackBatches = async(req, res) => {
     const snack_batches = await SnackBatches.findAll({
       where, order: [['snack_batch_id', 'ASC']]
     })
-    return res.status(200).send({ snack_batches })
+    return res.status(200).json({ snack_batches })
   } catch (err) {
-    return res.status(400).send({ Error: err.message })
+    return res.status(500).json({ error: err.message })
   }
 }
 
 export const deleteSnacks = async(req, res) => {
   try {
     const snack_id = req.params.snack_id
-
     const rows = await Snacks.destroy({ where: { snack_id } })
-    if (!rows) throw new Error(404)
-
-    return res.status(204).send()
-  } catch (err) {
-    if (err.message === NOT_AUTHORIZED) {
-      return res.status(401).send({ Error: 'Not Authorized' })
-    } else if (err.message === NOT_FOUND) {
-      return res.status(404).send({ Error: 'Not Found' })
-    } else {
-      return res.status(500).send({ Error: err.message })
+    if (!rows) {
+      return res.status(404).json({ Error: 'snack_id is not found on the snack table.' })
     }
+    return res.status(204).json()
+  } catch (err) {
+    return res.status(500).json({ error: err.message })
   }
 }
 
@@ -134,7 +106,7 @@ async function addQuantityFromBatch(snack) {
   return { quantity, ...snack.toJSON() }
 }
 
-export const updateSnackBatches = async (transaction, snackId) => {
+export const updateSnackBatches = async (quantity, snackId) => {
   const snackBatches = await SnackBatches.findAll({
     where: {
       snack_id: snackId,
@@ -148,17 +120,13 @@ export const updateSnackBatches = async (transaction, snackId) => {
     order: [['expiration_dtm', 'DESC']]
   })
     
-  let requestedQuantity = transaction.quantity
+  let requestedQuantity = quantity
   const totalQuantity = snackBatches.reduce((prev, cur) => {
     return prev + cur.quantity
   }, 0)
-  
   if (requestedQuantity > totalQuantity) {
-    const err = Error(400)
-    err.name = 'Requested quantity exceeds the total stock'
-    throw err
+    throw Error('Bad Request: Requested quantity exceeds the total stock.')
   }
-
   const tasks = []
   while (requestedQuantity > 0) { 
     const currBatch = snackBatches.pop()
