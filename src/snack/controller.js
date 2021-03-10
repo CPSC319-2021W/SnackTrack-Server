@@ -142,7 +142,7 @@ export const decreaseQuantityInSnackBatches = async (quantity, snackId) => {
   await Promise.all(tasks)
 }
 
-export const increaseQuantityInSnackBatch = async (quantity, snackId) => {
+export const increaseQuantityInSnackBatch = async (quantity, snack_id) => {
   const snackBatch = await SnackBatches.findOne({
     where: {
       snack_id: snackId,
