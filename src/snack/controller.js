@@ -106,10 +106,10 @@ async function addQuantityFromBatch(snack) {
   return { quantity, ...snack.toJSON() }
 }
 
-export const decreaseQuantityInSnackBatches = async (quantity, snackId) => {
+export const decreaseQuantityInSnackBatches = async (quantity, snack_id) => {
   const snackBatches = await SnackBatches.findAll({
     where: {
-      snack_id: snackId,
+      snack_id,
       expiration_dtm: {
         [Op.or]: {
           [Op.gt]: new Date(),
