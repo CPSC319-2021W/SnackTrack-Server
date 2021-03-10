@@ -32,20 +32,19 @@ export const updateTransaction = async (req, res) => {
     const balance = transaction.transaction_amount
     const user_id = transaction.user_id
     const query = { balance, where: { user_id } }
+    const handleNonNullPaymentId = (payment_id) => {
+      if (payment_id) throw Error('Bad Request: This transaction has been purchased.')
+    }
     if (from === to) {
       return res.status(200).json(transaction)
     } else if (from === PURCHASE && to === CANCEL) {
-      if (transaction.payment_id) {
-        throw Error('Bad Request: This transaction has been purchased.')
-      }
+      handleNonNullPaymentId(transaction.payment_id)
       await increaseQuantityInSnackBatch(transaction.quantity, snack.snack_id)
       await Users.decrement(query)
     } else if (from === PENDING && to === PURCHASE) {
       await Users.increment(query)
     } else if (from === PENDING && to === PENDING_CANCEL) {
-      if (transaction.payment_id) {
-        throw Error('Bad Request: This transaction has been purchased.')
-      }
+      handleNonNullPaymentId(transaction.payment_id)
       await increaseQuantityInSnackBatch(transaction.quantity, snack.snack_id)
     } else {
       throw Error('Bad Request: This update is not allowed.')
