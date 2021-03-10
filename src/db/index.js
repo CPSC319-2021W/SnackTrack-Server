@@ -46,10 +46,10 @@ db.users = Users(dbInstance, Sequelize)
 db.suggestions = Suggestions(dbInstance, Sequelize)
 
 db.payments.belongsTo(db.users, { foreignKey: 'user_id' })
-db.snacks.belongsTo(db.snackTypes, { foreignKey: { name: 'snack_type_id' }})
-db.snacks.hasMany(db.snackBatches, { foreignKey: { name: 'snack_id' }})
+db.snacks.belongsTo(db.snackTypes, { foreignKey: { name: 'snack_type_id' } })
+db.snacks.hasMany(db.snackBatches, { foreignKey: { name: 'snack_id' } })
 db.transactions.belongsTo(db.users, { foreignKey: 'user_id' })
-db.transactions.belongsTo(db.payments, { foreignKey: 'payment_id' })
+db.transactions.belongsTo(db.payments, { foreignKey: { name: 'payment_id', defaultValue: null } })
 db.transactions.belongsTo(db.transactionTypes, { foreignKey: 'transaction_type_id' })
 
 export const connect = async () => {
