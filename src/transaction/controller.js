@@ -22,22 +22,22 @@ export const updateTransaction = async (req, res) => {
       return res.status(404).json({ error: 'snack with the snack_name does not exist in the snacks table' })
     }
 
-    const currTransactionTypeId = transaction.transaction_type_id
-    const newTransactionTypeId = req.body.transaction_type_id
+    const from = transaction.transaction_type_id
+    const to = req.body.transaction_type_id
     const balance = transaction.transaction_amount
     const user_id = transaction.user_id
     const query = { balance, where: { user_id } }
-    if (currTransactionTypeId === newTransactionTypeId) {
+    if (from === to) {
       return res.status(200).json(transaction)
-    } else if (currTransactionTypeId === 1 && newTransactionTypeId === 2) {
+    } else if (from === 1 && to === 2) {
       if (transaction.payment_id) {
         throw Error('Bad Request: This transaction has been purchased.')
       }
       await increaseQuantityInSnackBatch(transaction.quantity, snack.snack_id)
       await Users.decrement(query)
-    } else if (currTransactionTypeId === 3 && newTransactionTypeId === 1) {
+    } else if (from === 3 && to === 1) {
       await Users.increment(query)
-    } else if (currTransactionTypeId === 3 && newTransactionTypeId === 4) {
+    } else if (from === 3 && to === 4) {
       if (transaction.payment_id) {
         throw Error('Bad Request: This transaction has been purchased.')
       }
@@ -46,7 +46,7 @@ export const updateTransaction = async (req, res) => {
       throw Error('Bad Request: This update is not allowed.')
     }
 
-    await transaction.update({ transaction_type_id: newTransactionTypeId })
+    await transaction.update({ transaction_type_id: to })
     return res.status(200).send(transaction)
   } catch (err) {
     if (err.message.startsWith('Bad Request:')) {
