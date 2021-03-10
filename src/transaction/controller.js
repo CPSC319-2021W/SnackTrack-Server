@@ -24,7 +24,9 @@ export const updateTransaction = async (req, res) => {
 
     const currTransactionTypeId = transaction.transaction_type_id
     const newTransactionTypeId = req.body.transaction_type_id
-    
+    const balance = transaction.transaction_amount
+    const user_id = transaction.user_id
+    const query = { balance, where: { user_id } }
     if (currTransactionTypeId === newTransactionTypeId) {
       return res.status(200).send(transaction)
     } else if (currTransactionTypeId === 1 && newTransactionTypeId === 2) {
