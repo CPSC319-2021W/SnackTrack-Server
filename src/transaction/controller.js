@@ -31,7 +31,7 @@ export const updateTransaction = async (req, res) => {
     const to = req.body.transaction_type_id
     const balance = transaction.transaction_amount
     const user_id = transaction.user_id
-    const query = { balance, where: { user_id } }
+    const selector = { where: { user_id } }
     const handleNonNullPaymentId = (payment_id) => {
       if (payment_id) throw Error('Bad Request: This transaction has been purchased.')
     }
@@ -40,9 +40,9 @@ export const updateTransaction = async (req, res) => {
     } else if (from === PURCHASE && to === CANCEL) {
       handleNonNullPaymentId(transaction.payment_id)
       await increaseQuantityInSnackBatch(transaction.quantity, snack.snack_id)
-      await Users.decrement(query)
+      await Users.decrement({ balance }, selector)
     } else if (from === PENDING && to === PURCHASE) {
-      await Users.increment(query)
+      await Users.increment({ balance }, selector)
     } else if (from === PENDING && to === PENDING_CANCEL) {
       handleNonNullPaymentId(transaction.payment_id)
       await increaseQuantityInSnackBatch(transaction.quantity, snack.snack_id)
@@ -51,7 +51,7 @@ export const updateTransaction = async (req, res) => {
     }
 
     await transaction.update({ transaction_type_id: to })
-    return res.status(200).send(transaction)
+    return res.status(200).json(transaction)
   } catch (err) {
     if (err.message.startsWith('Bad Request:')) {
       return res.status(400).json({ error: err.message })
