@@ -28,7 +28,7 @@ export const updateTransaction = async (req, res) => {
     const user_id = transaction.user_id
     const query = { balance, where: { user_id } }
     if (currTransactionTypeId === newTransactionTypeId) {
-      return res.status(200).send(transaction)
+      return res.status(200).json(transaction)
     } else if (currTransactionTypeId === 1 && newTransactionTypeId === 2) {
       if (transaction.payment_id) {
         throw Error('Bad Request: This transaction has been purchased.')
