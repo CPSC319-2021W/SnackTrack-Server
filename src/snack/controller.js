@@ -106,7 +106,7 @@ async function addQuantityFromBatch(snack) {
   return { quantity, ...snack.toJSON() }
 }
 
-export const updateSnackBatches = async (quantity, snackId) => {
+export const decreaseQuantityInSnackBatches = async (quantity, snackId) => {
   const snackBatches = await SnackBatches.findAll({
     where: {
       snack_id: snackId,
@@ -140,4 +140,31 @@ export const updateSnackBatches = async (quantity, snackId) => {
     }
   }
   await Promise.all(tasks)
+}
+
+export const increaseQuantityInSnackBatch = async (quantity, snackId) => {
+  const snackBatch = await SnackBatches.findOne({
+    where: {
+      snack_id: snackId,
+      expiration_dtm: {
+        [Op.or]: {
+          [Op.gt]: new Date(),
+          [Op.eq]: null
+        }
+      }
+    },
+    order: [['expiration_dtm', 'ASC']]
+  })
+
+  if (snackBatch) {
+    await snackBatch.increment({ quantity: quantity })
+  } else {
+    const newExpirationDTM = new Date(new Date().setFullYear(new Date().getFullYear() + 1))
+    const newSnackBatch = {
+      snack_id: snackId,
+      quantity: quantity,
+      expiration_dtm: newExpirationDTM
+    }
+    await SnackBatches.create(newSnackBatch)
+  }
 }

@@ -1,12 +1,64 @@
 import { db } from '../db/index.js'
 import { getPaginatedData } from '../util/pagination.js'
-import { updateSnackBatches } from '../snack/controller.js'
+import { decreaseQuantityInSnackBatches, increaseQuantityInSnackBatch } from '../snack/controller.js'
 import sequelize from 'sequelize'
 const { Op } = sequelize
 
 const Transactions = db.transactions
 const Users = db.users
 const Snacks = db.snacks
+
+export const updateTransaction = async (req, res) => {
+  try {
+    const transactionId = req.params.transaction_id
+    const transaction = await Transactions.findByPk(transactionId)
+    if (!transaction) {
+      return res.status(404).json({ error: 'transaction_id does not exist in the transactions table' })
+    }
+
+    const snack_name = transaction.snack_name
+    const snack = await Snacks.findOne({ where: { snack_name } })
+    if (!snack) {
+      return res.status(404).json({ error: 'snack with the snack_name does not exist in the snacks table' })
+    }
+
+    const currTransactionTypeId = transaction.transaction_type_id
+    const newTransactionTypeId = req.body.transaction_type_id
+    
+    if (currTransactionTypeId === newTransactionTypeId) {
+      return res.status(200).send(transaction)
+    } else if (currTransactionTypeId === 1 && newTransactionTypeId === 2) {
+      if (transaction.payment_id) {
+        throw Error('Bad Request: This transaction has been purchased.')
+      }
+      await increaseQuantityInSnackBatch(transaction.quantity, snack.snack_id)
+      await Users.decrement(
+        { balance: transaction.transaction_amount },
+        { where: { user_id: transaction.user_id } }
+      )
+    } else if (currTransactionTypeId === 3 && newTransactionTypeId === 1) {
+      await Users.increment(
+        { balance: transaction.transaction_amount },
+        { where: { user_id: transaction.user_id } }
+      )
+    } else if (currTransactionTypeId === 3 && newTransactionTypeId === 4) {
+      if (transaction.payment_id) {
+        throw Error('Bad Request: This transaction has been purchased.')
+      }
+      await increaseQuantityInSnackBatch(transaction.quantity, snack.snack_id)
+    } else {
+      throw Error('Bad Request: This update is not allowed.')
+    }
+
+    await transaction.update({ transaction_type_id: newTransactionTypeId })
+    return res.status(200).send(transaction)
+  } catch (err) {
+    if (err.message.startsWith('Bad Request:')) {
+      return res.status(400).json({ error: err.message })
+    }
+    return res.status(500).json({ error: err.message })
+  }
+}
 
 export const addTransaction = async (req, res) => {
   try {
@@ -23,7 +75,7 @@ export const addTransaction = async (req, res) => {
     if (!snack) {
       return res.status(404).json({ error: 'snack_id does not exist in the snacks table' })
     }
-    await updateSnackBatches(quantity, snack_id)
+    await decreaseQuantityInSnackBatches(quantity, snack_id)
     if (transaction_type_id === 1) {
       const balance = user.balance + transaction_amount
       await user.update({ balance })
