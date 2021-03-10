@@ -34,10 +34,7 @@ export const updateTransaction = async (req, res) => {
         throw Error('Bad Request: This transaction has been purchased.')
       }
       await increaseQuantityInSnackBatch(transaction.quantity, snack.snack_id)
-      await Users.decrement(
-        { balance: transaction.transaction_amount },
-        { where: { user_id: transaction.user_id } }
-      )
+      await Users.decrement(query)
     } else if (currTransactionTypeId === 3 && newTransactionTypeId === 1) {
       await Users.increment(
         { balance: transaction.transaction_amount },
