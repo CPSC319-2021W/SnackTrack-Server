@@ -98,6 +98,19 @@ export const deleteSnacks = async(req, res) => {
   }
 }
 
+export const deleteSnackBatches = async(req, res) => {
+  try {
+    const snack_batch_id = req.params.snack_batch_id
+    const rows = await SnackBatches.destroy({ where: { snack_batch_id } })
+    if (!rows) {
+      return res.status(404).json({ Error: 'snack_batch_id is not found on the snack batch table.' })
+    }
+    return res.status(204).json()
+  } catch (err) {
+    return res.status(500).json({ error: err.message })
+  }
+}
+
 async function addQuantityFromBatch(snack) {
   const desiredBatches = await SnackBatches.findAll({
     where: { snack_id: snack.snack_id }
