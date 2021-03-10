@@ -160,11 +160,8 @@ export const increaseQuantityInSnackBatch = async (quantity, snack_id) => {
     await snackBatch.increment({ quantity })
   } else {
     const newExpirationDTM = new Date(new Date().setFullYear(new Date().getFullYear() + 1))
-    const newSnackBatch = {
-      snack_id: snackId,
-      quantity: quantity,
-      expiration_dtm: newExpirationDTM
-    }
-    await SnackBatches.create(newSnackBatch)
+    await SnackBatches.create({
+      snack_id, quantity, expiration_dtm: newExpirationDTM
+    })
   }
 }
