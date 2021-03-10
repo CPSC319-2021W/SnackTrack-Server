@@ -145,7 +145,7 @@ export const decreaseQuantityInSnackBatches = async (quantity, snackId) => {
 export const increaseQuantityInSnackBatch = async (quantity, snack_id) => {
   const snackBatch = await SnackBatches.findOne({
     where: {
-      snack_id: snackId,
+      snack_id,
       expiration_dtm: {
         [Op.or]: {
           [Op.gt]: new Date(),
