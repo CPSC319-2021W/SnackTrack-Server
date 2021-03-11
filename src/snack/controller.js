@@ -1,6 +1,4 @@
 import { db } from '../db/index.js'
-import sequelize from 'sequelize'
-const { Op } = sequelize
 
 const UNIQUE_VIOLATION = '23505'
 const Snacks = db.snacks
@@ -108,16 +106,8 @@ async function addQuantityFromBatch(snack) {
 
 export const decreaseQuantityInSnackBatches = async (quantity, snack_id) => {
   const snackBatches = await SnackBatches.findAll({
-    where: {
-      snack_id,
-      expiration_dtm: {
-        [Op.or]: {
-          [Op.gt]: new Date(),
-          [Op.eq]: null
-        }
-      }
-    },
-    order: [['expiration_dtm', 'DESC']]
+    where: { snack_id },
+    order: [['expiration_dtm', 'DESC'], ['snack_batch_id', 'DESC']]
   })
     
   let requestedQuantity = quantity
@@ -144,18 +134,9 @@ export const decreaseQuantityInSnackBatches = async (quantity, snack_id) => {
 
 export const increaseQuantityInSnackBatch = async (quantity, snack_id) => {
   const snackBatch = await SnackBatches.findOne({
-    where: {
-      snack_id,
-      expiration_dtm: {
-        [Op.or]: {
-          [Op.gt]: new Date(),
-          [Op.eq]: null
-        }
-      }
-    },
-    order: [['expiration_dtm', 'ASC']]
+    where: { snack_id },
+    order: [['expiration_dtm', 'ASC'], ['snack_batch_id', 'ASC']]
   })
-
   if (snackBatch) {
     await snackBatch.increment({ quantity })
   } else {
