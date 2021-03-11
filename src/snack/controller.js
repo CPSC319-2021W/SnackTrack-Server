@@ -1,6 +1,4 @@
 import { db } from '../db/index.js'
-import sequelize from 'sequelize'
-const { Op } = sequelize
 
 const UNIQUE_VIOLATION = '23505'
 const Snacks = db.snacks
@@ -106,18 +104,10 @@ async function addQuantityFromBatch(snack) {
   return { quantity, ...snack.toJSON() }
 }
 
-export const updateSnackBatches = async (quantity, snackId) => {
+export const decreaseQuantityInSnackBatches = async (quantity, snack_id) => {
   const snackBatches = await SnackBatches.findAll({
-    where: {
-      snack_id: snackId,
-      expiration_dtm: {
-        [Op.or]: {
-          [Op.gt]: new Date(),
-          [Op.eq]: null
-        }
-      }
-    },
-    order: [['expiration_dtm', 'DESC']]
+    where: { snack_id },
+    order: [['expiration_dtm', 'DESC'], ['snack_batch_id', 'DESC']]
   })
     
   let requestedQuantity = quantity
@@ -140,4 +130,19 @@ export const updateSnackBatches = async (quantity, snackId) => {
     }
   }
   await Promise.all(tasks)
+}
+
+export const increaseQuantityInSnackBatch = async (quantity, snack_id) => {
+  const snackBatch = await SnackBatches.findOne({
+    where: { snack_id },
+    order: [['expiration_dtm', 'ASC'], ['snack_batch_id', 'ASC']]
+  })
+  if (snackBatch) {
+    await snackBatch.increment({ quantity })
+  } else {
+    const newExpirationDTM = new Date(new Date().setFullYear(new Date().getFullYear() + 1))
+    await SnackBatches.create({
+      snack_id, quantity, expiration_dtm: newExpirationDTM
+    })
+  }
 }
