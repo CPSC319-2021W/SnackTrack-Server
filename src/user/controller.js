@@ -19,6 +19,18 @@ export const addUser = async (req, res) => {
   }
 }
 
+export const getUsers = async (req, res) => {
+  try {
+    const isFetchAll = req.query.email_address === undefined
+    const email_address = req.query.email_address
+    const where = isFetchAll ? {} : { email_address }
+    const users = await Users.findAll({ where })
+    return res.status(200).json({ users })
+  } catch (err) {
+    return res.status(500).json({ error: err.message })
+  }
+}
+
 export const getUser = async (req, res) => {
   try {
     const user_id = req.params.user_id
