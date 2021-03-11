@@ -75,6 +75,8 @@ export const addTransaction = async (req, res) => {
     if (!snack) {
       return res.status(404).json({ error: 'snack_id does not exist in the snacks table' })
     }
+    if (transaction_amount < 0) throw Error('Bad Request: transaction_amount should be positive.')
+    if (quantity < 0) throw Error('Bad Request: quantity should be positive.')
     await decreaseQuantityInSnackBatches(quantity, snack_id)
     if (transaction_type_id === PURCHASE) {
       const balance = user.balance + transaction_amount
@@ -87,7 +89,7 @@ export const addTransaction = async (req, res) => {
     })
     return res.status(201).json(result)
   } catch (err) {
-    if (err.message === 'Bad Request: Requested quantity exceeds the total stock.') {
+    if (err.message.startsWith('Bad Request:')) {
       res.status(400).json({ error: err.message })
     }
     return res.status(500).json({ error: err.message })
