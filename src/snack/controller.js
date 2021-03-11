@@ -26,9 +26,9 @@ export const addSnack = async(req, res) => {
     return res.status(201).json({ quantity, ...result.toJSON() })
   } catch (err) {
     if (err.parent.code === UNIQUE_VIOLATION) {
-      return res.status(409).json({ error: 'Conflict: snack is already exist.' })
+      return res.status(409).json({ Error: 'Conflict: snack is already exist.' })
     }
-    return res.status(500).json({ error: err.message })
+    return res.status(500).json({ Error: err.message })
   }
 }
 
@@ -38,7 +38,7 @@ export const addSnackBatches = async(req, res) => {
     const result = await SnackBatches.create(snackBatch)
     return res.status(201).json(result)
   } catch (err) {
-    return res.status(500).json({ error: err.message })
+    return res.status(500).json({ Error: err.message })
   }
 }
 
@@ -58,7 +58,7 @@ export const putSnacks = async(req, res) => {
     }
     return res.status(200).json(result[1][0].dataValues)
   } catch (err) {
-    return res.status(500).json({ error: err.message })
+    return res.status(500).json({ Error: err.message })
   }
 }
 
@@ -78,16 +78,13 @@ export const putSnackBatches = async(req, res) => {
     if (snackBatch.expiration_dtm === 'null') {
       snackBatch.expiration_dtm = null
     }
-    if (snackBatch.quantity < 0) {
-      return res.status(400).json({ Error: 'Bad Request: quantity cannot be a negative number' })
-    }
     const result = await SnackBatches.update(snackBatch, { where: { snack_batch_id }, returning: true })
     if (result[0] === 0) {
       return res.status(404).json({ Error: 'Not Found: snack_batch_id is not found on the snack_batch table' })
     }
     return res.status(200).json(result[1][0].dataValues)
   } catch (err) {
-    return res.status(500).json({ error: err.message })
+    return res.status(500).json({ Error: err.message })
   }
 }
 
@@ -102,7 +99,7 @@ export const getSnacks = async(req, res) => {
     const snacks = await Promise.all(data.map(snack => addQuantityFromBatch(snack)))
     return res.status(200).json({ snacks })
   } catch (err) {
-    return res.status(500).json({ error: err.message })
+    return res.status(500).json({ Error: err.message })
   }
 }
 
@@ -116,7 +113,7 @@ export const getSnackBatches = async(req, res) => {
     })
     return res.status(200).json({ snack_batches })
   } catch (err) {
-    return res.status(500).json({ error: err.message })
+    return res.status(500).json({ Error: err.message })
   }
 }
 
@@ -129,7 +126,7 @@ export const deleteSnacks = async(req, res) => {
     }
     return res.status(204).json()
   } catch (err) {
-    return res.status(500).json({ error: err.message })
+    return res.status(500).json({ Error: err.message })
   }
 }
 

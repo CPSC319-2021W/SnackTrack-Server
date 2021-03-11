@@ -15,13 +15,19 @@ export default (db, DataTypes) => {
       type: DataTypes.STRING
     },
     price: {
-      type: DataTypes.INTEGER
+      type: DataTypes.INTEGER,
+      validate: {
+        min: 0
+      }
     },
     is_active: {
       type: DataTypes.BOOLEAN
     },
     order_threshold: {
-      type: DataTypes.INTEGER
+      type: DataTypes.INTEGER,
+      validate: {
+        min: 0
+      }
     },
     last_updated_dtm: {
       type: DataTypes.DATE
