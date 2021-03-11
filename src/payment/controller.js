@@ -1,12 +1,7 @@
 import { db } from '../db/index.js'
 import { getPaginatedData } from '../util/pagination.js'
-
-const ERROR_CODES = {
-  400: 'Bad Request',
-  401: 'Not Authorized',
-  404: 'Not Found',
-  409: 'Conflict'
-}
+import sequelize from 'sequelize'
+const { Op } = sequelize
 
 const Payments = db.payments
 const Transactions = db.transactions
@@ -15,85 +10,42 @@ const Users = db.users
 export const addPayment = async (req, res) => {
   try {
     const payment = req.body
-    const userId = payment.user_id
-    const { user_id, is_admin } = req.user
-    if (!is_admin && user_id !== parseInt(userId)) {
-      return res.sendStatus(403)
+    const { user_id, payment_amount, transaction_ids } = payment
+    const { user_id: currUserId, is_admin } = req.user
+    if (!is_admin && parseInt(user_id) !== currUserId) {
+      return res.status(403).json({ error: 'Not authorized.' })
     }
-    const user = await Users.findByPk(userId)
-    if (user === null) {
-      const err = new Error(404)
-      err.name = "userid doesn't exist in the users table"
-      throw err
+    const user = await Users.findByPk(user_id)
+    if (!user) {
+      return res.status(404).json({ error: 'user_id does not exist in the users table.' })
     }
-
-    const updatedBalance = user.balance - payment.payment_amount
+    const updatedBalance = user.balance - payment_amount
     if (updatedBalance < 0) {
-      const err = new Error(400)
-      err.name = 'Unable to carry a balance less than 0.'
-      throw err
+      return res.status(400).json({ error: 'Unable to carry a balance less than 0.' })
     }
     await user.update({ balance: updatedBalance })
-
     const result = await Payments.create(payment)
-    const transactions = req.body.transaction_ids
-    const paymentId = result.payment_id
-    transactions.forEach(async id => {
-      const transaction = await Transactions.findByPk(id)
-      transaction.update({ payment_id: paymentId })
+    const payment_id = result.payment_id
+    Transactions.update({ payment_id }, {
+      where: { transaction_id: { [Op.in]: transaction_ids } }
     })
-    return res.status(201).send(result)
+    return res.status(201).json(result)
   } catch (err) {
-    const code = Number(err.message)
-    if (err.name) {
-      return res.status(code).send({ Error: err.name })
-    }
-    else if (code in ERROR_CODES) {
-      return res.status(code).send({ Error: ERROR_CODES[code] })
-    } else {
-      return res.status(500).send({ Error: err.message })
-    }
-  }
-}
-
-export const getPayments = async (req, res) => {
-  try {
-    const order = [['payment_dtm', 'DESC']]
-    const response = await getPaginatedData(req.query, {}, Payments, order)
-    res.status(200).send(response)
-  } catch (err) {
-    // TODO: Handling 401 NOT AUTHORIZED SNAK-123
-    const code = Number(err.message)
-    if (err.name) {
-      return res.status(code).send({ Error: err.name })
-    }
-    if (code in ERROR_CODES) {
-      return res.status(code).send({ Error: ERROR_CODES[code] })
-    } else {
-      return res.status(500).send({ Error: 'Internal Server Error' })
-    }
+    return res.status(500).json({ error: err.message })
   }
 }
 
 export const getUserPayments = async(req, res) => {
   try {
-    const user_id = req.params.userId
+    const user_id = req.params.user_id
     const user = await Users.findByPk(user_id)
-    if (!user) throw new Error(404)
-    const where = { user_id }
+    if (!user) {
+      return res.status(404).json({ error: 'userid does not exist in the users table.' })
+    }
     const order = [['payment_dtm', 'DESC']]
-    const response = await getPaginatedData(req.query, where, Payments, order)
-    res.status(200).send(response)
+    const response = await getPaginatedData(req.query, { user_id }, Payments, order)
+    return res.status(200).json(response)
   } catch (err) {
-    // TODO : handle 401 (Not authorized) case in SNAK-123
-    const code = Number(err.message)
-    if (err.name) {
-      return res.status(code).send({ Error: err.name })
-    }
-    if (code in ERROR_CODES) {
-      return res.status(code).send({ Error: ERROR_CODES[code] })
-    } else {
-      return res.status(500).send({ Error: 'Internal Server Error' })
-    }
+    return res.status(500).json({ error: err.message })
   }
 }
