@@ -42,6 +42,7 @@ export const addSnackBatches = async(req, res) => {
   }
 }
 
+// TODO: implement the ability to change only part of the fields
 export const putSnacks = async(req, res) => {
   try {
     const snack = req.body
@@ -50,7 +51,32 @@ export const putSnacks = async(req, res) => {
     if (result[0] === 0) {
       return res.status(404).json({ Error: 'snack_id is not found on the snack table.' })
     }
-    return res.status(204).json()
+    return res.status(204).json() // TODO: return the JSON of changed snack instance
+  } catch (err) {
+    return res.status(500).json({ error: err.message })
+  }
+}
+
+export const putSnackBatches = async(req, res) => {
+  try {
+    const snackBatch = JSON.parse(JSON.stringify(req.body))
+    const snack_batch_id = req.params.snack_batch_id
+
+    if (snackBatch.snack_id !== undefined) {
+      return res.status(400).json({ Error: 'snack_id cannot be changed for snack_batches.' })
+    }
+    if (snackBatch.snack_batch_id !== undefined) {
+      return res.status(400).json({ Error: 'snack_batch_id cannot be changed for snack_batches' })
+    }
+    if (snackBatch.expiration_dtm === 'null') {
+      snackBatch.expiration_dtm = null
+    }
+
+    const result = await SnackBatches.update(snackBatch, { where: { snack_batch_id }, returning: true })
+    if (result[0] === 0) {
+      return res.status(404).json({ Error: 'snack_batch_id is not found on the snack_batch table' })
+    }
+    return res.status(200).json(result[1][0].dataValues)
   } catch (err) {
     return res.status(500).json({ error: err.message })
   }
