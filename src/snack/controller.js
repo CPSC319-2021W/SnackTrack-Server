@@ -42,16 +42,20 @@ export const addSnackBatches = async(req, res) => {
   }
 }
 
-// TODO: implement the ability to change only part of the fields
 export const putSnacks = async(req, res) => {
   try {
     const snack = req.body
     const snack_id = req.params.snack_id
-    const result = await Snacks.update(snack, { where: { snack_id } })
+
+    if (snack.order_threshold === 'null') {
+      snack.order_threshold = null
+    }
+
+    const result = await Snacks.update(snack, { where: { snack_id }, returning: true })
     if (result[0] === 0) {
       return res.status(404).json({ Error: 'snack_id is not found on the snack table.' })
     }
-    return res.status(204).json() // TODO: return the JSON of changed snack instance
+    return res.status(200).json(result[1][0].dataValues)
   } catch (err) {
     return res.status(500).json({ error: err.message })
   }
@@ -59,7 +63,7 @@ export const putSnacks = async(req, res) => {
 
 export const putSnackBatches = async(req, res) => {
   try {
-    const snackBatch = JSON.parse(JSON.stringify(req.body))
+    const snackBatch = req.body
     const snack_batch_id = req.params.snack_batch_id
 
     if (snackBatch.snack_id !== undefined) {
