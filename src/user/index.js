@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { addUser, getUser } from './controller.js'
+import { addUser, getUser, getUsers } from './controller.js'
 import { getUserTransaction, getUserTransactions, getPendingOrders } from '../transaction/controller.js'
 import { getUserPayments } from '../payment/controller.js'
 import { checkPermission } from '../auth/controller.js'
@@ -7,6 +7,7 @@ import { checkPermission } from '../auth/controller.js'
 const router = Router()
 
 router.post('/', addUser)
+router.get('/', checkPermission, getUsers)
 router.get('/:user_id', checkPermission, getUser)
 router.get('/:user_id/transactions', checkPermission, getUserTransactions)
 router.get('/:user_id/transactions/:transaction_id', checkPermission, getUserTransaction)
