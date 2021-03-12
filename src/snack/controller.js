@@ -52,11 +52,12 @@ export const putSnacks = async(req, res) => {
     if (snack.order_threshold === 'null') {
       snack.order_threshold = null
     }
-    const result = await Snacks.update(snack, { where: { snack_id }, returning: true })
-    if (result[0] === 0) {
+    const [found, result] = await Snacks.update(snack, { where: { snack_id }, returning: true })
+    const [data] = result.map(elem => elem.get())
+    if (!found) {
       return res.status(404).json({ error: 'snack_id is not found on the snack table.' })
     }
-    return res.status(200).json(result[1][0].dataValues)
+    return res.status(200).json(data)
   } catch (err) {
     return res.status(500).json({ error: err.message })
   }
@@ -78,11 +79,12 @@ export const putSnackBatches = async(req, res) => {
     if (snackBatch.expiration_dtm === 'null') {
       snackBatch.expiration_dtm = null
     }
-    const result = await SnackBatches.update(snackBatch, { where: { snack_batch_id }, returning: true })
-    if (result[0] === 0) {
+    const [found, result] = await SnackBatches.update(snackBatch, { where: { snack_batch_id }, returning: true })
+    const [data] = result.map(elem => elem.get())
+    if (!found) {
       return res.status(404).json({ error: 'snack_batch_id is not found on the snack_batch table' })
     }
-    return res.status(200).json(result[1][0].dataValues)
+    return res.status(200).json(data)
   } catch (err) {
     return res.status(500).json({ error: err.message })
   }
