@@ -24,7 +24,7 @@ export const addSnack = async(req, res) => {
     return res.status(201).json({ quantity, ...result.toJSON() })
   } catch (err) {
     if (err.parent.code === UNIQUE_VIOLATION) {
-      return res.status(409).json({ error: 'snack is already exist.' })
+      return res.status(409).json({ error: 'snack already exists.' })
     }
     return res.status(500).json({ error: err.message })
   }
@@ -44,11 +44,45 @@ export const putSnacks = async(req, res) => {
   try {
     const snack = req.body
     const snack_id = req.params.snack_id
-    const result = await Snacks.update(snack, { where: { snack_id } })
-    if (result[0] === 0) {
+    if (Object.keys(snack).length === 0) {
+      return res.status(200).json(await Snacks.findByPk(snack_id))
+    }
+    if (snack.order_threshold === 'null') {
+      snack.order_threshold = null
+    }
+    const [found, result] = await Snacks.update(snack, { where: { snack_id }, returning: true })
+    const [data] = result.map(elem => elem.get())
+    if (!found) {
       return res.status(404).json({ error: 'snack_id is not found on the snack table.' })
     }
-    return res.status(204).json()
+    return res.status(200).json(data)
+  } catch (err) {
+    return res.status(500).json({ error: err.message })
+  }
+}
+
+export const putSnackBatches = async(req, res) => {
+  try {
+    const snackBatch = req.body
+    const snack_batch_id = req.params.snack_batch_id
+    if (Object.keys(snackBatch).length === 0) {
+      return res.status(200).json(await SnackBatches.findByPk(snack_batch_id))
+    }
+    if (snackBatch.snack_id !== undefined) {
+      return res.status(400).json({ error: 'snack_id cannot be changed for snack_batches.' })
+    }
+    if (snackBatch.snack_batch_id !== undefined) {
+      return res.status(400).json({ error: 'snack_batch_id cannot be changed for snack_batches' })
+    }
+    if (snackBatch.expiration_dtm === 'null') {
+      snackBatch.expiration_dtm = null
+    }
+    const [found, result] = await SnackBatches.update(snackBatch, { where: { snack_batch_id }, returning: true })
+    const [data] = result.map(elem => elem.get())
+    if (!found) {
+      return res.status(404).json({ error: 'snack_batch_id is not found on the snack_batch table' })
+    }
+    return res.status(200).json(data)
   } catch (err) {
     return res.status(500).json({ error: err.message })
   }
@@ -128,7 +162,7 @@ export const decreaseQuantityInSnackBatches = async (quantity, snack_id) => {
     return prev + cur.quantity
   }, 0)
   if (requestedQuantity > totalQuantity) {
-    throw Error('Bad Request: Requested quantity exceeds the total stock.')
+    throw Error('requested quantity exceeds the total stock.')
   }
   const tasks = []
   while (requestedQuantity > 0) { 
