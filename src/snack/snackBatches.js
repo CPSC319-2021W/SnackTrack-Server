@@ -6,7 +6,10 @@ export default (db, DataTypes) => {
       autoIncrement: true,
     },
     quantity: {
-      type: DataTypes.INTEGER
+      type: DataTypes.INTEGER,
+      validate: {
+        min: 0
+      }
     },
     expiration_dtm: {
       type: DataTypes.DATE
