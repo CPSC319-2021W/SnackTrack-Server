@@ -10,7 +10,7 @@ export const addSnack = async(req, res) => {
   try {
     const snack = req.body
     if (snack.quantity < 0) {
-      return res.status(400).json({ Error: 'Bad Request: quantity must be greater than 0!' })
+      return res.status(400).json({ error: 'quantity must be greater than 0!' })
     }
     const result = await Snacks.create(snack)
     let quantity = 0
@@ -48,7 +48,7 @@ export const putSnacks = async(req, res) => {
     const snack_id = req.params.snack_id
     const result = await Snacks.update(snack, { where: { snack_id } })
     if (result[0] === 0) {
-      return res.status(404).json({ Error: 'snack_id is not found on the snack table.' })
+      return res.status(404).json({ error: 'snack_id is not found on the snack table.' })
     }
     return res.status(204).json()
   } catch (err) {
@@ -90,7 +90,7 @@ export const deleteSnacks = async(req, res) => {
     const snack_id = req.params.snack_id
     const rows = await Snacks.destroy({ where: { snack_id } })
     if (!rows) {
-      return res.status(404).json({ Error: 'snack_id is not found on the snack table.' })
+      return res.status(404).json({ error: 'snack_id is not found on the snack table.' })
     }
     return res.status(204).json()
   } catch (err) {
@@ -103,7 +103,7 @@ export const deleteSnackBatches = async(req, res) => {
     const snack_batch_id = req.params.snack_batch_id
     const rows = await SnackBatches.destroy({ where: { snack_batch_id } })
     if (!rows) {
-      return res.status(404).json({ Error: 'snack_batch_id is not found on the snack batch table.' })
+      return res.status(404).json({ error: 'snack_batch_id is not found on the snack batch table.' })
     }
     return res.status(204).json()
   } catch (err) {
