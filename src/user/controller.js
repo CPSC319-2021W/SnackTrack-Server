@@ -47,12 +47,13 @@ export const getUser = async (req, res) => {
 export const deleteUser = async (req, res) => {
   try {
     const user_id = req.params.user_id
-    const response = await Users.findByPk(user_id)
-    if (!response) {
+    const [found, result] = await Users.update({ is_active: false }, { where: { user_id }, returning: true })
+    const [data] = result.map(elem => elem.get())
+    if (!found) {
       return res.status(404).json({ error: 'user_id does not exist in the users table' })
     }
     await Users.destroy({ where: { user_id } })
-    return res.status(200).json(response)
+    return res.status(200).json(data)
   } catch (err) {
     return res.status(500).json({ error: err.message })
   }
