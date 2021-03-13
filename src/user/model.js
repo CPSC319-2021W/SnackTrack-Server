@@ -29,7 +29,10 @@ export default (db, DataTypes) => {
     is_admin: {
       type: DataTypes.BOOLEAN
     }
-  }, { underscored: true })
+  }, {
+    underscored: true,
+    paranoid: true
+  })
   return Users
 }
 

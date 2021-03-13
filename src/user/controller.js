@@ -15,7 +15,7 @@ export const addUser = async (req, res) => {
     if (err.parent.code === UNIQUE_VIOLATION) {
       return res.status(409).json({ error: 'User is already exist.' })
     }
-    return res.status(400).json({ error: 'User was not created!' })
+    return res.status(400).json({ error: err.message })
   }
 }
 
@@ -38,6 +38,20 @@ export const getUser = async (req, res) => {
     if (!response) {
       return res.status(404).json({ error: 'user_id does not exist in the users table' })
     }
+    return res.status(200).json(response)
+  } catch (err) {
+    return res.status(500).json({ error: err.message })
+  }
+}
+
+export const deleteUser = async (req, res) => {
+  try {
+    const user_id = req.params.user_id
+    const response = await Users.findByPk(user_id)
+    if (!response) {
+      return res.status(404).json({ error: 'user_id does not exist in the users table' })
+    }
+    await Users.destroy({ where: { user_id } })
     return res.status(200).json(response)
   } catch (err) {
     return res.status(500).json({ error: err.message })
