@@ -31,6 +31,18 @@ export const getUsers = async (req, res) => {
   }
 }
 
+export const getUsersCommon = async (req, res) => {
+  try {
+    const users = await Users.findAll({
+      attributes: ['username', 'first_name', 'last_name', 'image_uri']
+    })
+    return res.status(200).json({ users })
+  } catch (err) {
+    return res.status(500).json({ error: err.message })
+  }
+}
+
+
 export const getUser = async (req, res) => {
   try {
     const user_id = req.params.user_id
