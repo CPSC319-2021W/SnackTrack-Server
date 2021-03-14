@@ -156,7 +156,6 @@ export const decreaseQuantityInSnackBatches = async (quantity, snack_id) => {
     where: { snack_id },
     order: [['expiration_dtm', 'DESC'], ['snack_batch_id', 'DESC']]
   })
-    
   let requestedQuantity = quantity
   const totalQuantity = snackBatches.reduce((prev, cur) => {
     return prev + cur.quantity
@@ -187,9 +186,6 @@ export const increaseQuantityInSnackBatch = async (quantity, snack_id) => {
   if (snackBatch) {
     await snackBatch.increment({ quantity })
   } else {
-    const newExpirationDTM = new Date(new Date().setFullYear(new Date().getFullYear() + 1))
-    await SnackBatches.create({
-      snack_id, quantity, expiration_dtm: newExpirationDTM
-    })
+    await SnackBatches.create({ snack_id, quantity, expiration_dtm: null })
   }
 }
