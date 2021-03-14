@@ -31,7 +31,11 @@ export default (db, DataTypes) => {
     }
   }, {
     underscored: true,
-    paranoid: true
+    paranoid: true,
+    timestamps: true,
+    createdAt: false,
+    updatedAt: false,
+    deletedAt: 'deleted_at'
   })
   return Users
 }
