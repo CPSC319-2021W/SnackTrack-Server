@@ -25,13 +25,13 @@ export const putUsers = async (req, res) => {
   try {
     const user = req.body
     const user_id = req.params.user_id
-    if (Object.keys(user).length === 0) {
-      return res.status(200).json(await Users.findByPk(user_id))
-    }
     if (user.deleted_at === 'null') { // This if else block ensures any change to the delete_at field is to set it to
       user.deleted_at = null          // null, for the restoration of the soft-deleted users
     } else {
-      user.deleted_at = undefined
+      delete user.deleted_at          // ignore other values passed into delete
+    }
+    if (Object.keys(user).length === 0) {
+      return res.status(200).json(await Users.findByPk(user_id))
     }
     const [found, result] = await Users.update(user, { where: { user_id }, returning: true, paranoid: false })
     const [data] = result.map(elem => elem.get())
