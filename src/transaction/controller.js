@@ -76,7 +76,7 @@ export const addTransaction = async (req, res) => {
       return res.status(404).json({ error: 'snack_id does not exist in the snacks table' })
     }
     if (transaction_amount < 0) throw Error('Bad Request: transaction_amount should be positive.')
-    if (quantity < 0) throw Error('Bad Request: quantity should be positive.')
+    if (quantity <= 0) throw Error('Bad Request: quantity should be positive.')
     await decreaseQuantityInSnackBatches(quantity, snack_id)
     if (transaction_type_id === PURCHASE) {
       const balance = user.balance + transaction_amount

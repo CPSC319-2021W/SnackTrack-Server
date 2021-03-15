@@ -10,7 +10,7 @@ import { authenticateJWT, isAdmin } from './src/auth/controller.js'
 
 const router = Router()
 
-router.use('/users', authenticateJWT, userRouter)
+router.use('/users', userRouter)
 router.use('/transactions', transactionRouter)
 router.use('/payments', authenticateJWT, paymentRouter)
 router.use('/snacks', snackRouter)
