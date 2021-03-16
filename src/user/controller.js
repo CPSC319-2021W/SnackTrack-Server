@@ -25,10 +25,8 @@ export const putUsers = async (req, res) => {
   try {
     const user = req.body
     const user_id = req.params.user_id
-    if (user.deleted_at === 'null') { // This if else block ensures any change to the delete_at field is to set it to
-      user.deleted_at = null          // null, for the restoration of the soft-deleted users
-    } else {
-      delete user.deleted_at          // ignore other values passed into delete
+    if (!putValidate(user)) {
+      return res.status(400).json({ error: 'attempting to change field not supposed to be changed' })
     }
     if (Object.keys(user).length === 0) {
       return res.status(200).json(await Users.findByPk(user_id))
@@ -94,4 +92,11 @@ export const deleteUser = async (req, res) => {
   } catch (err) {
     return res.status(500).json({ error: err.message })
   }
+}
+
+// returns true if the request body for PUT /users is valid
+function putValidate(user) {
+  return !(user.username !== undefined || user.email_address !== undefined || user.first_name !== undefined
+      || user.last_name !== undefined || user.image_uri !== undefined || user.is_active !== undefined
+      || user.deleted_at !== undefined || user.user_id !== undefined)
 }
