@@ -4,42 +4,69 @@ import { db } from '../db/index.js'
 // https://www.postgresql.org/docs/8.2/errcodes-appendix.html
 // 23505 = UNIQUE_VIOLATION
 const UNIQUE_VIOLATION = '23505'
-const NOT_FOUND = '404'
-
 const Users = db.users 
-const Admins = db.admins
 
 export const addUser = async (req, res) => {
   try {
     const user = req.body
     const result = await Users.create(user)
-    res.status(201).send(result)
+    return res.status(201).json(result)
   } catch (err) {
     if (err.parent.code === UNIQUE_VIOLATION) {
-      return res.status(409).send({ Error: err.message })
+      return res.status(409).json({ error: 'User is already exist.' })
     }
-    return res.status(400).send({ Error: err.message })
+    return res.status(400).json({ error: err.message })
   }
 }
 
-export const getUser = async(req, res) => {
-    try {
-        // TODO : Add logic checking if the requesting user is authorized (Ticket: SNAK-78)
-        const userId = req.params.userId
+export const getUsers = async (req, res) => {
+  try {
+    const isFetchAll = req.query.email_address === undefined
+    const email_address = req.query.email_address
+    const where = isFetchAll ? {} : { email_address }
+    const users = await Users.findAll({ where })
+    return res.status(200).json({ users })
+  } catch (err) {
+    return res.status(500).json({ error: err.message })
+  }
+}
 
-        // TODO: Optimization (Ticket: SNAK-93)
-        const resultFromDB = await Users.findByPk(userId)
-        if (resultFromDB == null) throw new Error(404)
-        const response = resultFromDB.toJSON()
+export const getUsersCommon = async (req, res) => {
+  try {
+    const users = await Users.findAll({
+      attributes: ['user_id', 'username', 'first_name', 'last_name', 'image_uri']
+    })
+    return res.status(200).json({ users })
+  } catch (err) {
+    return res.status(500).json({ error: err.message })
+  }
+}
 
-        const isAdmin = await Admins.findOne({ 
-            where: { user_id : userId }
-        })
-        response.is_admin = Boolean(isAdmin) ?? false
 
-        return res.status(200).json(response)
-    } catch (err) {
-        if (err.message === NOT_FOUND) return res.status(404).send({ Error: "userid doesn't exist in the users table" })
-        return res.status(500).send({ Error: err.message })
+export const getUser = async (req, res) => {
+  try {
+    const user_id = req.params.user_id
+    const response = await Users.findByPk(user_id)
+    if (!response) {
+      return res.status(404).json({ error: 'user_id does not exist in the users table' })
     }
+    return res.status(200).json(response)
+  } catch (err) {
+    return res.status(500).json({ error: err.message })
+  }
+}
+
+export const deleteUser = async (req, res) => {
+  try {
+    const user_id = req.params.user_id
+    const result = await Users.update({ is_active: false }, { where: { user_id } })
+    if (!result[0]) {
+      return res.status(404).json({ error: 'user_id does not exist in the users table' })
+    }
+    await Users.destroy({ where: { user_id } })
+    const response = await Users.findByPk(user_id, { paranoid: false })
+    return res.status(200).json(response)
+  } catch (err) {
+    return res.status(500).json({ error: err.message })
+  }
 }
