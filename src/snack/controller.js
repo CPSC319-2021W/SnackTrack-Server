@@ -1,6 +1,6 @@
 import { db } from '../db/index.js'
+import { errorCode } from '../util/error.js'
 
-const UNIQUE_VIOLATION = '23505'
 const Snacks = db.snacks
 const SnackBatches = db.snackBatches
 
@@ -23,10 +23,7 @@ export const addSnack = async(req, res) => {
     }
     return res.status(201).json({ quantity, ...result.toJSON() })
   } catch (err) {
-    if (err.parent.code === UNIQUE_VIOLATION) {
-      return res.status(409).json({ error: 'snack already exists.' })
-    }
-    return res.status(500).json({ error: err.message })
+    return res.status(errorCode(err)).json({ error: err.message })
   }
 }
 
@@ -57,7 +54,7 @@ export const putSnacks = async(req, res) => {
     }
     return res.status(200).json(data)
   } catch (err) {
-    return res.status(500).json({ error: err.message })
+    return res.status(errorCode(err)).json({ error: err.message })
   }
 }
 
@@ -84,7 +81,7 @@ export const putSnackBatches = async(req, res) => {
     }
     return res.status(200).json(data)
   } catch (err) {
-    return res.status(500).json({ error: err.message })
+    return res.status(errorCode(err)).json({ error: err.message })
   }
 }
 

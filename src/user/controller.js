@@ -1,10 +1,7 @@
 import { db } from '../db/index.js'
+import { errorCode } from '../util/error.js'
 
-// Reference: PostgreSQL error code documentation
-// https://www.postgresql.org/docs/8.2/errcodes-appendix.html
-// 23505 = UNIQUE_VIOLATION
-const UNIQUE_VIOLATION = '23505'
-const Users = db.users 
+const Users = db.users
 
 export const addUser = async (req, res) => {
   try {
@@ -12,10 +9,7 @@ export const addUser = async (req, res) => {
     const result = await Users.create(user)
     return res.status(201).json(result)
   } catch (err) {
-    if (err.parent.code === UNIQUE_VIOLATION) {
-      return res.status(409).json({ error: 'User is already exist.' })
-    }
-    return res.status(400).json({ error: err.message })
+    return res.status(errorCode(err)).json({ error: err.message })
   }
 }
 

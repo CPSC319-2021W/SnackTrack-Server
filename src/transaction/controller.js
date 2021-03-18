@@ -1,4 +1,5 @@
 import { db } from '../db/index.js'
+import { errorCode } from '../util/error.js'
 import { getPaginatedData } from '../util/pagination.js'
 import { decreaseQuantityInSnackBatches, increaseQuantityInSnackBatch } from '../snack/controller.js'
 import sequelize from 'sequelize'
@@ -53,10 +54,7 @@ export const updateTransaction = async (req, res) => {
     await transaction.update({ transaction_type_id: to })
     return res.status(200).json(transaction)
   } catch (err) {
-    if (err.message.startsWith('Bad Request:')) {
-      return res.status(400).json({ error: err.message })
-    }
-    return res.status(500).json({ error: err.message })
+    return res.status(errorCode(err)).json({ error: err.message })
   }
 }
 
@@ -89,10 +87,7 @@ export const addTransaction = async (req, res) => {
     })
     return res.status(201).json(result)
   } catch (err) {
-    if (err.message.startsWith('Bad Request:')) {
-      res.status(400).json({ error: err.message })
-    }
-    return res.status(500).json({ error: err.message })
+    return res.status(errorCode(err)).json({ error: err.message })
   }
 }
 
