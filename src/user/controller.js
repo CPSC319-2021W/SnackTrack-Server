@@ -6,7 +6,7 @@ import { db } from '../db/index.js'
 const UNIQUE_VIOLATION = '23505'
 const Users = db.users
 
-const NotFoundMsg = 'user_id is not found on the users table'
+const NOT_FOUND = 'user_id is not found on the users table'
 
 export const addUser = async (req, res) => {
   try {
@@ -23,18 +23,18 @@ export const addUser = async (req, res) => {
 
 export const putUsers = async (req, res) => {
   try {
-    const user = req.body
+    const { balance, is_admin } = req.body
     const user_id = req.params.user_id
-    if (!putValidate(user)) {
-      return res.status(400).json({ error: 'attempting to change field not supposed to be changed' })
-    }
-    if (Object.keys(user).length === 0) {
+    console.log({ balance, is_admin })
+    if (balance === undefined && is_admin === undefined) {
       return res.status(200).json(await Users.findByPk(user_id))
     }
-    const [found, result] = await Users.update(user, { where: { user_id }, returning: true, paranoid: false })
+    const [found, result] = await Users.update({ balance, is_admin }, {
+      where: { user_id }, returning: true, paranoid: false
+    })
     const [data] = result.map(elem => elem.get())
     if (!found) {
-      return res.status(404).json({ error: NotFoundMsg })
+      return res.status(404).json({ error: NOT_FOUND })
     }
     return res.status(200).json(data)
   } catch (err) {
@@ -71,7 +71,7 @@ export const getUser = async (req, res) => {
     const user_id = req.params.user_id
     const response = await Users.findByPk(user_id)
     if (!response) {
-      return res.status(404).json({ error: NotFoundMsg })
+      return res.status(404).json({ error: NOT_FOUND })
     }
     return res.status(200).json(response)
   } catch (err) {
@@ -84,7 +84,7 @@ export const deleteUser = async (req, res) => {
     const user_id = req.params.user_id
     const result = await Users.update({ is_active: false }, { where: { user_id } })
     if (!result[0]) {
-      return res.status(404).json({ error: NotFoundMsg })
+      return res.status(404).json({ error: NOT_FOUND })
     }
     await Users.destroy({ where: { user_id } })
     const response = await Users.findByPk(user_id, { paranoid: false })
@@ -92,11 +92,4 @@ export const deleteUser = async (req, res) => {
   } catch (err) {
     return res.status(500).json({ error: err.message })
   }
-}
-
-// returns true if the request body for PUT /users is valid
-function putValidate(user) {
-  return !(user.username !== undefined || user.email_address !== undefined || user.first_name !== undefined
-      || user.last_name !== undefined || user.image_uri !== undefined || user.is_active !== undefined
-      || user.deleted_at !== undefined || user.user_id !== undefined)
 }
