@@ -25,7 +25,6 @@ export const putUsers = async (req, res) => {
   try {
     const { balance, is_admin } = req.body
     const user_id = req.params.user_id
-    console.log({ balance, is_admin })
     if (balance === undefined && is_admin === undefined) {
       return res.status(200).json(await Users.findByPk(user_id))
     }
