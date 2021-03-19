@@ -19,30 +19,35 @@ export const addPayment = async (req, res) => {
     if (!user) {
       return res.status(404).json({ error: 'user_id does not exist in the users table.' })
     }
-    const updatedBalance = user.balance - payment_amount
-    if (updatedBalance < 0) {
-      return res.status(400).json({ error: 'Unable to carry a balance less than 0.' })
-    }
+    let balance, condition
     if (transaction_ids.length === 0) {
-      await user.update({ balance: 0 })
-      const result = await Payments.create(payment)
-      const payment_id = result.payment_id
-      await Transactions.update({ payment_id }, {
+      balance = 0
+      payment.payment_amount = user.balance
+      condition = {
         where: {
           [Op.and]: [
-            { user_id: user.user_id },
+            { user_id },
             { payment_id: null }
           ]
         }
-      })
-      return res.status(201).json(result)
-    }
-    await user.update({ balance: updatedBalance })
+      }
+    } else {
+      balance = user.balance - payment_amount
+      if (balance < 0) {
+        return res.status(400).json({ error: 'Unable to carry a balance less than 0.' })
+      }
+      condition = {
+        where: {
+          transaction_id: {
+            [Op.in]: transaction_ids
+          }
+        }
+      }
+    } 
     const result = await Payments.create(payment)
     const payment_id = result.payment_id
-    Transactions.update({ payment_id }, {
-      where: { transaction_id: { [Op.in]: transaction_ids } }
-    })
+    await user.update({ balance })
+    await Transactions.update({ payment_id }, condition)
     return res.status(201).json(result)
   } catch (err) {
     return res.status(500).json({ error: err.message })
