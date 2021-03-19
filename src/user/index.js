@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { addUser, deleteUser, getUser, getUsers, getUsersCommon } from './controller.js'
+import { addUser, deleteUser, getUser, getUsers, getUsersCommon, putUsers } from './controller.js'
 import { getUserTransaction, getUserTransactions, getPendingOrders } from '../transaction/controller.js'
 import { getUserPayments } from '../payment/controller.js'
 import { authenticateJWT, checkPermission } from '../auth/controller.js'
@@ -7,6 +7,7 @@ import { authenticateJWT, checkPermission } from '../auth/controller.js'
 const router = Router()
 
 router.post('/', addUser)
+router.put('/:user_id', authenticateJWT, checkPermission, putUsers)
 router.get('/', authenticateJWT, checkPermission, getUsers)
 router.get('/common', getUsersCommon)
 router.get('/:user_id', authenticateJWT, checkPermission, getUser)
