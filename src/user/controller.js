@@ -2,6 +2,7 @@ import { db } from '../db/index.js'
 import { errorCode } from '../util/error.js'
 
 const Users = db.users
+const NOT_FOUND = 'user_id is not found on the users table'
 
 export const addUser = async (req, res) => {
   try {
@@ -10,6 +11,26 @@ export const addUser = async (req, res) => {
     return res.status(201).json(result)
   } catch (err) {
     return res.status(errorCode(err)).json({ error: err.message })
+  }
+}
+
+export const putUsers = async (req, res) => {
+  try {
+    const { balance, is_admin } = req.body
+    const user_id = req.params.user_id
+    if (balance === undefined && is_admin === undefined) {
+      return res.status(200).json(await Users.findByPk(user_id))
+    }
+    const [found, result] = await Users.update({ balance, is_admin }, {
+      where: { user_id }, returning: true, paranoid: false
+    })
+    const [data] = result.map(elem => elem.get())
+    if (!found) {
+      return res.status(404).json({ error: NOT_FOUND })
+    }
+    return res.status(200).json(data)
+  } catch (err) {
+    return res.status(500).json({ err: err.message })
   }
 }
 
@@ -42,7 +63,7 @@ export const getUser = async (req, res) => {
     const user_id = req.params.user_id
     const response = await Users.findByPk(user_id)
     if (!response) {
-      return res.status(404).json({ error: 'user_id does not exist in the users table' })
+      return res.status(404).json({ error: NOT_FOUND })
     }
     return res.status(200).json(response)
   } catch (err) {
@@ -55,7 +76,7 @@ export const deleteUser = async (req, res) => {
     const user_id = req.params.user_id
     const result = await Users.update({ is_active: false }, { where: { user_id } })
     if (!result[0]) {
-      return res.status(404).json({ error: 'user_id does not exist in the users table' })
+      return res.status(404).json({ error: NOT_FOUND })
     }
     await Users.destroy({ where: { user_id } })
     const response = await Users.findByPk(user_id, { paranoid: false })
