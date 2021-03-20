@@ -39,6 +39,15 @@ export const verifyAndCreateToken = async (req, res) => {
   }   
 }
 
+export const createTestToken = () => {
+  const accessToken = sign(
+    { user_id: 999,  is_admin: true }, 
+    accessTokenSecret, 
+    { expiresIn: '30 days' })
+  return accessToken
+}
+
+
 export const authenticateJWT = (req, res, next) => {
   const authHeader = req.headers.authorization
   if (authHeader) {

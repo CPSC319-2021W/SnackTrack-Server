@@ -10,6 +10,7 @@
     "lint": "eslint src/**/*.js --cache --fix"
   },
   "dependencies": {
+    "axios": "^0.21.1",
     "cors": "^2.8.5",
     "debug": "~2.6.9",
     "dotenv": "^8.2.0",
