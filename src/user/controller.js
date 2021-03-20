@@ -26,10 +26,10 @@ export const putUsers = async (req, res) => {
     const { balance, is_admin } = req.body
     const user_id = req.params.user_id
     if (balance === undefined && is_admin === undefined) {
-      return res.status(200).json(await Users.findByPk(user_id, { paranoid: false }))
+      return res.status(200).json(await Users.findByPk(user_id))
     }
     const [found, result] = await Users.update({ balance, is_admin }, {
-      where: { user_id }, returning: true, paranoid: false
+      where: { user_id }, returning: true
     })
     const [data] = result.map(elem => elem.get())
     if (!found) {
