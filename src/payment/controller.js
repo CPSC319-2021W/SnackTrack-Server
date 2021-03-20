@@ -47,6 +47,6 @@ export const getUserPayments = async(req, res) => {
     const response = await getPaginatedData(req.query, { user_id }, Payments, order)
     return res.status(200).json(response)
   } catch (err) {
-    return res.status(500).json({ error: err.message })
+    return res.status(errorCode(err)).json({ error: err.message })
   }
 }

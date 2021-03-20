@@ -103,7 +103,7 @@ export const getUserTransactions = async (req, res) => {
     const response = await getPaginatedData(req.query, where, Transactions, order)
     return res.status(200).json(response)
   } catch (err) {
-    return res.status(500).json({ error: err.message })
+    return res.status(errorCode(err)).json({ error: err.message })
   }
 }
 
@@ -116,7 +116,7 @@ export const getUserTransaction = async (req, res) => {
     }
     return res.status(200).json(transaction)
   } catch (err) {
-    return res.status(500).json({ error: err.message })
+    return res.status(errorCode(err)).json({ error: err.message })
   }
 }
 
@@ -132,6 +132,6 @@ export const getPendingOrders = async (req, res) => {
     const response = await getPaginatedData(req.query, where, Transactions, order)
     return res.status(200).json(response)
   } catch (err) {
-    return res.status(500).json({ error: err.message })
+    return res.status(errorCode(err)).json({ error: err.message })
   }
 }

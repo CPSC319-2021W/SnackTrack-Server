@@ -30,7 +30,7 @@ export const putUsers = async (req, res) => {
     }
     return res.status(200).json(data)
   } catch (err) {
-    return res.status(500).json({ err: err.message })
+    return res.status(errorCode(err)).json({ error: err.message })
   }
 }
 
@@ -42,7 +42,7 @@ export const getUsers = async (req, res) => {
     const users = await Users.findAll({ where })
     return res.status(200).json({ users })
   } catch (err) {
-    return res.status(500).json({ error: err.message })
+    return res.status(errorCode(err)).json({ error: err.message })
   }
 }
 
@@ -53,7 +53,7 @@ export const getUsersCommon = async (req, res) => {
     })
     return res.status(200).json({ users })
   } catch (err) {
-    return res.status(500).json({ error: err.message })
+    return res.status(errorCode(err)).json({ error: err.message })
   }
 }
 
@@ -67,7 +67,7 @@ export const getUser = async (req, res) => {
     }
     return res.status(200).json(response)
   } catch (err) {
-    return res.status(500).json({ error: err.message })
+    return res.status(errorCode(err)).json({ error: err.message })
   }
 }
 
@@ -82,6 +82,6 @@ export const deleteUser = async (req, res) => {
     const response = await Users.findByPk(user_id, { paranoid: false })
     return res.status(200).json(response)
   } catch (err) {
-    return res.status(500).json({ error: err.message })
+    return res.status(errorCode(err)).json({ error: err.message })
   }
 }

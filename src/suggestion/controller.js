@@ -1,4 +1,5 @@
 import { db } from '../db/index.js'
+import { errorCode } from '../util/error.js'
 
 const Suggestions = db.suggestions
 const Users = db.users
@@ -18,7 +19,7 @@ export const addSuggestion = async (req, res) => {
     const result = await Suggestions.create(suggestion)
     return res.status(201).json(result)
   } catch (err) {
-    return res.status(500).json({ error: err.message })
+    return res.status(errorCode(err)).json({ error: err.message })
   }
 }
 
@@ -27,6 +28,6 @@ export const getSuggestions = async (req, res) => {
     const response = await Suggestions.findAll()
     return res.status(200).json({ suggestions: response })
   } catch (err) {
-    return res.status(500).json({ error: err.message })
+    return res.status(errorCode(err)).json({ error: err.message })
   }
 }
