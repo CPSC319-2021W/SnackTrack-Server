@@ -1,11 +1,7 @@
 import { db } from '../db/index.js'
+import { errorCode } from '../util/error.js'
 
-// Reference: PostgreSQL error code documentation
-// https://www.postgresql.org/docs/8.2/errcodes-appendix.html
-// 23505 = UNIQUE_VIOLATION
-const UNIQUE_VIOLATION = '23505'
 const Users = db.users
-
 const NOT_FOUND = 'user_id is not found on the users table'
 
 export const addUser = async (req, res) => {
@@ -14,10 +10,7 @@ export const addUser = async (req, res) => {
     const result = await Users.create(user)
     return res.status(201).json(result)
   } catch (err) {
-    if (err.parent.code === UNIQUE_VIOLATION) {
-      return res.status(409).json({ error: 'User is already exist.' })
-    }
-    return res.status(400).json({ error: err.message })
+    return res.status(errorCode(err)).json({ error: err.message })
   }
 }
 
@@ -37,7 +30,7 @@ export const putUsers = async (req, res) => {
     }
     return res.status(200).json(data)
   } catch (err) {
-    return res.status(500).json({ err: err.message })
+    return res.status(errorCode(err)).json({ error: err.message })
   }
 }
 
@@ -49,7 +42,7 @@ export const getUsers = async (req, res) => {
     const users = await Users.findAll({ where })
     return res.status(200).json({ users })
   } catch (err) {
-    return res.status(500).json({ error: err.message })
+    return res.status(errorCode(err)).json({ error: err.message })
   }
 }
 
@@ -60,7 +53,7 @@ export const getUsersCommon = async (req, res) => {
     })
     return res.status(200).json({ users })
   } catch (err) {
-    return res.status(500).json({ error: err.message })
+    return res.status(errorCode(err)).json({ error: err.message })
   }
 }
 
@@ -74,7 +67,7 @@ export const getUser = async (req, res) => {
     }
     return res.status(200).json(response)
   } catch (err) {
-    return res.status(500).json({ error: err.message })
+    return res.status(errorCode(err)).json({ error: err.message })
   }
 }
 
@@ -89,6 +82,6 @@ export const deleteUser = async (req, res) => {
     const response = await Users.findByPk(user_id, { paranoid: false })
     return res.status(200).json(response)
   } catch (err) {
-    return res.status(500).json({ error: err.message })
+    return res.status(errorCode(err)).json({ error: err.message })
   }
 }
