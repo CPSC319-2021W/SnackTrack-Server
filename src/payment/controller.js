@@ -1,4 +1,5 @@
 import { db } from '../db/index.js'
+import { errorCode } from '../util/error.js'
 import { getPaginatedData } from '../util/pagination.js'
 import sequelize from 'sequelize'
 const { Op } = sequelize
@@ -61,7 +62,7 @@ export const addPayment = async (req, res) => {
     })
     return res.status(201).json(result)
   } catch (err) {
-    return res.status(500).json({ error: err.message })
+    return res.status(errorCode(err)).json({ error: err.message })
   }
 }
 
@@ -76,6 +77,6 @@ export const getUserPayments = async(req, res) => {
     const response = await getPaginatedData(req.query, { user_id }, Payments, order)
     return res.status(200).json(response)
   } catch (err) {
-    return res.status(500).json({ error: err.message })
+    return res.status(errorCode(err)).json({ error: err.message })
   }
 }

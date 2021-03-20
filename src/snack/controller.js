@@ -1,6 +1,6 @@
 import { db } from '../db/index.js'
+import { errorCode } from '../util/error.js'
 
-const UNIQUE_VIOLATION = '23505'
 const Snacks = db.snacks
 const SnackBatches = db.snackBatches
 
@@ -23,10 +23,7 @@ export const addSnack = async(req, res) => {
     }
     return res.status(201).json({ quantity, ...result.toJSON() })
   } catch (err) {
-    if (err.parent.code === UNIQUE_VIOLATION) {
-      return res.status(409).json({ error: 'snack already exists.' })
-    }
-    return res.status(500).json({ error: err.message })
+    return res.status(errorCode(err)).json({ error: err.message })
   }
 }
 
@@ -36,7 +33,7 @@ export const addSnackBatches = async(req, res) => {
     const result = await SnackBatches.create(snackBatch)
     return res.status(201).json(result)
   } catch (err) {
-    return res.status(500).json({ error: err.message })
+    return res.status(errorCode(err)).json({ error: err.message })
   }
 }
 
@@ -57,7 +54,7 @@ export const putSnacks = async(req, res) => {
     }
     return res.status(200).json(data)
   } catch (err) {
-    return res.status(500).json({ error: err.message })
+    return res.status(errorCode(err)).json({ error: err.message })
   }
 }
 
@@ -84,7 +81,7 @@ export const putSnackBatches = async(req, res) => {
     }
     return res.status(200).json(data)
   } catch (err) {
-    return res.status(500).json({ error: err.message })
+    return res.status(errorCode(err)).json({ error: err.message })
   }
 }
 
@@ -99,7 +96,7 @@ export const getSnacks = async(req, res) => {
     const snacks = await Promise.all(data.map(snack => addQuantityFromBatch(snack)))
     return res.status(200).json({ snacks })
   } catch (err) {
-    return res.status(500).json({ error: err.message })
+    return res.status(errorCode(err)).json({ error: err.message })
   }
 }
 
@@ -113,7 +110,7 @@ export const getSnackBatches = async(req, res) => {
     })
     return res.status(200).json({ snack_batches })
   } catch (err) {
-    return res.status(500).json({ error: err.message })
+    return res.status(errorCode(err)).json({ error: err.message })
   }
 }
 
@@ -126,7 +123,7 @@ export const deleteSnacks = async(req, res) => {
     }
     return res.status(204).json()
   } catch (err) {
-    return res.status(500).json({ error: err.message })
+    return res.status(errorCode(err)).json({ error: err.message })
   }
 }
 
@@ -139,7 +136,7 @@ export const deleteSnackBatches = async(req, res) => {
     }
     return res.status(204).json()
   } catch (err) {
-    return res.status(500).json({ error: err.message })
+    return res.status(errorCode(err)).json({ error: err.message })
   }
 }
 
