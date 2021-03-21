@@ -14,7 +14,6 @@ export const addSnack = async(req, res) => {
       }
       let quantity = 0
       const result = await Snacks.create(snack, { transaction: t })
-      console.log(result)
       if (snack.quantity > 0) {
         quantity = snack.quantity
         const snackBatch = {
