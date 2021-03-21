@@ -3,14 +3,14 @@ import { createTestToken } from '../../src/auth/controller.js'
 import axios from 'axios'
 
 const Users = db.users 
+const inValidToken = 'inValid'
 const testUserData = {
-  username: 'test13',
+  username: 'jessicahaha',
   first_name: 'test',
-  last_name: 'Huh',
-  email_address: 'test_email130@gmail.com',
+  last_name: 'test',
+  email_address: 'test_email10@gmail.com',
   image_uri: 'https://test.com'
 }
-const inValidToken = 'inValid'
 
 describe('POST /users', () => {
   let token 
@@ -27,7 +27,6 @@ describe('POST /users', () => {
 
   afterAll(async () => {
     await clearUserDatabase()
-    await disconnect()
   })
 
   const clearUserDatabase = async () => {
@@ -67,7 +66,6 @@ describe('GET /users', () => {
 
   afterAll(async () => {
     await clearUserDatabase()
-    await disconnect()
   })
 
   const clearUserDatabase = async () => {
@@ -173,7 +171,6 @@ describe('DELETE /users', () => {
 
   afterAll(async () => {
     await clearUserDatabase()
-    await disconnect()
   })
 
   const clearUserDatabase = async () => {
@@ -207,4 +204,8 @@ describe('DELETE /users', () => {
       expect(error.response.status).toBe(404)
     }
   })
+})
+
+afterAll(async () => {
+  await disconnect()
 })
