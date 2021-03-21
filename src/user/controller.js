@@ -2,6 +2,7 @@ import { db } from '../db/index.js'
 import { errorCode } from '../util/error.js'
 
 const Users = db.users
+const instance = db.dbInstance
 const NOT_FOUND = 'user_id is not found on the users table'
 
 export const addUser = async (req, res) => {
@@ -73,14 +74,18 @@ export const getUser = async (req, res) => {
 
 export const deleteUser = async (req, res) => {
   try {
-    const user_id = req.params.user_id
-    const result = await Users.update({ is_active: false }, { where: { user_id } })
-    if (!result[0]) {
-      return res.status(404).json({ error: NOT_FOUND })
-    }
-    await Users.destroy({ where: { user_id } })
-    const response = await Users.findByPk(user_id, { paranoid: false })
-    return res.status(200).json(response)
+    const result = await instance.transaction(async (t) => {
+      const user_id = req.params.user_id
+      const result = await Users.update({ is_active: false },
+        { where: { user_id }, transaction: t })
+      if (!result[0]) {
+        return res.status(404).json({ error: NOT_FOUND })
+      }
+      await Users.destroy({ where: { user_id }, transaction: t })
+      const response = await Users.findByPk(user_id, { paranoid: false })
+      return response
+    })
+    return res.status(200).json(result)
   } catch (err) {
     return res.status(errorCode(err)).json({ error: err.message })
   }
