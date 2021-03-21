@@ -13,46 +13,47 @@ const PENDING_CANCEL = 4
 const Transactions = db.transactions
 const Users = db.users
 const Snacks = db.snacks
+const instance = db.dbInstance
 
 export const updateTransaction = async (req, res) => {
   try {
-    const transactionId = req.params.transaction_id
-    const transaction = await Transactions.findByPk(transactionId)
-    if (!transaction) {
-      return res.status(404).json({ error: 'transaction_id does not exist in the transactions table' })
-    }
-
-    const snack_name = transaction.snack_name
-    const snack = await Snacks.findOne({ where: { snack_name } })
-    if (!snack) {
-      return res.status(404).json({ error: 'snack with the snack_name does not exist in the snacks table' })
-    }
-
-    const from = transaction.transaction_type_id
-    const to = req.body.transaction_type_id
-    const balance = transaction.transaction_amount
-    const user_id = transaction.user_id
-    const selector = { where: { user_id } }
-    const handleNonNullPaymentId = (payment_id) => {
-      if (payment_id) throw Error('Bad Request: This transaction has been purchased.')
-    }
-    if (from === to) {
-      return res.status(200).json(transaction)
-    } else if (from === PURCHASE && to === CANCEL) {
-      handleNonNullPaymentId(transaction.payment_id)
-      await increaseQuantityInSnackBatch(transaction.quantity, snack.snack_id)
-      await Users.decrement({ balance }, selector)
-    } else if (from === PENDING && to === PURCHASE) {
-      await Users.increment({ balance }, selector)
-    } else if (from === PENDING && to === PENDING_CANCEL) {
-      handleNonNullPaymentId(transaction.payment_id)
-      await increaseQuantityInSnackBatch(transaction.quantity, snack.snack_id)
-    } else {
-      throw Error('Bad Request: This update is not allowed.')
-    }
-
-    await transaction.update({ transaction_type_id: to })
-    return res.status(200).json(transaction)
+    const result = await instance.transaction(async (t) => {
+      const transactionId = req.params.transaction_id
+      const transaction = await Transactions.findByPk(transactionId)
+      if (!transaction) {
+        return res.status(404).json({ error: 'transaction_id does not exist in the transactions table' })
+      }
+      const snack_name = transaction.snack_name
+      const snack = await Snacks.findOne({ where: { snack_name } })
+      if (!snack) {
+        return res.status(404).json({ error: 'snack with the snack_name does not exist in the snacks table' })
+      }
+      const from = transaction.transaction_type_id
+      const to = req.body.transaction_type_id
+      const balance = transaction.transaction_amount
+      const user_id = transaction.user_id
+      const selector = { where: { user_id }, transaction: t }
+      const handleNonNullPaymentId = (payment_id) => {
+        if (payment_id) throw Error('Bad Request: This transaction has been purchased.')
+      }
+      if (from === to) {
+        return transaction
+      } else if (from === PURCHASE && to === CANCEL) {
+        handleNonNullPaymentId(transaction.payment_id)
+        await increaseQuantityInSnackBatch(transaction.quantity, snack.snack_id, t)
+        await Users.decrement({ balance }, selector)
+      } else if (from === PENDING && to === PURCHASE) {
+        await Users.increment({ balance }, selector)
+      } else if (from === PENDING && to === PENDING_CANCEL) {
+        handleNonNullPaymentId(transaction.payment_id)
+        await increaseQuantityInSnackBatch(transaction.quantity, snack.snack_id, t)
+      } else {
+        throw Error('Bad Request: This update is not allowed.')
+      }
+      await transaction.update({ transaction_type_id: to }, { transaction: t })
+      return transaction
+    })
+    return res.status(200).json(result)
   } catch (err) {
     return res.status(errorCode(err)).json({ error: err.message })
   }

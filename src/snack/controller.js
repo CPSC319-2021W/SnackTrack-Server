@@ -3,25 +3,29 @@ import { errorCode } from '../util/error.js'
 
 const Snacks = db.snacks
 const SnackBatches = db.snackBatches
+const instance = db.dbInstance
 
 export const addSnack = async(req, res) => {
   try {
-    const snack = req.body
-    if (snack.quantity < 0) {
-      return res.status(400).json({ error: 'quantity must be greater than 0!' })
-    }
-    const result = await Snacks.create(snack)
-    let quantity = 0
-    if (snack.quantity > 0) {
-      quantity = snack.quantity
-      const snackBatch = {
-        snack_id: result.snack_id,
-        quantity,
-        expiration_dtm: snack.expiration_dtm
+    const result = await instance.transaction(async (t) => {
+      const snack = req.body
+      if (snack.quantity < 0) {
+        return res.status(400).json({ error: 'quantity must be greater than 0!' })
       }
-      await SnackBatches.create(snackBatch)
-    }
-    return res.status(201).json({ quantity, ...result.toJSON() })
+      let quantity = 0
+      const result = await Snacks.create({ snack }, { transaction: t })
+      if (snack.quantity > 0) {
+        quantity = snack.quantity
+        const snackBatch = {
+          snack_id: result.snack_id,
+          quantity,
+          expiration_dtm: snack.expiration_dtm
+        }
+        await SnackBatches.create({ snackBatch }, { transaction: t })
+      }
+      return { quantity, ...result.toJSON() }
+    })
+    return res.status(201).json(result)
   } catch (err) {
     return res.status(errorCode(err)).json({ error: err.message })
   }
@@ -175,14 +179,14 @@ export const decreaseQuantityInSnackBatches = async (quantity, snack_id) => {
   await Promise.all(tasks)
 }
 
-export const increaseQuantityInSnackBatch = async (quantity, snack_id) => {
+export const increaseQuantityInSnackBatch = async (quantity, snack_id, transaction) => {
   const snackBatch = await SnackBatches.findOne({
     where: { snack_id },
     order: [['expiration_dtm', 'ASC'], ['snack_batch_id', 'ASC']]
   })
   if (snackBatch) {
-    await snackBatch.increment({ quantity })
+    await snackBatch.increment({ quantity }, { transaction })
   } else {
-    await SnackBatches.create({ snack_id, quantity, expiration_dtm: null })
+    await SnackBatches.create({ snack_id, quantity, expiration_dtm: null }, { transaction })
   }
 }
