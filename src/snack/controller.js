@@ -1,32 +1,33 @@
 import { db } from '../db/index.js'
+import { errorCode } from '../util/error.js'
 
-const UNIQUE_VIOLATION = '23505'
 const Snacks = db.snacks
 const SnackBatches = db.snackBatches
+const instance = db.dbInstance
 
 export const addSnack = async(req, res) => {
   try {
-    const snack = req.body
-    if (snack.quantity < 0) {
-      return res.status(400).json({ error: 'quantity must be greater than 0!' })
-    }
-    const result = await Snacks.create(snack)
-    let quantity = 0
-    if (snack.quantity > 0) {
-      quantity = snack.quantity
-      const snackBatch = {
-        snack_id: result.snack_id,
-        quantity,
-        expiration_dtm: snack.expiration_dtm
+    const result = await instance.transaction(async (t) => {
+      const snack = req.body
+      if (snack.quantity < 0) {
+        return res.status(400).json({ error: 'quantity must be greater than 0!' })
       }
-      await SnackBatches.create(snackBatch)
-    }
-    return res.status(201).json({ quantity, ...result.toJSON() })
+      let quantity = 0
+      const result = await Snacks.create(snack, { transaction: t })
+      if (snack.quantity > 0) {
+        quantity = snack.quantity
+        const snackBatch = {
+          snack_id: result.snack_id,
+          quantity,
+          expiration_dtm: snack.expiration_dtm
+        }
+        await SnackBatches.create(snackBatch, { transaction: t })
+      }
+      return { quantity, ...result.toJSON() }
+    })
+    return res.status(201).json(result)
   } catch (err) {
-    if (err.parent.code === UNIQUE_VIOLATION) {
-      return res.status(409).json({ error: 'snack already exists.' })
-    }
-    return res.status(500).json({ error: err.message })
+    return res.status(errorCode(err)).json({ error: err.message })
   }
 }
 
@@ -36,7 +37,7 @@ export const addSnackBatches = async(req, res) => {
     const result = await SnackBatches.create(snackBatch)
     return res.status(201).json(result)
   } catch (err) {
-    return res.status(500).json({ error: err.message })
+    return res.status(errorCode(err)).json({ error: err.message })
   }
 }
 
@@ -57,7 +58,7 @@ export const putSnacks = async(req, res) => {
     }
     return res.status(200).json(data)
   } catch (err) {
-    return res.status(500).json({ error: err.message })
+    return res.status(errorCode(err)).json({ error: err.message })
   }
 }
 
@@ -84,7 +85,7 @@ export const putSnackBatches = async(req, res) => {
     }
     return res.status(200).json(data)
   } catch (err) {
-    return res.status(500).json({ error: err.message })
+    return res.status(errorCode(err)).json({ error: err.message })
   }
 }
 
@@ -99,7 +100,7 @@ export const getSnacks = async(req, res) => {
     const snacks = await Promise.all(data.map(snack => addQuantityFromBatch(snack)))
     return res.status(200).json({ snacks })
   } catch (err) {
-    return res.status(500).json({ error: err.message })
+    return res.status(errorCode(err)).json({ error: err.message })
   }
 }
 
@@ -113,7 +114,7 @@ export const getSnackBatches = async(req, res) => {
     })
     return res.status(200).json({ snack_batches })
   } catch (err) {
-    return res.status(500).json({ error: err.message })
+    return res.status(errorCode(err)).json({ error: err.message })
   }
 }
 
@@ -126,7 +127,7 @@ export const deleteSnacks = async(req, res) => {
     }
     return res.status(204).json()
   } catch (err) {
-    return res.status(500).json({ error: err.message })
+    return res.status(errorCode(err)).json({ error: err.message })
   }
 }
 
@@ -139,7 +140,7 @@ export const deleteSnackBatches = async(req, res) => {
     }
     return res.status(204).json()
   } catch (err) {
-    return res.status(500).json({ error: err.message })
+    return res.status(errorCode(err)).json({ error: err.message })
   }
 }
 
@@ -151,7 +152,7 @@ async function addQuantityFromBatch(snack) {
   return { quantity, ...snack.toJSON() }
 }
 
-export const decreaseQuantityInSnackBatches = async (quantity, snack_id) => {
+export const decreaseQuantityInSnackBatches = async (quantity, snack_id, transaction) => {
   const snackBatches = await SnackBatches.findAll({
     where: { snack_id },
     order: [['expiration_dtm', 'DESC'], ['snack_batch_id', 'DESC']]
@@ -168,24 +169,24 @@ export const decreaseQuantityInSnackBatches = async (quantity, snack_id) => {
     const currBatch = snackBatches.pop()
     if (requestedQuantity >= currBatch.quantity) {
       requestedQuantity -= currBatch.quantity
-      tasks.push(currBatch.destroy())
+      tasks.push(currBatch.destroy({ transaction }))
     } else {
       const quantity = currBatch.quantity - requestedQuantity
       requestedQuantity = 0
-      tasks.push(currBatch.update({ quantity }))
+      tasks.push(currBatch.update({ quantity }, { transaction }))
     }
   }
   await Promise.all(tasks)
 }
 
-export const increaseQuantityInSnackBatch = async (quantity, snack_id) => {
+export const increaseQuantityInSnackBatch = async (quantity, snack_id, transaction) => {
   const snackBatch = await SnackBatches.findOne({
     where: { snack_id },
     order: [['expiration_dtm', 'ASC'], ['snack_batch_id', 'ASC']]
   })
   if (snackBatch) {
-    await snackBatch.increment({ quantity })
+    await snackBatch.increment({ quantity }, { transaction })
   } else {
-    await SnackBatches.create({ snack_id, quantity, expiration_dtm: null })
+    await SnackBatches.create({ snack_id, quantity, expiration_dtm: null }, { transaction })
   }
 }
