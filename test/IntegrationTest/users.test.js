@@ -2,21 +2,20 @@ import { db, disconnect } from '../../src/db/index.js'
 import { createTestToken } from '../../src/auth/controller.js'
 import axios from 'axios'
 
-describe('/users endpoints', () => {
-  const Users = db.users 
-  const inValidToken = 'invaid'
+const Users = db.users 
+const testUserData = {
+  username: 'test13',
+  first_name: 'test',
+  last_name: 'Huh',
+  email_address: 'test_email130@gmail.com',
+  image_uri: 'https://test.com'
+}
+const inValidToken = 'inValid'
+
+describe('POST /users', () => {
   let token 
   let testUser
   let testUserId
-
-  
-  const testUserData = {
-    username: 'testHuh',
-    first_name: 'test',
-    last_name: 'Huh',
-    email_address: 'test@gmail.com',
-    image_uri: 'https://test.com'
-  }
 
   beforeAll(() => {
     return initializeUserTest()
@@ -42,6 +41,38 @@ describe('/users endpoints', () => {
     testUserId = testUser.user_id
     expect(response.status).toBe(201)
   })
+})
+
+describe('GET /users', () => {
+  let token 
+  let testUser
+  let testUserId
+
+  beforeAll(async () => {
+    initializeUserTest()
+    await addDummyUser()
+  })
+
+  const initializeUserTest = () => {
+    token = createTestToken()
+  }
+
+  const addDummyUser = async () => {
+    const authHeader = { headers: { Authorization: `Bearer ${token}` } }
+    const response = await axios.post('https://snacktrack-back-stg.herokuapp.com/api/v1/users', testUserData, authHeader)
+    testUser = response.data
+    testUserId = testUser.user_id
+    expect(response.status).toBe(201)
+  }
+
+  afterAll(async () => {
+    await clearUserDatabase()
+    await disconnect()
+  })
+
+  const clearUserDatabase = async () => {
+    await Users.destroy({ where: { user_id: testUserId } ,force: true })
+  }
 
   it('should get a user by id', async () => {
     const authHeader = { headers: { Authorization: `Bearer ${token}` } }
@@ -89,35 +120,35 @@ describe('/users endpoints', () => {
     expect(data).toEqual(          
       expect.arrayContaining([      
         expect.objectContaining({   
-          username: 'testHuh'               
+          username: testUserData.username             
         })
       ])
     )
     expect(data).toEqual(          
       expect.arrayContaining([      
         expect.objectContaining({   
-          first_name: 'test'
+          first_name: testUserData.first_name
         })               
       ])
     )
     expect(data).toEqual(          
       expect.arrayContaining([      
         expect.objectContaining({   
-          last_name: 'Huh'
+          last_name: testUserData.last_name
         })               
       ])
     )
     expect(data).toEqual(          
       expect.arrayContaining([      
         expect.objectContaining({   
-          email_address: 'test@gmail.com'
+          email_address: testUserData.email_address
         })               
       ])
     )
     expect(data).toEqual(          
       expect.arrayContaining([      
         expect.objectContaining({   
-          image_uri: 'https://test.com' 
+          image_uri: testUserData.image_uri
         })               
       ])
     )
@@ -127,5 +158,53 @@ describe('/users endpoints', () => {
     const response = await axios.get(`https://snacktrack-back-stg.herokuapp.com/api/v1/users/common`)
     expect(response.status).toBe(200)
   })
+})
 
+describe('DELETE /users', () => {
+  const inValidUserId = 999999
+  let token 
+  let testUser
+  let testUserId
+
+  beforeAll(async () => {
+    token = createTestToken()
+    await addDummyUser()
+  })
+
+  afterAll(async () => {
+    await clearUserDatabase()
+    await disconnect()
+  })
+
+  const clearUserDatabase = async () => {
+    await Users.destroy({ where: { user_id: testUserId } ,force: true })
+  }
+
+  const addDummyUser = async () => {
+    const authHeader = { headers: { Authorization: `Bearer ${token}` } }
+    const response = await axios.post('https://snacktrack-back-stg.herokuapp.com/api/v1/users', testUserData, authHeader)
+    testUser = response.data
+    testUserId = testUser.user_id
+    expect(response.status).toBe(201)
+  }
+  
+  it('should delete a valid user', async() => {
+    const authHeader = { headers: { Authorization: `Bearer ${token}` } }
+    const response = await axios.delete(`https://snacktrack-back-stg.herokuapp.com/api/v1/users/${testUserId}`, authHeader)
+    expect(response.status).toBe(200)
+    try {
+      await axios.get(`https://snacktrack-back-stg.herokuapp.com/api/v1/users/${testUserId}`, authHeader)
+    } catch(error) {
+      expect(error.response.status).toBe(404)
+    }
+  }) 
+
+  it('should not delete an invalid user', async() => {
+    const authHeader = { headers: { Authorization: `Bearer ${token}` } }
+    try { 
+      await axios.delete(`https://snacktrack-back-stg.herokuapp.com/api/v1/users/${inValidUserId}`, authHeader)
+    } catch(error) {
+      expect(error.response.status).toBe(404)
+    }
+  })
 })
