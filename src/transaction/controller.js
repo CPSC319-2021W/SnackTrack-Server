@@ -61,30 +61,33 @@ export const updateTransaction = async (req, res) => {
 
 export const addTransaction = async (req, res) => {
   try {
-    const transaction = req.body
-    const {
-      transaction_type_id, user_id, snack_id,
-      transaction_amount, quantity,
-    } = transaction
-    const user = await Users.findByPk(user_id)
-    if (!user) {
-      return res.status(404).json({ error: 'user_id does not exist in the users table' })
-    }
-    const snack = await Snacks.findByPk(snack_id)
-    if (!snack) {
-      return res.status(404).json({ error: 'snack_id does not exist in the snacks table' })
-    }
-    if (transaction_amount < 0) throw Error('Bad Request: transaction_amount should be positive.')
-    if (quantity <= 0) throw Error('Bad Request: quantity should be positive.')
-    await decreaseQuantityInSnackBatches(quantity, snack_id)
-    if (transaction_type_id === PURCHASE) {
-      const balance = user.balance + transaction_amount
-      await user.update({ balance })
-    }
-    const result = await Transactions.create({
-      user_id, transaction_type_id,
-      snack_name: snack.snack_name,
-      transaction_amount, quantity,
+    const result = await instance.transaction(async (t) => {
+      const transaction = req.body
+      const {
+        transaction_type_id, user_id, snack_id,
+        transaction_amount, quantity,
+      } = transaction
+      const user = await Users.findByPk(user_id)
+      if (!user) {
+        return res.status(404).json({ error: 'user_id does not exist in the users table' })
+      }
+      const snack = await Snacks.findByPk(snack_id)
+      if (!snack) {
+        return res.status(404).json({ error: 'snack_id does not exist in the snacks table' })
+      }
+      if (transaction_amount < 0) throw Error('Bad Request: transaction_amount should be positive.')
+      if (quantity <= 0) throw Error('Bad Request: quantity should be positive.')
+      await decreaseQuantityInSnackBatches(quantity, snack_id, t)
+      if (transaction_type_id === PURCHASE) {
+        const balance = user.balance + transaction_amount
+        await user.update({ balance }, { transaction: t })
+      }
+      const result = await Transactions.create({
+        user_id, transaction_type_id,
+        snack_name: snack.snack_name,
+        transaction_amount, quantity,
+      }, { transaction: t })
+      return result
     })
     return res.status(201).json(result)
   } catch (err) {

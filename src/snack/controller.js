@@ -13,7 +13,8 @@ export const addSnack = async(req, res) => {
         return res.status(400).json({ error: 'quantity must be greater than 0!' })
       }
       let quantity = 0
-      const result = await Snacks.create({ snack }, { transaction: t })
+      const result = await Snacks.create(snack, { transaction: t })
+      console.log(result)
       if (snack.quantity > 0) {
         quantity = snack.quantity
         const snackBatch = {
@@ -21,7 +22,7 @@ export const addSnack = async(req, res) => {
           quantity,
           expiration_dtm: snack.expiration_dtm
         }
-        await SnackBatches.create({ snackBatch }, { transaction: t })
+        await SnackBatches.create(snackBatch, { transaction: t })
       }
       return { quantity, ...result.toJSON() }
     })
@@ -152,7 +153,7 @@ async function addQuantityFromBatch(snack) {
   return { quantity, ...snack.toJSON() }
 }
 
-export const decreaseQuantityInSnackBatches = async (quantity, snack_id) => {
+export const decreaseQuantityInSnackBatches = async (quantity, snack_id, transaction) => {
   const snackBatches = await SnackBatches.findAll({
     where: { snack_id },
     order: [['expiration_dtm', 'DESC'], ['snack_batch_id', 'DESC']]
@@ -169,11 +170,11 @@ export const decreaseQuantityInSnackBatches = async (quantity, snack_id) => {
     const currBatch = snackBatches.pop()
     if (requestedQuantity >= currBatch.quantity) {
       requestedQuantity -= currBatch.quantity
-      tasks.push(currBatch.destroy())
+      tasks.push(currBatch.destroy({ transaction }))
     } else {
       const quantity = currBatch.quantity - requestedQuantity
       requestedQuantity = 0
-      tasks.push(currBatch.update({ quantity }))
+      tasks.push(currBatch.update({ quantity }, { transaction }))
     }
   }
   await Promise.all(tasks)

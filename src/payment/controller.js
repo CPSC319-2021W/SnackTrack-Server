@@ -27,11 +27,11 @@ export const addPayment = async (req, res) => {
         return res.status(400).json({ error: 'Unable to carry a balance less than 0.' })
       }
       await user.update({ balance: updatedBalance }, { transaction: t })
-      const result = await Payments.create({ payment }, { transaction: t })
+      const result = await Payments.create(payment, { transaction: t })
       const payment_id = result.payment_id
       await Transactions.update({ payment_id }, {
-        where: { transaction_id: { [Op.in]: transaction_ids } }
-      }, { transaction: t })
+        where: { transaction_id: { [Op.in]: transaction_ids } }, transaction: t
+      })
       return result
     })
     return res.status(201).json(result)
