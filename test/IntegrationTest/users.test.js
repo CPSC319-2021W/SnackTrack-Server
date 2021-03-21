@@ -5,10 +5,10 @@ import axios from 'axios'
 const Users = db.users 
 const inValidToken = 'inValid'
 const testUserData = {
-  username: 'jessicahaha',
+  username: 'test',
   first_name: 'test',
   last_name: 'test',
-  email_address: 'test_email10@gmail.com',
+  email_address: 'test_email@gmail.com',
   image_uri: 'https://test.com'
 }
 
