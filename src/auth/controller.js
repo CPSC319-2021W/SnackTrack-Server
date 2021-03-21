@@ -15,7 +15,7 @@ export const verifyAndCreateToken = async (req, res) => {
       audience: clientId,
     })
     const payload = ticket.getPayload()
-    let user = await Users.findOne({ where: { email_address: payload.email } })
+    let user = await Users.findOne({ where: { email_address: payload.email }, paranoid: false })
     if (!user) {
       const randomInt = Math.floor((Math.random() * 1000) + 1)
       const username = payload.given_name + payload.family_name + randomInt.toString()
@@ -28,7 +28,7 @@ export const verifyAndCreateToken = async (req, res) => {
       }
       const result = await Users.create(newUser)
       user = result.toJSON()
-    } else if (user.is_active === false && user.deleted_at !== null) { // TODO: ensure this works as intended
+    } else if (user.is_active === false && user.deleted_at !== null) {
       await user.restore()
       user = await user.update({ is_active: true })
     }
