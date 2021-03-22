@@ -34,7 +34,7 @@ export const getSuggestions = async (_, res) => {
 
 export const deleteSuggestions = async(_, res) => {
   try {
-    await Suggestions.destroy()
+    await Suggestions.destroy({ where: {} })
     return res.status(204).json()
   } catch (err) {
     return res.status(errorCode(err)).json({ error: err.message })
