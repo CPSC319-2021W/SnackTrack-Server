@@ -1,5 +1,5 @@
-import { db, disconnect } from '../../src/db/index.js'
-import { createTestToken } from '../../src/auth/controller.js'
+import { db, disconnect } from '../../../src/db/index.js'
+import { createTestToken } from '../../../src/auth/controller.js'
 import axios from 'axios'
 
 const Users = db.users 
@@ -155,6 +155,61 @@ describe('GET /users', () => {
   it('should get users for iPad module', async() => {
     const response = await axios.get(`https://snacktrack-back-stg.herokuapp.com/api/v1/users/common`)
     expect(response.status).toBe(200)
+  })
+})
+
+describe('PUT /users', () => {
+  let token 
+  let testUser
+  let testUserId
+
+  beforeAll(async () => {
+    initializeUserTest()
+    await addDummyUser()
+  })
+
+  const initializeUserTest = () => {
+    token = createTestToken()
+  }
+
+  const addDummyUser = async () => {
+    const authHeader = { headers: { Authorization: `Bearer ${token}` } }
+    const response = await axios.post('https://snacktrack-back-stg.herokuapp.com/api/v1/users', testUserData, authHeader)
+    testUser = response.data
+    testUserId = testUser.user_id
+    expect(response.status).toBe(201)
+  }
+
+  afterAll(async () => {
+    await clearUserDatabase()
+  })
+
+  const clearUserDatabase = async () => {
+    await Users.destroy({ where: { user_id: testUserId } ,force: true })
+  }
+
+  it('should edit balance', async () => {
+    const requestBalance = 1000
+    const requestBody = {
+      'balance' : requestBalance
+    }
+    const authHeader = { headers: { Authorization: `Bearer ${token}` } }
+    const response = await axios.put(`https://snacktrack-back-stg.herokuapp.com/api/v1/users/${testUserId}`, requestBody, authHeader)
+    const data = response.data
+    expect(response.status).toBe(200)
+    expect(data.balance).toEqual(requestBalance)
+  })
+
+  it('should edit is_admin', async () => {
+    const is_admin = false
+    const requestBody = {
+      'is_admin' : is_admin
+    }
+    const authHeader = { headers: { Authorization: `Bearer ${token}` } }
+    const response = await axios.put(`https://snacktrack-back-stg.herokuapp.com/api/v1/users/${testUserId}`, requestBody, authHeader)
+    const data = response.data
+    expect(response.status).toBe(200)
+    expect(data.is_admin).toBeFalsy()
   })
 })
 
