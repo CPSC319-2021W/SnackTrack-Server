@@ -15,8 +15,8 @@ export const verifyAndCreateToken = async (req, res) => {
       audience: clientId,
     })
     const payload = ticket.getPayload()
-    let user = await Users.findOne({ where: { email_address: payload.email } })
-    if (!user) { // TODO: handle the case where soft-deleted user tries to log in again SNAK-336
+    let user = await Users.findOne({ where: { email_address: payload.email }, paranoid: false })
+    if (!user) {
       const randomInt = Math.floor((Math.random() * 1000) + 1)
       const username = payload.given_name + payload.family_name + randomInt.toString()
       const newUser = {
@@ -28,6 +28,9 @@ export const verifyAndCreateToken = async (req, res) => {
       }
       const result = await Users.create(newUser)
       user = result.toJSON()
+    } else if (user.is_active === false && user.deleted_at !== null) {
+      await user.restore()
+      user = await user.update({ is_active: true })
     }
     const accessToken = sign(
       { user_id: user.user_id,  is_admin: user.is_admin }, 
