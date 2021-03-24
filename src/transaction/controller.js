@@ -143,6 +143,9 @@ export const getPendingOrders = async (req, res) => {
 export const getPopularSnacks = async (req, res) => {
   try {
     const { start_date, end_date, transaction_type_id, limit } = req.query
+    if (!start_date || !end_date || !transaction_type_id || !limit) {
+      throw Error('Bad Request: invalid query')
+    }
     const response = await Transactions.findAll({
       where: {
         transaction_type_id,
