@@ -23,7 +23,7 @@ export const putUsers = async (req, res) => {
       return res.status(200).json(await Users.findByPk(user_id))
     }
     const [found, result] = await Users.update({ balance, is_admin }, {
-      where: { user_id }, returning: true, paranoid: false
+      where: { user_id }, returning: true
     })
     const [data] = result.map(elem => elem.get())
     if (!found) {
