@@ -23,10 +23,19 @@ export const addSuggestion = async (req, res) => {
   }
 }
 
-export const getSuggestions = async (req, res) => {
+export const getSuggestions = async (_, res) => {
   try {
     const response = await Suggestions.findAll()
     return res.status(200).json({ suggestions: response })
+  } catch (err) {
+    return res.status(errorCode(err)).json({ error: err.message })
+  }
+}
+
+export const deleteSuggestions = async(_, res) => {
+  try {
+    await Suggestions.destroy({ where: { }, force: true })
+    return res.status(204).json()
   } catch (err) {
     return res.status(errorCode(err)).json({ error: err.message })
   }
