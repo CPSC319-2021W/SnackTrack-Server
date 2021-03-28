@@ -139,3 +139,30 @@ export const getPendingOrders = async (req, res) => {
     return res.status(errorCode(err)).json({ error: err.message })
   }
 }
+
+export const getPopularSnacks = async (req, res) => {
+  try {
+    const { start_date, end_date, transaction_type_id, limit } = req.query
+    if (!start_date || !end_date || !transaction_type_id || !limit) {
+      throw Error('Bad Request: invalid query')
+    }
+    const response = await Transactions.findAll({
+      where: {
+        transaction_type_id,
+        payment_id: {
+          [Op.ne]: null
+        },
+        transaction_dtm: { [Op.between]: [new Date(start_date), new Date(end_date)] }
+      },
+      attributes: [
+        'snack_name',
+        [sequelize.fn('sum', sequelize.col('quantity')), 'total_quantity'],
+      ],
+      group: ['snack_name'],
+    })
+    response.sort((a,b) => b.get('total_quantity') - a.get('total_quantity'))
+    return res.status(200).json(response.splice(0, limit))
+  } catch (err) {
+    return res.status(errorCode(err)).json({ error: err.message })
+  }
+}
