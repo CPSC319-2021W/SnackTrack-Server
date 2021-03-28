@@ -221,48 +221,46 @@ describe('GET /snacks', () => {
 
 })
 
-// describe('PUT /sancks', () => {
-//   let token 
-//   let testSnackId
-//   let testSnack
-//   let testInactiveSnackId
-//   let testInactiveSnack
+describe('PUT /sancks', () => {
+  let token 
+  let testSnackId
+  let testSnack
+  const newPrice = 500
   
-//   beforeAll(async () => {
-//     intializeSnackTest()
-//     await addDummySnacks()
-//   })
+  beforeAll(async () => {
+    intializeSnackTest()
+    await addDummySnacks()
+  })
   
-//   const intializeSnackTest = () => {
-//     token = createTestToken()
-//   }
+  const intializeSnackTest = () => {
+    token = createTestToken()
+  }
 
-//   const addDummySnacks = async () => {
-//     const authHeader = { headers: { Authorization: `Bearer ${token}` } }
-//     let response = await axios.post('https://snacktrack-back-stg.herokuapp.com/api/v1/snacks', testSnackData, authHeader)
-//     testSnack = response.data
-//     testSnackId = testSnack.snack_id
-//     expect(response.status).toBe(201)
-
-//     response = await axios.post('https://snacktrack-back-stg.herokuapp.com/api/v1/snacks', testSnackData_inactive, authHeader)
-//     testInactiveSnack = response.data
-//     testInactiveSnackId = testInactiveSnack.snack_id
-//     expect(response.status).toBe(201)
-//   }
+  const addDummySnacks = async () => {
+    const authHeader = { headers: { Authorization: `Bearer ${token}` } }
+    const response = await axios.post('https://snacktrack-back-stg.herokuapp.com/api/v1/snacks', testSnackData, authHeader)
+    testSnack = response.data
+    testSnackId = testSnack.snack_id
+    expect(response.status).toBe(201)
+  }
   
-//   afterAll(async () => {
-//     await clearUserDatabase()
-//   })
+  afterAll(async () => {
+    await clearUserDatabase()
+  })
   
-//   const clearUserDatabase = async () => {
-//     await Snacks.destroy({ where: { snack_id: testSnackId } ,force: true })
-//     await Snacks.destroy({ where: { snack_id: testInactiveSnackId } ,force: true })
-//   }
+  const clearUserDatabase = async () => {
+    await Snacks.destroy({ where: { snack_id: testSnackId } ,force: true })
+  }
 
-//   it('edit snack property', async () => {
-
-//   })
-// })
+  it('edit snack property', async () => {
+    const newSnackInfo = { 'price' : newPrice }
+    const authHeader = { headers: { Authorization: `Bearer ${token}` } }
+    const response = await axios.put(`https://snacktrack-back-stg.herokuapp.com/api/v1/snacks/${testSnackId}`, newSnackInfo, authHeader)
+    const data = response.data
+    expect(response.status).toBe(200)
+    expect(data.price).toEqual(newPrice)
+  })
+})
 
 describe('DELETE /sancks', () => {
   let token 
