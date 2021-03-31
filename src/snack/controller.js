@@ -34,6 +34,9 @@ export const addSnack = async(req, res) => {
 export const addSnackBatches = async(req, res) => {
   try {
     const snackBatch = req.body
+    if (snackBatch.quantity <= 0) {
+      return res.status(400).json({ error: 'quantity must be greater than 0!' })
+    }
     const result = await SnackBatches.create(snackBatch)
     return res.status(201).json(result)
   } catch (err) {
