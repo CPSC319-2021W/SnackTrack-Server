@@ -1,6 +1,6 @@
 import { db } from '../../../src/db/index.js'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, it, jest } from '@jest/globals'
-import { addSnackBatches, deleteSnackBatches, getSnackBatches } from '../../../src/snack/controller.js'
+import { addSnackBatches, putSnackBatches, deleteSnackBatches, getSnackBatches } from '../../../src/snack/controller.js'
 
 const SnackBatches = db.snackBatches
 
@@ -97,6 +97,85 @@ describe('POST/ snack_batches', () => {
     const expected = { error : 'quantity must be greater than 0!' }
     await addSnackBatches(req, res)
     expect(res.status).toHaveBeenCalledWith(400)
+    expect(res.json).toHaveBeenCalledWith(expected)
+  })
+})
+
+describe('PUT/ snack_batches', () => {
+  beforeEach(async() => {
+    jest.spyOn(SnackBatches, 'findByPk').mockImplementation((snack_batch_id) => {
+      if (snack_batch_id === 1) {
+        return Promise.resolve({
+          snack_batch_id: snack_batch_id
+        })
+      } else {
+        return Promise.resolve(null)
+      }
+    })
+
+    jest.spyOn(SnackBatches, 'update').mockImplementation((snack_batch, options) => {
+      let expiration_dtm
+      if (snack_batch.expiration_dtm === undefined || snack_batch.expiration_dtm === 'null') {
+        expiration_dtm = null
+      } else {
+        expiration_dtm = snack_batch.expiration_dtm
+      }
+      const found = options.where.snack_batch_id === 1
+      const result = [{
+        dataValues: {
+          snack_batch_id: 1,
+          quantity: snack_batch.quantity,
+          expiration_dtm: expiration_dtm
+        },
+        previousDataValues: {
+          snack_batch_id: 1,
+          quantity: 1,
+          expiration_dtm: null
+        },
+        _options: {
+          isNewRecord: false,
+          _schema: null,
+          _schemaDelimiter: '',
+          raw: true,
+          attribute: undefined
+        },
+        isNewRecord: false
+      }]
+      return Promise.resolve([found, result])
+    })
+  })
+
+  afterEach(async() => {
+    jest.restoreAllMocks()
+  })
+
+  it('should change all the fields but id', async () => {
+    const mockRequest = () => {
+      return {
+        body: {
+          quantity: 120,
+          expiration_dtm: '2021-07-29T07:22Z'
+        },
+        params: {
+          snack_batch_id: 1
+        }
+      }
+    }
+    const mockResponse = () => {
+      const res = {}
+      res.status = jest.fn().mockReturnValue(res)
+      res.json = jest.fn().mockReturnValue(res)
+      return res
+    }
+    const req = mockRequest()
+    const res = mockResponse()
+    const expected = {
+      snack_batch_id: 1,
+      quantity: 120,
+      expiration_dtm: '2021-07-29T07:22Z'
+    }
+    await putSnackBatches(req, res)
+    expect(res.status).toHaveBeenCalledWith(200)
     expect(res.json).toHaveBeenCalledWith(expected)
   })
 })
