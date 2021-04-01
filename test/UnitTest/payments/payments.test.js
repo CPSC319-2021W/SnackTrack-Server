@@ -128,7 +128,7 @@ describe ('POST /payments', () => {
         'created_by': payment.created_by,
         'user_id': payment.user_id
       }
-      return result
+      return Promise.resolve(result)
     })
   })
 
