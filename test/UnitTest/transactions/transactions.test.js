@@ -16,24 +16,26 @@ describe ('GET /:user_id/transactions', () => {
     jest.spyOn(pagination, 'getPaginatedData').mockImplementation(() => {
       return Promise.resolve({
         'total_rows': 1,
-        'payments': [
+        'transactions': [
           {
             'transaction_id': 1,
-            'user_id': 1,
-            'transaction_type_id': 0,
-            'snack_name': 'KitKat',
-            'transaction_amount': 200,
+            'snack_name': 'Lays - Original',
+            'transaction_amount': 100,
             'quantity': 1,
-            'transaction_dtm': '2012-03-19T07:22Z'
+            'transaction_dtm': '2021-03-31T21:36:26.006Z',
+            'user_id': 1,
+            'payment_id': null,
+            'transaction_type_id': 1
           },
           {
             'transaction_id': 2,
-            'user_id': 1,
-            'transaction_type_id': 1,
             'snack_name': 'KitKat',
-            'transaction_amount': 200,
+            'transaction_amount': 100,
             'quantity': 1,
-            'transaction_dtm': '2012-03-20T07:22Z'
+            'transaction_dtm': '2021-03-30T21:36:26.006Z',
+            'user_id': 1,
+            'payment_id': null,
+            'transaction_type_id': 1
           }
         ],
         'total_pages': 1,
@@ -76,24 +78,26 @@ describe ('GET /:user_id/transactions', () => {
     const res = mockResponse()
     const expected = {
       'total_rows': 1,
-      'payments': [
+      'transactions': [
         {
           'transaction_id': 1,
-          'user_id': 1,
-          'transaction_type_id': 0,
-          'snack_name': 'KitKat',
-          'transaction_amount': 200,
+          'snack_name': 'Lays - Original',
+          'transaction_amount': 100,
           'quantity': 1,
-          'transaction_dtm': '2012-03-19T07:22Z'
+          'transaction_dtm': '2021-03-31T21:36:26.006Z',
+          'user_id': 1,
+          'payment_id': null,
+          'transaction_type_id': 1
         },
         {
           'transaction_id': 2,
-          'user_id': 1,
-          'transaction_type_id': 1,
           'snack_name': 'KitKat',
-          'transaction_amount': 200,
+          'transaction_amount': 100,
           'quantity': 1,
-          'transaction_dtm': '2012-03-20T07:22Z'
+          'transaction_dtm': '2021-03-30T21:36:26.006Z',
+          'user_id': 1,
+          'payment_id': null,
+          'transaction_type_id': 1
         }
       ],
       'total_pages': 1,
