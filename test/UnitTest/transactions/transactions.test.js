@@ -1,8 +1,9 @@
 import { db } from '../../../src/db/index.js'
-import { getUserTransactions } from '../../../src/transaction/controller.js'
+import { getUserTransaction, getUserTransactions } from '../../../src/transaction/controller.js'
 import * as pagination from '../../../src/util/pagination.js'
 
 const Users = db.users
+const Transactions = db.transactions
 
 describe ('GET /:user_id/transactions', () => {
   beforeAll (async () => {
@@ -104,6 +105,74 @@ describe ('GET /:user_id/transactions', () => {
       'current_page': 0
     }
     await getUserTransactions(req, res)
+    expect(res.status).toHaveBeenCalledWith(200)
+    expect(res.json).toHaveBeenCalledWith(expected)
+  })
+})
+
+describe ('GET /:user_id/transactions/:transaction_id', () => {
+  beforeAll(async () => {
+    jest.spyOn(Transactions, 'findOne').mockImplementation((condition) => {
+      if (condition.where.transaction_id === 1) {
+        return Promise.resolve({
+          'transaction_id': 1,
+          'snack_name': 'KitKat',
+          'transaction_amount': 125,
+          'quantity': 1,
+          'transaction_dtm': '2021-03-20T21:50:18.299Z',
+          'user_id': 1,
+          'payment_id': null,
+          'transaction_type_id': 1
+        })
+      } else {
+        return Promise.resolve(null)
+      }
+    })
+  })
+
+  afterAll(async () => jest.clearAllMocks())
+
+  it ('should reject with 404 - transaction_id not found', async () => {
+    const mockRequest = () => {
+      return { 'params' : { 'user_id': 1, 'transaction_id': 999 } }
+    }
+    const mockResponse = () => {
+      const res = {}
+      res.status = jest.fn().mockReturnValue(res)
+      res.json = jest.fn().mockReturnValue(res)
+      return res
+    }
+    const req = mockRequest()
+    const res = mockResponse()
+    const expected = { error: 'transaction does not exist in the table' }
+    await getUserTransaction(req, res)
+    expect(res.status).toHaveBeenCalledWith(404)
+    expect(res.json).toHaveBeenCalledWith(expected)
+  })
+
+  it ('should get a transaction of the user', async () => {
+    const mockRequest = () => {
+      return { 'params' : { 'user_id': 1, 'transaction_id': 1 } }
+    }
+    const mockResponse = () => {
+      const res = {}
+      res.status = jest.fn().mockReturnValue(res)
+      res.json = jest.fn().mockReturnValue(res)
+      return res
+    }
+    const req = mockRequest()
+    const res = mockResponse()
+    const expected = {
+      'transaction_id': 1,
+      'snack_name': 'KitKat',
+      'transaction_amount': 125,
+      'quantity': 1,
+      'transaction_dtm': '2021-03-20T21:50:18.299Z',
+      'user_id': 1,
+      'payment_id': null,
+      'transaction_type_id': 1
+    }
+    await getUserTransaction(req, res)
     expect(res.status).toHaveBeenCalledWith(200)
     expect(res.json).toHaveBeenCalledWith(expected)
   })
