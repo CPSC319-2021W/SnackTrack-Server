@@ -1,10 +1,11 @@
 import { db } from '../../../src/db/index.js'
-import { getPendingOrders, getPopularSnacks, getUserTransaction, getUserTransactions } from '../../../src/transaction/controller.js'
+import { addTransaction, getPendingOrders, getPopularSnacks, getUserTransaction, getUserTransactions } from '../../../src/transaction/controller.js'
 import * as pagination from '../../../src/util/pagination.js'
 import { popularSnacks } from './popularSnacks.data.js'
 
 const Users = db.users
 const Transactions = db.transactions
+const instance = db.dbInstance
 
 describe ('GET /:user_id/transactions', () => {
   beforeAll (async () => {
@@ -453,6 +454,184 @@ describe ('GET /transactions (GET popularSnacks)', () => {
     ])
     await getPopularSnacks(req, res)
     expect(res.status).toHaveBeenCalledWith(200)
+    expect(res.json).toHaveBeenCalledWith(expected)
+  })
+})
+
+describe ('POST /transactions', () => {
+  let req, res
+  beforeAll (async () => {
+    jest.spyOn(instance, 'transaction').mockImplementation(() => {
+      const transaction = req.body
+      const {
+        transaction_type_id, user_id, snack_id,
+        transaction_amount, quantity,
+      } = transaction
+      if (user_id !== 1) {
+        return res.status(404).json({ error: 'user_id does not exist in the users table' })
+      }
+      if (snack_id !== 1) {
+        return res.status(404).json({ error: 'snack_id does not exist in the snacks table' })
+      }
+      if (transaction_amount < 0) throw Error('Bad Request: transaction_amount should be positive.')
+      if (quantity <= 0) throw Error('Bad Request: quantity should be positive.')
+      const result = {
+        'transaction_id': 1,
+        'user_id': user_id,
+        'transaction_type_id': transaction_type_id,
+        'snack_name': 'KitKat',
+        'transaction_amount': transaction_amount,
+        'quantity': quantity,
+        'payment_id': null,
+        'transaction_dtm': '2021-03-30T22:28:24.022Z'
+      }
+      return Promise.resolve(result)
+    })
+  })
+
+  afterAll (async () => jest.clearAllMocks())
+
+  it ('should reject with 404 - user_id not found', async () => {
+    const mockRequest = () => {
+      const req = {
+        'body': {
+          'transaction_type_id': 1,
+          'user_id': 999,
+          'snack_id': 1,
+          'transaction_amount': 125,
+          'quantity': 1
+        }
+      }
+      return req
+    }
+    const mockResponse = () => {
+      const res = {}
+      res.status = jest.fn().mockReturnValue(res)
+      res.json = jest.fn().mockReturnValue(res)
+      return res
+    }
+    req = mockRequest()
+    res = mockResponse()
+    const expected = { error: 'user_id does not exist in the users table' }
+    await addTransaction(req, res)
+    expect(res.status).toHaveBeenCalledWith(404)
+    expect(res.json).toHaveBeenCalledWith(expected)
+  })
+
+  it ('should reject with 404 - snack_id not found', async () => {
+    const mockRequest = () => {
+      const req = {
+        'body': {
+          'transaction_type_id': 1,
+          'user_id': 1,
+          'snack_id': 999,
+          'transaction_amount': 125,
+          'quantity': 1
+        }
+      }
+      return req
+    }
+    const mockResponse = () => {
+      const res = {}
+      res.status = jest.fn().mockReturnValue(res)
+      res.json = jest.fn().mockReturnValue(res)
+      return res
+    }
+    req = mockRequest()
+    res = mockResponse()
+    const expected = { error: 'snack_id does not exist in the snacks table' }
+    await addTransaction(req, res)
+    expect(res.status).toHaveBeenCalledWith(404)
+    expect(res.json).toHaveBeenCalledWith(expected)
+  })
+
+  it ('should reject with 400 - transaction_amount is not positive', async () => {
+    const mockRequest = () => {
+      const req = {
+        'body': {
+          'transaction_type_id': 1,
+          'user_id': 1,
+          'snack_id': 1,
+          'transaction_amount': -125,
+          'quantity': 1
+        }
+      }
+      return req
+    }
+    const mockResponse = () => {
+      const res = {}
+      res.status = jest.fn().mockReturnValue(res)
+      res.json = jest.fn().mockReturnValue(res)
+      return res
+    }
+    req = mockRequest()
+    res = mockResponse()
+    const expected = { error: 'Bad Request: transaction_amount should be positive.' }
+    await addTransaction(req, res)
+    expect(res.status).toHaveBeenCalledWith(400)
+    expect(res.json).toHaveBeenCalledWith(expected)
+  })
+
+  it ('should reject with 400 - quantity is not positive', async () => {
+    const mockRequest = () => {
+      const req = {
+        'body': {
+          'transaction_type_id': 1,
+          'user_id': 1,
+          'snack_id': 1,
+          'transaction_amount': 125,
+          'quantity': -1
+        }
+      }
+      return req
+    }
+    const mockResponse = () => {
+      const res = {}
+      res.status = jest.fn().mockReturnValue(res)
+      res.json = jest.fn().mockReturnValue(res)
+      return res
+    }
+    req = mockRequest()
+    res = mockResponse()
+    const expected = { error: 'Bad Request: quantity should be positive.' }
+    await addTransaction(req, res)
+    expect(res.status).toHaveBeenCalledWith(400)
+    expect(res.json).toHaveBeenCalledWith(expected)
+  })
+
+  it ('should create a new transaction', async () => {
+    const mockRequest = () => {
+      const req = {
+        'body': {
+          'transaction_type_id': 1,
+          'user_id': 1,
+          'snack_id': 1,
+          'transaction_amount': 125,
+          'quantity': 1
+        }
+      }
+      return req
+    }
+    const mockResponse = () => {
+      const res = {}
+      res.status = jest.fn().mockReturnValue(res)
+      res.json = jest.fn().mockReturnValue(res)
+      return res
+    }
+    req = mockRequest()
+    res = mockResponse()
+    const expected = {
+      'transaction_id': 1,
+      'user_id': 1,
+      'transaction_type_id': 1,
+      'snack_name': 'KitKat',
+      'transaction_amount': 125,
+      'quantity': 1,
+      'payment_id': null,
+      'transaction_dtm': '2021-03-30T22:28:24.022Z'
+    }
+    await addTransaction(req, res)
+    expect(res.status).toHaveBeenCalledWith(201)
     expect(res.json).toHaveBeenCalledWith(expected)
   })
 })
