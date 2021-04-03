@@ -284,4 +284,93 @@ describe('PUT/ snacks', () => {
     expect(res.status).toHaveBeenCalledWith(200)
     expect(res.json).toHaveBeenCalledWith(expected)
   })
+
+  it('should change nullable fields in the snack to null', async () => {
+    const mockRequest = () => {
+      return {
+        body: {
+          order_threshold: 'null'
+        },
+        params: {
+          snack_id: 1
+        }
+      }
+    }
+    const mockResponse = () => {
+      const res = {}
+      res.status = jest.fn().mockReturnValue(res)
+      res.json = jest.fn().mockReturnValue(res)
+      return res
+    }
+    const req = mockRequest()
+    const res = mockResponse()
+    const expected = {
+      snack_id: 1,
+      snack_type_id: 1,
+      snack_name: 'TestSnack',
+      description: 'This is a test snack',
+      image_uri: 'https://testImage.ca/testSnack',
+      price: 400,
+      is_active: true,
+      order_threshold: null,
+      last_updated_dtm: '2021-04-02T07:22Z',
+      last_updated_by: 'Howard'
+    }
+    await putSnacks(req, res)
+    expect(res.status).toHaveBeenCalledWith(200)
+    expect(res.json).toHaveBeenCalledWith(expected)
+  })
+
+  it('should not change the snack_id', async () => {
+    const mockRequest = () => {
+      return {
+        body: {
+          snack_id: 23,
+          price: 66,
+          last_updated_by: 'HB'
+        },
+        params: {
+          snack_id: 1
+        }
+      }
+    }
+    const mockResponse = () => {
+      const res = {}
+      res.status = jest.fn().mockReturnValue(res)
+      res.json = jest.fn().mockReturnValue(res)
+      return res
+    }
+    const req = mockRequest()
+    const res = mockResponse()
+    const expected = { error: 'snack_id cannot be changed for snacks.' }
+    await putSnacks(req, res)
+    expect(res.status).toHaveBeenCalledWith(400)
+    expect(res.json).toHaveBeenCalledWith(expected)
+  })
+
+  it('should return error 404 if snack_id is not in the database', async () => {
+    const mockRequest = () => {
+      return {
+        body: {
+          price: 66,
+          last_updated_by: 'HB'
+        },
+        params: {
+          snack_id: 5
+        }
+      }
+    }
+    const mockResponse = () => {
+      const res = {}
+      res.status = jest.fn().mockReturnValue(res)
+      res.json = jest.fn().mockReturnValue(res)
+      return res
+    }
+    const req = mockRequest()
+    const res = mockResponse()
+    const expected = { error: 'snack_id is not found on the snack table.' }
+    await putSnacks(req, res)
+    expect(res.status).toHaveBeenCalledWith(404)
+    expect(res.json).toHaveBeenCalledWith(expected)
+  })
 })
