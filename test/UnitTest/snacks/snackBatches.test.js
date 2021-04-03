@@ -103,35 +103,28 @@ describe('POST/ snack_batches', () => {
 
 describe('PUT/ snack_batches', () => {
   beforeEach(async() => {
+    const prevVal = {
+      snack_batch_id: 1,
+      quantity: 1,
+      expiration_dtm: '2021-06-29T07:22Z'
+    }
     jest.spyOn(SnackBatches, 'findByPk').mockImplementation((snack_batch_id) => {
       if (snack_batch_id === 1) {
-        return Promise.resolve({
-          snack_batch_id: snack_batch_id
-        })
+        return Promise.resolve(prevVal)
       } else {
         return Promise.resolve(null)
       }
     })
 
     jest.spyOn(SnackBatches, 'update').mockImplementation((snack_batch, options) => {
-      let expiration_dtm
-      if (snack_batch.expiration_dtm === undefined || snack_batch.expiration_dtm === 'null') {
-        expiration_dtm = null
-      } else {
-        expiration_dtm = snack_batch.expiration_dtm
-      }
       const found = options.where.snack_batch_id === 1
       const result = [{
         dataValues: {
           snack_batch_id: 1,
           quantity: snack_batch.quantity,
-          expiration_dtm: expiration_dtm
+          expiration_dtm: snack_batch.expiration_dtm
         },
-        previousDataValues: {
-          snack_batch_id: 1,
-          quantity: 1,
-          expiration_dtm: null
-        },
+        previousDataValues: prevVal,
         _options: {
           isNewRecord: false,
           _schema: null,
@@ -141,6 +134,13 @@ describe('PUT/ snack_batches', () => {
         },
         isNewRecord: false
       }]
+      if (snack_batch.expiration_dtm === 'null') {
+        result[0].dataValues.expiration_dtm = null
+      } else if (snack_batch.expiration_dtm === undefined) {
+        result[0].dataValues.expiration_dtm = result[0].previousDataValues.expiration_dtm
+      } else if (snack_batch.quantity === undefined) {
+        result[0].dataValues.quantity = result[0].previousDataValues.quantity
+      }
       return Promise.resolve([found, result])
     })
   })
@@ -176,6 +176,168 @@ describe('PUT/ snack_batches', () => {
     }
     await putSnackBatches(req, res)
     expect(res.status).toHaveBeenCalledWith(200)
+    expect(res.json).toHaveBeenCalledWith(expected)
+  })
+
+  it('should change only one of the fields', async () => {
+    const mockRequest = () => {
+      return {
+        body: {
+          quantity: 14
+        },
+        params: {
+          snack_batch_id: 1
+        }
+      }
+    }
+    const mockResponse = () => {
+      const res = {}
+      res.status = jest.fn().mockReturnValue(res)
+      res.json = jest.fn().mockReturnValue(res)
+      return res
+    }
+    const req = mockRequest()
+    const res = mockResponse()
+    const expected = {
+      snack_batch_id: 1,
+      quantity: 14,
+      expiration_dtm: '2021-06-29T07:22Z'
+    }
+    await putSnackBatches(req, res)
+    expect(res.status).toHaveBeenCalledWith(200)
+    expect(res.json).toHaveBeenCalledWith(expected)
+  })
+
+  it('should be able to change nullable value to null', async () => {
+    const mockRequest = () => {
+      return {
+        body: {
+          expiration_dtm: 'null'
+        },
+        params: {
+          snack_batch_id: 1
+        }
+      }
+    }
+    const mockResponse = () => {
+      const res = {}
+      res.status = jest.fn().mockReturnValue(res)
+      res.json = jest.fn().mockReturnValue(res)
+      return res
+    }
+    const req = mockRequest()
+    const res = mockResponse()
+    const expected = {
+      snack_batch_id: 1,
+      quantity: 1,
+      expiration_dtm: null
+    }
+    await putSnackBatches(req, res)
+    expect(res.status).toHaveBeenCalledWith(200)
+    expect(res.json).toHaveBeenCalledWith(expected)
+  })
+
+  it('should return the previous value if the request body is empty', async () => {
+    const mockRequest = () => {
+      return {
+        body: {},
+        params: {
+          snack_batch_id: 1
+        }
+      }
+    }
+    const mockResponse = () => {
+      const res = {}
+      res.status = jest.fn().mockReturnValue(res)
+      res.json = jest.fn().mockReturnValue(res)
+      return res
+    }
+    const req = mockRequest()
+    const res = mockResponse()
+    const expected = {
+      snack_batch_id: 1,
+      quantity: 1,
+      expiration_dtm: '2021-06-29T07:22Z'
+    }
+    await putSnackBatches(req, res)
+    expect(res.status).toHaveBeenCalledWith(200)
+    expect(res.json).toHaveBeenCalledWith(expected)
+  })
+
+  it('should return an error 400 if request body includes snack_id', async () => {
+    const mockRequest = () => {
+      return {
+        body: {
+          snack_id: 34,
+          quantity: 20
+        },
+        params: {
+          snack_batch_id: 1
+        }
+      }
+    }
+    const mockResponse = () => {
+      const res = {}
+      res.status = jest.fn().mockReturnValue(res)
+      res.json = jest.fn().mockReturnValue(res)
+      return res
+    }
+    const req = mockRequest()
+    const res = mockResponse()
+    const expected = { error: 'snack_id cannot be changed for snack_batches.' }
+    await putSnackBatches(req, res)
+    expect(res.status).toHaveBeenCalledWith(400)
+    expect(res.json).toHaveBeenCalledWith(expected)
+  })
+
+  it('should return an error 400 if request body includes snack_batch_id', async () => {
+    const mockRequest = () => {
+      return {
+        body: {
+          snack_batch_id: 34,
+          quantity: 20
+        },
+        params: {
+          snack_batch_id: 1
+        }
+      }
+    }
+    const mockResponse = () => {
+      const res = {}
+      res.status = jest.fn().mockReturnValue(res)
+      res.json = jest.fn().mockReturnValue(res)
+      return res
+    }
+    const req = mockRequest()
+    const res = mockResponse()
+    const expected = { error: 'snack_batch_id cannot be changed for snack_batches.' }
+    await putSnackBatches(req, res)
+    expect(res.status).toHaveBeenCalledWith(400)
+    expect(res.json).toHaveBeenCalledWith(expected)
+  })
+
+  it('should return an error 404 if snack_batch_id cannot be found', async () => {
+    const mockRequest = () => {
+      return {
+        body: {
+          quantity: 20
+        },
+        params: {
+          snack_batch_id: 25
+        }
+      }
+    }
+    const mockResponse = () => {
+      const res = {}
+      res.status = jest.fn().mockReturnValue(res)
+      res.json = jest.fn().mockReturnValue(res)
+      return res
+    }
+    const req = mockRequest()
+    const res = mockResponse()
+    const expected = { error: 'snack_batch_id is not found on the snack_batch table.' }
+    await putSnackBatches(req, res)
+    expect(res.status).toHaveBeenCalledWith(404)
     expect(res.json).toHaveBeenCalledWith(expected)
   })
 })
