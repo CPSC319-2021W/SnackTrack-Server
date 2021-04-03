@@ -34,6 +34,9 @@ export const addSnack = async(req, res) => {
 export const addSnackBatches = async(req, res) => {
   try {
     const snackBatch = req.body
+    if (snackBatch.quantity <= 0) {
+      return res.status(400).json({ error: 'quantity must be greater than 0!' })
+    }
     const result = await SnackBatches.create(snackBatch)
     return res.status(201).json(result)
   } catch (err) {
@@ -73,15 +76,15 @@ export const putSnackBatches = async(req, res) => {
       return res.status(400).json({ error: 'snack_id cannot be changed for snack_batches.' })
     }
     if (snackBatch.snack_batch_id !== undefined) {
-      return res.status(400).json({ error: 'snack_batch_id cannot be changed for snack_batches' })
+      return res.status(400).json({ error: 'snack_batch_id cannot be changed for snack_batches.' })
     }
     if (snackBatch.expiration_dtm === 'null') {
       snackBatch.expiration_dtm = null
     }
     const [found, result] = await SnackBatches.update(snackBatch, { where: { snack_batch_id }, returning: true })
-    const [data] = result.map(elem => elem.get())
+    const data = result[0].dataValues
     if (!found) {
-      return res.status(404).json({ error: 'snack_batch_id is not found on the snack_batch table' })
+      return res.status(404).json({ error: 'snack_batch_id is not found on the snack_batch table.' })
     }
     return res.status(200).json(data)
   } catch (err) {
