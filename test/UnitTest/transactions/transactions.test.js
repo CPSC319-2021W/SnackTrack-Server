@@ -1,5 +1,5 @@
 import { db } from '../../../src/db/index.js'
-import { addTransaction, getPendingOrders, getPopularSnacks, getUserTransaction, getUserTransactions } from '../../../src/transaction/controller.js'
+import { addTransaction, getPendingOrders, getPopularSnacks, getUserTransaction, getUserTransactions, updateTransaction } from '../../../src/transaction/controller.js'
 import * as pagination from '../../../src/util/pagination.js'
 import { popularSnacks } from './popularSnacks.data.js'
 
@@ -632,6 +632,712 @@ describe ('POST /transactions', () => {
     }
     await addTransaction(req, res)
     expect(res.status).toHaveBeenCalledWith(201)
+    expect(res.json).toHaveBeenCalledWith(expected)
+  })
+})
+
+describe ('PUT /transactions/:transaction_id', () => {
+  let req, res, transaction
+  beforeAll (async () => {
+    const PURCHASE = 1
+    const CANCEL = 2
+    const PENDING = 3
+    const PENDING_CANCEL = 4
+    jest.spyOn(instance, 'transaction').mockImplementation(() => {
+      const transaction_id = req.params.transaction_id
+      if (transaction_id !== 1) {
+        return res.status(404).json({ error: 'transaction_id does not exist in the transactions table' })
+      }
+      const snack_name = transaction.snack_name
+      if (snack_name !== 'KitKat') {
+        return res.status(404).json({ error: 'snack with the snack_name does not exist in the snacks table' })
+      }
+      const from = transaction.transaction_type_id
+      const to = req.body.transaction_type_id
+      const handleNonNullPaymentId = (payment_id) => {
+        if (payment_id) throw Error('Bad Request: This transaction has been purchased.')
+      }
+      const allowed_condition = (from === PURCHASE && to === CANCEL)
+                             || (from === PENDING && to === PURCHASE)
+                             || (from === PENDING && to === PENDING_CANCEL)
+      if (from === to) {
+        return Promise.resolve(transaction)
+      } else if (allowed_condition) {
+        handleNonNullPaymentId(transaction.payment_id)
+      } else {
+        throw Error('Bad Request: This update is not allowed.')
+      }
+      transaction.transaction_type_id = to
+      return Promise.resolve(transaction)
+    })
+  })
+
+  afterAll (async () => jest.clearAllMocks())
+
+  it ('should reject with 404 - transaction_id not found', async () => {
+    const mockRequest = () => {
+      const req = {
+        'params': {
+          'transaction_id': 999
+        },
+        'body': {
+          'transaction_type_id': 2
+        }
+      }
+      return req
+    }
+    const mockResponse = () => {
+      const res = {}
+      res.status = jest.fn().mockReturnValue(res)
+      res.json = jest.fn().mockReturnValue(res)
+      return res
+    }
+    const mockTransaction = () => {
+      const transaction = {
+        'transaction_id': 999,
+        'user_id': 1,
+        'transaction_type_id': 1,
+        'snack_name': 'KitKat',
+        'transaction_amount': 125,
+        'quantity': 1,
+        'payment_id': null,
+        'transaction_dtm': '2021-03-30T22:28:24.022Z'
+      }
+      return transaction
+    }
+    req = mockRequest()
+    res = mockResponse()
+    transaction = mockTransaction()
+    const expected = { error: 'transaction_id does not exist in the transactions table' }
+    await updateTransaction(req, res)
+    expect(res.status).toHaveBeenCalledWith(404)
+    expect(res.json).toHaveBeenCalledWith(expected)
+  })
+
+  it ('should reject with 404 - snack not found', async () => {
+    const mockRequest = () => {
+      const req = {
+        'params': {
+          'transaction_id': 1
+        },
+        'body': {
+          'transaction_type_id': 2
+        }
+      }
+      return req
+    }
+    const mockResponse = () => {
+      const res = {}
+      res.status = jest.fn().mockReturnValue(res)
+      res.json = jest.fn().mockReturnValue(res)
+      return res
+    }
+    const mockTransaction = () => {
+      const transaction = {
+        'transaction_id': 1,
+        'user_id': 1,
+        'transaction_type_id': 1,
+        'snack_name': 'Expensive Frined!',
+        'transaction_amount': 125,
+        'quantity': 1,
+        'payment_id': null,
+        'transaction_dtm': '2021-03-30T22:28:24.022Z'
+      }
+      return transaction
+    }
+    req = mockRequest()
+    res = mockResponse()
+    transaction = mockTransaction()
+    const expected = { error: 'snack with the snack_name does not exist in the snacks table' }
+    await updateTransaction(req, res)
+    expect(res.status).toHaveBeenCalledWith(404)
+    expect(res.json).toHaveBeenCalledWith(expected)
+  })
+
+  it ('should reject with 400 - payment_id is not null', async () => {
+    const mockRequest = () => {
+      const req = {
+        'params': {
+          'transaction_id': 1
+        },
+        'body': {
+          'transaction_type_id': 2
+        }
+      }
+      return req
+    }
+    const mockResponse = () => {
+      const res = {}
+      res.status = jest.fn().mockReturnValue(res)
+      res.json = jest.fn().mockReturnValue(res)
+      return res
+    }
+    const mockTransaction = () => {
+      const transaction = {
+        'transaction_id': 1,
+        'user_id': 1,
+        'transaction_type_id': 1,
+        'snack_name': 'KitKat',
+        'transaction_amount': 125,
+        'quantity': 1,
+        'payment_id': 1,
+        'transaction_dtm': '2021-03-30T22:28:24.022Z'
+      }
+      return transaction
+    }
+    req = mockRequest()
+    res = mockResponse()
+    transaction = mockTransaction()
+    const expected = { error: 'Bad Request: This transaction has been purchased.' }
+    await updateTransaction(req, res)
+    expect(res.status).toHaveBeenCalledWith(400)
+    expect(res.json).toHaveBeenCalledWith(expected)
+  })
+
+  it ('should reject with 400 - unallowed update: PURCHASE -> PENDING', async () => {
+    const mockRequest = () => {
+      const req = {
+        'params': {
+          'transaction_id': 1
+        },
+        'body': {
+          'transaction_type_id': 3
+        }
+      }
+      return req
+    }
+    const mockResponse = () => {
+      const res = {}
+      res.status = jest.fn().mockReturnValue(res)
+      res.json = jest.fn().mockReturnValue(res)
+      return res
+    }
+    const mockTransaction = () => {
+      const transaction = {
+        'transaction_id': 1,
+        'user_id': 1,
+        'transaction_type_id': 1,
+        'snack_name': 'KitKat',
+        'transaction_amount': 125,
+        'quantity': 1,
+        'payment_id': null,
+        'transaction_dtm': '2021-03-30T22:28:24.022Z'
+      }
+      return transaction
+    }
+    req = mockRequest()
+    res = mockResponse()
+    transaction = mockTransaction()
+    const expected = { error: 'Bad Request: This update is not allowed.' }
+    await updateTransaction(req, res)
+    expect(res.status).toHaveBeenCalledWith(400)
+    expect(res.json).toHaveBeenCalledWith(expected)
+  })
+
+  it ('should reject with 400 - unallowed update: PURCHASE -> PENDING_CANCEL', async () => {
+    const mockRequest = () => {
+      const req = {
+        'params': {
+          'transaction_id': 1
+        },
+        'body': {
+          'transaction_type_id': 4
+        }
+      }
+      return req
+    }
+    const mockResponse = () => {
+      const res = {}
+      res.status = jest.fn().mockReturnValue(res)
+      res.json = jest.fn().mockReturnValue(res)
+      return res
+    }
+    const mockTransaction = () => {
+      const transaction = {
+        'transaction_id': 1,
+        'user_id': 1,
+        'transaction_type_id': 1,
+        'snack_name': 'KitKat',
+        'transaction_amount': 125,
+        'quantity': 1,
+        'payment_id': null,
+        'transaction_dtm': '2021-03-30T22:28:24.022Z'
+      }
+      return transaction
+    }
+    req = mockRequest()
+    res = mockResponse()
+    transaction = mockTransaction()
+    const expected = { error: 'Bad Request: This update is not allowed.' }
+    await updateTransaction(req, res)
+    expect(res.status).toHaveBeenCalledWith(400)
+    expect(res.json).toHaveBeenCalledWith(expected)
+  })
+
+  it ('should reject with 400 - unallowed update: CANCEL -> PURCHASE', async () => {
+    const mockRequest = () => {
+      const req = {
+        'params': {
+          'transaction_id': 1
+        },
+        'body': {
+          'transaction_type_id': 1
+        }
+      }
+      return req
+    }
+    const mockResponse = () => {
+      const res = {}
+      res.status = jest.fn().mockReturnValue(res)
+      res.json = jest.fn().mockReturnValue(res)
+      return res
+    }
+    const mockTransaction = () => {
+      const transaction = {
+        'transaction_id': 1,
+        'user_id': 1,
+        'transaction_type_id': 2,
+        'snack_name': 'KitKat',
+        'transaction_amount': 125,
+        'quantity': 1,
+        'payment_id': null,
+        'transaction_dtm': '2021-03-30T22:28:24.022Z'
+      }
+      return transaction
+    }
+    req = mockRequest()
+    res = mockResponse()
+    transaction = mockTransaction()
+    const expected = { error: 'Bad Request: This update is not allowed.' }
+    await updateTransaction(req, res)
+    expect(res.status).toHaveBeenCalledWith(400)
+    expect(res.json).toHaveBeenCalledWith(expected)
+  })
+
+  it ('should reject with 400 - unallowed update: CANCEL -> PENDING', async () => {
+    const mockRequest = () => {
+      const req = {
+        'params': {
+          'transaction_id': 1
+        },
+        'body': {
+          'transaction_type_id': 3
+        }
+      }
+      return req
+    }
+    const mockResponse = () => {
+      const res = {}
+      res.status = jest.fn().mockReturnValue(res)
+      res.json = jest.fn().mockReturnValue(res)
+      return res
+    }
+    const mockTransaction = () => {
+      const transaction = {
+        'transaction_id': 1,
+        'user_id': 1,
+        'transaction_type_id': 2,
+        'snack_name': 'KitKat',
+        'transaction_amount': 125,
+        'quantity': 1,
+        'payment_id': null,
+        'transaction_dtm': '2021-03-30T22:28:24.022Z'
+      }
+      return transaction
+    }
+    req = mockRequest()
+    res = mockResponse()
+    transaction = mockTransaction()
+    const expected = { error: 'Bad Request: This update is not allowed.' }
+    await updateTransaction(req, res)
+    expect(res.status).toHaveBeenCalledWith(400)
+    expect(res.json).toHaveBeenCalledWith(expected)
+  })
+
+  it ('should reject with 400 - unallowed update: CANCEL -> PENDING_CANCEL', async () => {
+    const mockRequest = () => {
+      const req = {
+        'params': {
+          'transaction_id': 1
+        },
+        'body': {
+          'transaction_type_id': 4
+        }
+      }
+      return req
+    }
+    const mockResponse = () => {
+      const res = {}
+      res.status = jest.fn().mockReturnValue(res)
+      res.json = jest.fn().mockReturnValue(res)
+      return res
+    }
+    const mockTransaction = () => {
+      const transaction = {
+        'transaction_id': 1,
+        'user_id': 1,
+        'transaction_type_id': 2,
+        'snack_name': 'KitKat',
+        'transaction_amount': 125,
+        'quantity': 1,
+        'payment_id': null,
+        'transaction_dtm': '2021-03-30T22:28:24.022Z'
+      }
+      return transaction
+    }
+    req = mockRequest()
+    res = mockResponse()
+    transaction = mockTransaction()
+    const expected = { error: 'Bad Request: This update is not allowed.' }
+    await updateTransaction(req, res)
+    expect(res.status).toHaveBeenCalledWith(400)
+    expect(res.json).toHaveBeenCalledWith(expected)
+  })
+
+  it ('should reject with 400 - unallowed update: PENDING -> CANCEL', async () => {
+    const mockRequest = () => {
+      const req = {
+        'params': {
+          'transaction_id': 1
+        },
+        'body': {
+          'transaction_type_id': 2
+        }
+      }
+      return req
+    }
+    const mockResponse = () => {
+      const res = {}
+      res.status = jest.fn().mockReturnValue(res)
+      res.json = jest.fn().mockReturnValue(res)
+      return res
+    }
+    const mockTransaction = () => {
+      const transaction = {
+        'transaction_id': 1,
+        'user_id': 1,
+        'transaction_type_id': 3,
+        'snack_name': 'KitKat',
+        'transaction_amount': 125,
+        'quantity': 1,
+        'payment_id': null,
+        'transaction_dtm': '2021-03-30T22:28:24.022Z'
+      }
+      return transaction
+    }
+    req = mockRequest()
+    res = mockResponse()
+    transaction = mockTransaction()
+    const expected = { error: 'Bad Request: This update is not allowed.' }
+    await updateTransaction(req, res)
+    expect(res.status).toHaveBeenCalledWith(400)
+    expect(res.json).toHaveBeenCalledWith(expected)
+  })
+
+  it ('should reject with 400 - unallowed update: PENDING_CANCEL -> PURCHASE', async () => {
+    const mockRequest = () => {
+      const req = {
+        'params': {
+          'transaction_id': 1
+        },
+        'body': {
+          'transaction_type_id': 1
+        }
+      }
+      return req
+    }
+    const mockResponse = () => {
+      const res = {}
+      res.status = jest.fn().mockReturnValue(res)
+      res.json = jest.fn().mockReturnValue(res)
+      return res
+    }
+    const mockTransaction = () => {
+      const transaction = {
+        'transaction_id': 1,
+        'user_id': 1,
+        'transaction_type_id': 4,
+        'snack_name': 'KitKat',
+        'transaction_amount': 125,
+        'quantity': 1,
+        'payment_id': null,
+        'transaction_dtm': '2021-03-30T22:28:24.022Z'
+      }
+      return transaction
+    }
+    req = mockRequest()
+    res = mockResponse()
+    transaction = mockTransaction()
+    const expected = { error: 'Bad Request: This update is not allowed.' }
+    await updateTransaction(req, res)
+    expect(res.status).toHaveBeenCalledWith(400)
+    expect(res.json).toHaveBeenCalledWith(expected)
+  })
+
+  it ('should reject with 400 - unallowed update: PENDING_CANCEL -> CANCEL', async () => {
+    const mockRequest = () => {
+      const req = {
+        'params': {
+          'transaction_id': 1
+        },
+        'body': {
+          'transaction_type_id': 2
+        }
+      }
+      return req
+    }
+    const mockResponse = () => {
+      const res = {}
+      res.status = jest.fn().mockReturnValue(res)
+      res.json = jest.fn().mockReturnValue(res)
+      return res
+    }
+    const mockTransaction = () => {
+      const transaction = {
+        'transaction_id': 1,
+        'user_id': 1,
+        'transaction_type_id': 4,
+        'snack_name': 'KitKat',
+        'transaction_amount': 125,
+        'quantity': 1,
+        'payment_id': null,
+        'transaction_dtm': '2021-03-30T22:28:24.022Z'
+      }
+      return transaction
+    }
+    req = mockRequest()
+    res = mockResponse()
+    transaction = mockTransaction()
+    const expected = { error: 'Bad Request: This update is not allowed.' }
+    await updateTransaction(req, res)
+    expect(res.status).toHaveBeenCalledWith(400)
+    expect(res.json).toHaveBeenCalledWith(expected)
+  })
+
+  it ('should reject with 400 - unallowed update: PENDING_CANCEL -> PENDING', async () => {
+    const mockRequest = () => {
+      const req = {
+        'params': {
+          'transaction_id': 1
+        },
+        'body': {
+          'transaction_type_id': 3
+        }
+      }
+      return req
+    }
+    const mockResponse = () => {
+      const res = {}
+      res.status = jest.fn().mockReturnValue(res)
+      res.json = jest.fn().mockReturnValue(res)
+      return res
+    }
+    const mockTransaction = () => {
+      const transaction = {
+        'transaction_id': 1,
+        'user_id': 1,
+        'transaction_type_id': 4,
+        'snack_name': 'KitKat',
+        'transaction_amount': 125,
+        'quantity': 1,
+        'payment_id': null,
+        'transaction_dtm': '2021-03-30T22:28:24.022Z'
+      }
+      return transaction
+    }
+    req = mockRequest()
+    res = mockResponse()
+    transaction = mockTransaction()
+    const expected = { error: 'Bad Request: This update is not allowed.' }
+    await updateTransaction(req, res)
+    expect(res.status).toHaveBeenCalledWith(400)
+    expect(res.json).toHaveBeenCalledWith(expected)
+  })
+
+  it ('should update transaction information - PURCHASE -> CANCEL', async () => {
+    const mockRequest = () => {
+      const req = {
+        'params': {
+          'transaction_id': 1
+        },
+        'body': {
+          'transaction_type_id': 2
+        }
+      }
+      return req
+    }
+    const mockResponse = () => {
+      const res = {}
+      res.status = jest.fn().mockReturnValue(res)
+      res.json = jest.fn().mockReturnValue(res)
+      return res
+    }
+    const mockTransaction = () => {
+      const transaction = {
+        'transaction_id': 1,
+        'user_id': 1,
+        'transaction_type_id': 1,
+        'snack_name': 'KitKat',
+        'transaction_amount': 125,
+        'quantity': 1,
+        'payment_id': null,
+        'transaction_dtm': '2021-03-30T22:28:24.022Z'
+      }
+      return transaction
+    }
+    req = mockRequest()
+    res = mockResponse()
+    transaction = mockTransaction()
+    const expected = {
+      'transaction_id': 1,
+      'user_id': 1,
+      'transaction_type_id': 2,
+      'snack_name': 'KitKat',
+      'transaction_amount': 125,
+      'quantity': 1,
+      'payment_id': null,
+      'transaction_dtm': '2021-03-30T22:28:24.022Z'
+    }
+    await updateTransaction(req, res)
+    expect(res.status).toHaveBeenCalledWith(200)
+    expect(res.json).toHaveBeenCalledWith(expected)
+  })
+
+  it ('should update transaction information - PENDING -> PURCHASE', async () => {
+    const mockRequest = () => {
+      const req = {
+        'params': {
+          'transaction_id': 1
+        },
+        'body': {
+          'transaction_type_id': 1
+        }
+      }
+      return req
+    }
+    const mockResponse = () => {
+      const res = {}
+      res.status = jest.fn().mockReturnValue(res)
+      res.json = jest.fn().mockReturnValue(res)
+      return res
+    }
+    const mockTransaction = () => {
+      const transaction = {
+        'transaction_id': 1,
+        'user_id': 1,
+        'transaction_type_id': 3,
+        'snack_name': 'KitKat',
+        'transaction_amount': 125,
+        'quantity': 1,
+        'payment_id': null,
+        'transaction_dtm': '2021-03-30T22:28:24.022Z'
+      }
+      return transaction
+    }
+    req = mockRequest()
+    res = mockResponse()
+    transaction = mockTransaction()
+    const expected = {
+      'transaction_id': 1,
+      'user_id': 1,
+      'transaction_type_id': 1,
+      'snack_name': 'KitKat',
+      'transaction_amount': 125,
+      'quantity': 1,
+      'payment_id': null,
+      'transaction_dtm': '2021-03-30T22:28:24.022Z'
+    }
+    await updateTransaction(req, res)
+    expect(res.status).toHaveBeenCalledWith(200)
+    expect(res.json).toHaveBeenCalledWith(expected)
+  })
+
+  it ('should update transaction information - PENDING -> PENDING_CANCEL', async () => {
+    const mockRequest = () => {
+      const req = {
+        'params': {
+          'transaction_id': 1
+        },
+        'body': {
+          'transaction_type_id': 4
+        }
+      }
+      return req
+    }
+    const mockResponse = () => {
+      const res = {}
+      res.status = jest.fn().mockReturnValue(res)
+      res.json = jest.fn().mockReturnValue(res)
+      return res
+    }
+    const mockTransaction = () => {
+      const transaction = {
+        'transaction_id': 1,
+        'user_id': 1,
+        'transaction_type_id': 3,
+        'snack_name': 'KitKat',
+        'transaction_amount': 125,
+        'quantity': 1,
+        'payment_id': null,
+        'transaction_dtm': '2021-03-30T22:28:24.022Z'
+      }
+      return transaction
+    }
+    req = mockRequest()
+    res = mockResponse()
+    transaction = mockTransaction()
+    const expected = {
+      'transaction_id': 1,
+      'user_id': 1,
+      'transaction_type_id': 4,
+      'snack_name': 'KitKat',
+      'transaction_amount': 125,
+      'quantity': 1,
+      'payment_id': null,
+      'transaction_dtm': '2021-03-30T22:28:24.022Z'
+    }
+    await updateTransaction(req, res)
+    expect(res.status).toHaveBeenCalledWith(200)
+    expect(res.json).toHaveBeenCalledWith(expected)
+  })
+
+  it ('should be valid request but no updates - from == to', async () => {
+    const mockRequest = () => {
+      const req = {
+        'params': {
+          'transaction_id': 1
+        },
+        'body': {
+          'transaction_type_id': 1
+        }
+      }
+      return req
+    }
+    const mockResponse = () => {
+      const res = {}
+      res.status = jest.fn().mockReturnValue(res)
+      res.json = jest.fn().mockReturnValue(res)
+      return res
+    }
+    const mockTransaction = () => {
+      const transaction = {
+        'transaction_id': 1,
+        'user_id': 1,
+        'transaction_type_id': 1,
+        'snack_name': 'KitKat',
+        'transaction_amount': 125,
+        'quantity': 1,
+        'payment_id': null,
+        'transaction_dtm': '2021-03-30T22:28:24.022Z'
+      }
+      return transaction
+    }
+    req = mockRequest()
+    res = mockResponse()
+    transaction = mockTransaction()
+    const expected = transaction
+    await updateTransaction(req, res)
+    expect(res.status).toHaveBeenCalledWith(200)
     expect(res.json).toHaveBeenCalledWith(expected)
   })
 })
