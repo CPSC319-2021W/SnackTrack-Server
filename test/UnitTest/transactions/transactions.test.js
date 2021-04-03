@@ -1,6 +1,7 @@
 import { db } from '../../../src/db/index.js'
-import { getPendingOrders, getUserTransaction, getUserTransactions } from '../../../src/transaction/controller.js'
+import { getPendingOrders, getPopularSnacks, getUserTransaction, getUserTransactions } from '../../../src/transaction/controller.js'
 import * as pagination from '../../../src/util/pagination.js'
+import { popularSnacks } from './popularSnacks.data.js'
 
 const Users = db.users
 const Transactions = db.transactions
@@ -278,6 +279,179 @@ describe ('GET /users/:user_id/pendingOrders', () => {
       'current_page': 0
     }
     await getPendingOrders(req, res)
+    expect(res.status).toHaveBeenCalledWith(200)
+    expect(res.json).toHaveBeenCalledWith(expected)
+  })
+})
+
+describe ('GET /transactions (GET popularSnacks)', () => {
+  const convertToMapArray = (snacks) => {
+    const result = []
+    for (const snack of snacks) {
+      const m = new Map()
+      m.set('snack_name', snack.snack_name)
+      m.set('total_quantity', snack.total_quantity)
+      result.push(m)
+    }
+    return result
+  }
+
+  beforeAll (async () => {
+    jest.spyOn(Transactions, 'findAll').mockImplementation(() => {
+      const result = convertToMapArray(popularSnacks)
+      return Promise.resolve(result)
+    })
+  })
+
+  afterAll (async () => jest.clearAllMocks())
+
+  it ('should reject with 400 - start_date is null', async () => {
+    const mockRequest = () => {
+      const req = {
+        'query': {
+          'start_date': null,
+          'end_date': '2021-03-22',
+          'transaction_type_id': 1,
+          'limit': 5
+        }
+      }
+      return req
+    }
+    const mockResponse = () => {
+      const res = {}
+      res.status = jest.fn().mockReturnValue(res)
+      res.json = jest.fn().mockReturnValue(res)
+      return res
+    }
+    const req = mockRequest()
+    const res = mockResponse()
+    const expected = { error: 'Bad Request: invalid query' }
+    await getPopularSnacks(req, res)
+    expect(res.status).toHaveBeenCalledWith(400)
+    expect(res.json).toHaveBeenCalledWith(expected) 
+  })
+
+  it ('should reject with 400 - end_date is null', async () => {
+    const mockRequest = () => {
+      const req = {
+        'query': {
+          'start_date': '2021-03-11',
+          'end_date': null,
+          'transaction_type_id': 1,
+          'limit': 5
+        }
+      }
+      return req
+    }
+    const mockResponse = () => {
+      const res = {}
+      res.status = jest.fn().mockReturnValue(res)
+      res.json = jest.fn().mockReturnValue(res)
+      return res
+    }
+    const req = mockRequest()
+    const res = mockResponse()
+    const expected = { error: 'Bad Request: invalid query' }
+    await getPopularSnacks(req, res)
+    expect(res.status).toHaveBeenCalledWith(400)
+    expect(res.json).toHaveBeenCalledWith(expected) 
+  })
+
+  it ('should reject with 400 - transaction_type_id is null', async () => {
+    const mockRequest = () => {
+      const req = {
+        'query': {
+          'start_date': '2021-03-11',
+          'end_date': '2021-03-22',
+          'transaction_type_id': null,
+          'limit': 5
+        }
+      }
+      return req
+    }
+    const mockResponse = () => {
+      const res = {}
+      res.status = jest.fn().mockReturnValue(res)
+      res.json = jest.fn().mockReturnValue(res)
+      return res
+    }
+    const req = mockRequest()
+    const res = mockResponse()
+    const expected = { error: 'Bad Request: invalid query' }
+    await getPopularSnacks(req, res)
+    expect(res.status).toHaveBeenCalledWith(400)
+    expect(res.json).toHaveBeenCalledWith(expected) 
+  })
+
+  it ('should reject with 400 - limit is null', async () => {
+    const mockRequest = () => {
+      const req = {
+        'query': {
+          'start_date': null,
+          'end_date': '2021-03-22',
+          'transaction_type_id': 1,
+          'limit': null
+        }
+      }
+      return req
+    }
+    const mockResponse = () => {
+      const res = {}
+      res.status = jest.fn().mockReturnValue(res)
+      res.json = jest.fn().mockReturnValue(res)
+      return res
+    }
+    const req = mockRequest()
+    const res = mockResponse()
+    const expected = { error: 'Bad Request: invalid query' }
+    await getPopularSnacks(req, res)
+    expect(res.status).toHaveBeenCalledWith(400)
+    expect(res.json).toHaveBeenCalledWith(expected) 
+  })
+
+  it ('should get popular snacks', async () => {
+    const mockRequest = () => {
+      const req = {
+        'query': {
+          'start_date': '2021-03-11',
+          'end_date': '2021-03-22',
+          'transaction_type_id': 1,
+          'limit': 5
+        }
+      }
+      return req
+    }
+    const mockResponse = () => {
+      const res = {}
+      res.status = jest.fn().mockReturnValue(res)
+      res.json = jest.fn().mockReturnValue(res)
+      return res
+    }
+    const req = mockRequest()
+    const res = mockResponse()
+    const expected = convertToMapArray([
+      {
+        'snack_name': 'The Marshmallow that Bob Left On The Table Last Week ',
+        'total_quantity': '1118'
+      },
+      {
+        'snack_name': 'KitKat',
+        'total_quantity': '1021'
+      },
+      {
+        'snack_name': "Lay's",
+        'total_quantity': '1000'
+      },
+      {
+        'snack_name': 'Tomato',
+        'total_quantity': '997'
+      },
+      {
+        'snack_name': "M&M's",
+        'total_quantity': '614'
+      }
+    ])
+    await getPopularSnacks(req, res)
     expect(res.status).toHaveBeenCalledWith(200)
     expect(res.json).toHaveBeenCalledWith(expected)
   })
