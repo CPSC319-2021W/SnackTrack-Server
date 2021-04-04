@@ -18,10 +18,15 @@ const instance = db.dbInstance
 export const updateTransaction = async (req, res) => {
   try {
     const result = await instance.transaction(async (t) => {
-      const transactionId = req.params.transaction_id
-      const transaction = await Transactions.findByPk(transactionId)
+      const transaction_id = req.params.transaction_id
+      const transaction = await Transactions.findByPk(transaction_id)
       if (!transaction) {
         return res.status(404).json({ error: 'transaction_id does not exist in the transactions table' })
+      }
+      const user_id = transaction.user_id
+      const { user_id: currUserId, is_admin } = req.user
+      if (!is_admin && parseInt(user_id) !== currUserId) {
+        return res.status(403).json({ error: 'Not authorized.' })
       }
       const snack_name = transaction.snack_name
       const snack = await Snacks.findOne({ where: { snack_name } })
@@ -31,7 +36,6 @@ export const updateTransaction = async (req, res) => {
       const from = transaction.transaction_type_id
       const to = req.body.transaction_type_id
       const balance = transaction.transaction_amount
-      const user_id = transaction.user_id
       const selector = { where: { user_id }, transaction: t }
       const handleNonNullPaymentId = (payment_id) => {
         if (payment_id) throw Error('Bad Request: This transaction has been purchased.')
