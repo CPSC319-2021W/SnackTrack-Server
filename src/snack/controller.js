@@ -98,7 +98,7 @@ export const getSnacks = async(req, res) => {
     const is_active = req.query.active !== 'false'
     const where = isFetchAll ? {} : { is_active }
     const data = await Snacks.findAll({
-      where, order: [['snack_type_id', 'ASC']]
+      where, order: [['snack_type_id', 'ASC'], ['snack_id', 'ASC']]
     })
     const snacks = await Promise.all(data.map(snack => addQuantityFromBatch(snack)))
     return res.status(200).json({ snacks })
