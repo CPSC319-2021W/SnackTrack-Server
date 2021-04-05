@@ -1,7 +1,6 @@
-import { db } from '../../../src/db/index.js'
+import { db, disconnect } from '../../../src/db/index.js'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, it, jest } from '@jest/globals'
 import { addSnack, putSnacks, getSnacks } from '../../../src/snack/controller.js'
-import * as controller from '../../../src/snack/controller.js'
 
 const Snacks = db.snacks
 const instance = db.dbInstance
@@ -377,109 +376,59 @@ describe('PUT/ snacks', () => {
 })
 
 describe('GET/snacks', () => {
-  beforeAll(async () => {
-    jest.spyOn(controller, 'addQuantityFromBatch').mockImplementation((snack) => {
-      if (snack.snack_id === 1) {
-        snack.quantity = 250
-      } else {
-        snack.quantity = 0
-      }
-      return Promise.resolve(snack)
-    })
-
+  const testSnackIDs = [37, 39, 107]
+  beforeEach(async () => {
     jest.spyOn(Snacks, 'findAll').mockImplementation((options) => {
+      const snack1 = Snacks.build({
+        snack_id: testSnackIDs[0],
+        snack_name: 'Hi-Chew',
+        description: 'Sensationally chewy fruit candy!',
+        image_uri: 'https://i.imgur.com/zbp518q.png',
+        price: 200,
+        is_active: true,
+        order_threshold: 10,
+        last_updated_dtm: '2021-03-14T20:11:18.876Z',
+        last_updated_by: 'JustinWong',
+        snack_type_id: 2
+      })
+      const snack2 = Snacks.build({
+        snack_id: testSnackIDs[1],
+        snack_name: 'Chocolate Chip Cookie',
+        description: "Dad's Oatmeal Chocolate Chip cookie.",
+        image_uri: 'https://i.imgur.com/Huci6Tq.png',
+        price: 50,
+        is_active: false,
+        order_threshold: 10,
+        last_updated_dtm: '2021-03-15T00:23:39.678Z',
+        last_updated_by: 'JustinWong',
+        snack_type_id: 4
+      })
+      const snack3 = Snacks.build({
+        snack_id: testSnackIDs[2],
+        snack_name: 'Reese',
+        description: 'Reese Peanut Buttercups',
+        image_uri: 'https://i.ibb.co/0X6pHB6/blob.png',
+        price: 125,
+        is_active: true,
+        order_threshold: null,
+        last_updated_dtm: '2021-04-02T23:22:35.830Z',
+        last_updated_by: 'JustinWong',
+        snack_type_id: 1
+      })
       if (Object.keys(options.where).length === 0) {
-        return Promise.resolve({
-          snacks: [
-            {
-              snack_id: 22,
-              snack_name: 'KitKat - Wasabi Flavour',
-              description: 'KitKat in wasabi flavour! Wow',
-              image_uri: 'https://testimg.com/kitkat',
-              price: 125,
-              is_active: true,
-              order_threshold: 10,
-              last_updated_dtm: '2021-04-04T01:38:43.657Z',
-              last_updated_by: 'HyesunAn',
-              snack_type_id: 1
-            },
-            {
-              snack_id: 107,
-              snack_name: 'Reese',
-              description: 'Reese Peanut Buttercups',
-              image_uri: 'https://i.ibb.co/0X6pHB6/blob.png',
-              price: 125,
-              is_active: true,
-              order_threshold: null,
-              last_updated_dtm: '2021-04-02T23:22:35.830Z',
-              last_updated_by: 'JustinWong',
-              snack_type_id: 1
-            },
-            {
-              snack_id: 76,
-              snack_name: 'High End Steak Cubes',
-              description: 'A5 Miyazaki Wagyu Ribeye Steak Cubes. Imported from Japan.',
-              image_uri: 'https://Wagyu.img.com',
-              price: 2500,
-              is_active: true,
-              order_threshold: null,
-              last_updated_dtm: '2021-04-01T21:35:39.920Z',
-              last_updated_by: 'JustinWong',
-              snack_type_id: 7
-            }
-          ]
-        })
+        return Promise.resolve([snack1, snack2, snack3])
       } else if (options.where.is_active === true) {
-        return Promise.resolve({
-          snacks: [
-            {
-              snack_id: 22,
-              snack_name: 'KitKat - Wasabi Flavour',
-              description: 'KitKat in wasabi flavour! Wow',
-              image_uri: 'https://testimg.com/kitkat',
-              price: 125,
-              is_active: true,
-              order_threshold: 10,
-              last_updated_dtm: '2021-04-04T01:38:43.657Z',
-              last_updated_by: 'HyesunAn',
-              snack_type_id: 1
-            },
-            {
-              snack_id: 76,
-              snack_name: 'High End Steak Cubes',
-              description: 'A5 Miyazaki Wagyu Ribeye Steak Cubes. Imported from Japan.',
-              image_uri: 'https://Wagyu.img.com',
-              price: 2500,
-              is_active: true,
-              order_threshold: null,
-              last_updated_dtm: '2021-04-01T21:35:39.920Z',
-              last_updated_by: 'JustinWong',
-              snack_type_id: 7
-            }
-          ]
-        })
+        return Promise.resolve([snack1, snack3])
       } else if (options.where.is_active === false) {
-        return Promise.resolve({
-          snacks: [
-            {
-              snack_id: 107,
-              snack_name: 'Reese',
-              description: 'Reese Peanut Buttercups',
-              image_uri: 'https://i.ibb.co/0X6pHB6/blob.png',
-              price: 125,
-              is_active: false,
-              order_threshold: null,
-              last_updated_dtm: '2021-04-02T23:22:35.830Z',
-              last_updated_by: 'JustinWong',
-              snack_type_id: 1
-            }
-          ]
-        })
+        return Promise.resolve([snack2])
       }
     })
   })
 
-  afterAll (async () => jest.clearAllMocks())
+  afterAll (async () => {
+    jest.clearAllMocks()
+    await disconnect()
+  })
 
   it('should get all the snacks', async () => {
     const mockRequest = () => {
@@ -496,51 +445,123 @@ describe('GET/snacks', () => {
     }
     const req = mockRequest()
     const res = mockResponse()
-    const expected = {
-      snacks: [
-        {
-          quantity: 250,
-          snack_id: 22,
-          snack_name: 'KitKat - Wasabi Flavour',
-          description: 'KitKat in wasabi flavour! Wow',
-          image_uri: 'https://testimg.com/kitkat',
-          price: 125,
-          is_active: true,
-          order_threshold: 10,
-          last_updated_dtm: '2021-04-04T01:38:43.657Z',
-          last_updated_by: 'HyesunAn',
-          snack_type_id: 1
-        },
-        {
-          quantity: 0,
-          snack_id: 107,
-          snack_name: 'Reese',
-          description: 'Reese Peanut Buttercups',
-          image_uri: 'https://i.ibb.co/0X6pHB6/blob.png',
-          price: 125,
-          is_active: true,
-          order_threshold: null,
-          last_updated_dtm: '2021-04-02T23:22:35.830Z',
-          last_updated_by: 'JustinWong',
-          snack_type_id: 1
-        },
-        {
-          quantity: 0,
-          snack_id: 76,
-          snack_name: 'High End Steak Cubes',
-          description: 'A5 Miyazaki Wagyu Ribeye Steak Cubes. Imported from Japan.',
-          image_uri: 'https://Wagyu.img.com',
-          price: 2500,
-          is_active: true,
-          order_threshold: null,
-          last_updated_dtm: '2021-04-01T21:35:39.920Z',
-          last_updated_by: 'JustinWong',
-          snack_type_id: 7
-        }
-      ]
-    }
     await getSnacks(req, res)
+
+    jest.restoreAllMocks()
+
+    let snack1 = await Snacks.findByPk(testSnackIDs[0])
+    let snack2 = await Snacks.findByPk(testSnackIDs[1])
+    let snack3 = await Snacks.findByPk(testSnackIDs[2])
+    snack1 = snack1.toJSON()
+    snack2 = snack2.toJSON()
+    snack3 = snack3.toJSON()
+    snack1.quantity = 7
+    snack2.quantity = 0
+    snack3.quantity = 0
+    const expected = {
+      snacks: [snack1, snack2, snack3]
+    }
+    expect(res.status).toHaveBeenCalledWith(200)
+    expect(res.json).toHaveBeenCalledWith(expected)
+  })
+
+  it('should get all the active snacks by querying active = true', async () => {
+    const mockRequest = () => {
+      return {
+        body: {},
+        query: {
+          active: 'true'
+        }
+      }
+    }
+    const mockResponse = () => {
+      const res = {}
+      res.status = jest.fn().mockReturnValue(res)
+      res.json = jest.fn().mockReturnValue(res)
+      return res
+    }
+    const req = mockRequest()
+    const res = mockResponse()
+    await getSnacks(req, res)
+
+    jest.restoreAllMocks()
+
+    let snack1 = await Snacks.findByPk(testSnackIDs[0])
+    let snack3 = await Snacks.findByPk(testSnackIDs[2])
+    snack1 = snack1.toJSON()
+    snack3 = snack3.toJSON()
+    snack1.quantity = 7
+    snack3.quantity = 0
+    const expected = {
+      snacks: [snack1, snack3]
+    }
+    expect(res.status).toHaveBeenCalledWith(200)
+    expect(res.json).toHaveBeenCalledWith(expected)
+  })
+
+  it('should get all the active snacks by querying active = randomStrings', async () => {
+    const mockRequest = () => {
+      return {
+        body: {},
+        query: {
+          active: 'blah'
+        }
+      }
+    }
+    const mockResponse = () => {
+      const res = {}
+      res.status = jest.fn().mockReturnValue(res)
+      res.json = jest.fn().mockReturnValue(res)
+      return res
+    }
+    const req = mockRequest()
+    const res = mockResponse()
+    await getSnacks(req, res)
+
+    jest.restoreAllMocks()
+
+    let snack1 = await Snacks.findByPk(testSnackIDs[0])
+    let snack3 = await Snacks.findByPk(testSnackIDs[2])
+    snack1 = snack1.toJSON()
+    snack3 = snack3.toJSON()
+    snack1.quantity = 7
+    snack3.quantity = 0
+    const expected = {
+      snacks: [snack1, snack3]
+    }
+    expect(res.status).toHaveBeenCalledWith(200)
+    expect(res.json).toHaveBeenCalledWith(expected)
+  })
+
+  it('should get all the inactive snacks', async () => {
+    const mockRequest = () => {
+      return {
+        body: {},
+        query: {
+          active: 'false'
+        }
+      }
+    }
+    const mockResponse = () => {
+      const res = {}
+      res.status = jest.fn().mockReturnValue(res)
+      res.json = jest.fn().mockReturnValue(res)
+      return res
+    }
+    const req = mockRequest()
+    const res = mockResponse()
+    await getSnacks(req, res)
+
+    jest.restoreAllMocks()
+
+    let snack2 = await Snacks.findByPk(testSnackIDs[1])
+    snack2 = snack2.toJSON()
+    snack2.quantity = 0
+    const expected = {
+      snacks: [snack2]
+    }
     expect(res.status).toHaveBeenCalledWith(200)
     expect(res.json).toHaveBeenCalledWith(expected)
   })
 })
+
