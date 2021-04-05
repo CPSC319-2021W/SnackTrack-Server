@@ -150,7 +150,7 @@ export const deleteSnackBatches = async(req, res) => {
   }
 }
 
-async function addQuantityFromBatch(snack) {
+export async function addQuantityFromBatch(snack) {
   const desiredBatches = await SnackBatches.findAll({
     where: { snack_id: snack.snack_id }
   })

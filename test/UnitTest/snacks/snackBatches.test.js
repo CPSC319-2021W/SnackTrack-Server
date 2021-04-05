@@ -365,8 +365,7 @@ describe('GET/ snack_batches', () => {
             expiration_dtm: '2021-08-29T07:22Z',
             snack_id: 13
           }
-        ]
-        )
+        ])
       } else if (options.where.snack_id === 12) {
         return Promise.resolve([
           {
