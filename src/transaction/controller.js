@@ -150,7 +150,7 @@ export const getPopularSnacks = async (req, res) => {
     if (!start_date || !end_date || !transaction_type_id || !limit) {
       throw Error('Bad Request: invalid query')
     }
-    const response = await Transactions.findAll({
+    let response = await Transactions.findAll({
       where: {
         transaction_type_id,
         payment_id: {
@@ -165,7 +165,15 @@ export const getPopularSnacks = async (req, res) => {
       group: ['snack_name'],
     })
     response.sort((a,b) => b.get('total_quantity') - a.get('total_quantity'))
-    return res.status(200).json(response.splice(0, limit))
+    response = response.splice(0, limit).map(el => el.get({ plain: true }))
+    const result = await response.map(async (el) => {
+      const snack_name = el.snack_name
+      const snack = await Snacks.findOne({ where: { snack_name } })
+      el.snack_type_id = snack ? snack.snack_type_id : null
+      el.image_uri = snack ? snack.image_uri : null
+      return el
+    })
+    return res.status(200).json(await Promise.all(result))
   } catch (err) {
     return res.status(errorCode(err)).json({ error: err.message })
   }
