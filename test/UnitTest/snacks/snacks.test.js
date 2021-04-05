@@ -1,6 +1,6 @@
 import { db, disconnect } from '../../../src/db/index.js'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, it, jest } from '@jest/globals'
-import { addSnack, putSnacks, getSnacks } from '../../../src/snack/controller.js'
+import { addSnack, putSnacks, getSnacks, deleteSnacks } from '../../../src/snack/controller.js'
 
 const Snacks = db.snacks
 const instance = db.dbInstance
@@ -561,6 +561,65 @@ describe('GET/snacks', () => {
       snacks: [snack2]
     }
     expect(res.status).toHaveBeenCalledWith(200)
+    expect(res.json).toHaveBeenCalledWith(expected)
+  })
+})
+
+describe('DELETE/snacks', () => {
+  beforeAll(async () => {
+    jest.spyOn(Snacks, 'destroy').mockImplementation((options) => {
+      if (options.where.snack_id === 1) {
+        return Promise.resolve(1)
+      } else {
+        return Promise.resolve(0)
+      }
+    })
+  })
+
+  afterAll (() => {
+    jest.clearAllMocks()
+  })
+
+  it('should delete snack', async () => {
+    const mockRequest = () => {
+      return {
+        params: {
+          snack_id: 1
+        }
+      }
+    }
+    const mockResponse = () => {
+      const res = {}
+      res.status = jest.fn().mockReturnValue(res)
+      res.json = jest.fn().mockReturnValue(res)
+      return res
+    }
+    const req = mockRequest()
+    const res = mockResponse()
+    await deleteSnacks(req, res)
+    expect(res.status).toHaveBeenCalledWith(204)
+    expect(res.json).toHaveBeenCalledWith()
+  })
+
+  it ('should not delete a snack that cannot be found', async () => {
+    const mockRequest = () => {
+      return {
+        params: {
+          snack_id: 250
+        }
+      }
+    }
+    const mockResponse = () => {
+      const res = {}
+      res.status = jest.fn().mockReturnValue(res)
+      res.json = jest.fn().mockReturnValue(res)
+      return res
+    }
+    const req = mockRequest()
+    const res = mockResponse()
+    const expected = { error: 'snack_id is not found on the snack table.' }
+    await deleteSnacks(req, res)
+    expect(res.status).toHaveBeenCalledWith(404)
     expect(res.json).toHaveBeenCalledWith(expected)
   })
 })
