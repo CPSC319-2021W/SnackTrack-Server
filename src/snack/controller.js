@@ -7,12 +7,12 @@ const instance = db.dbInstance
 
 export const addSnack = async(req, res) => {
   try {
+    const snack = req.body
+    if (snack.quantity < 0 || snack.price < 0 || snack.order_threshold < 0) {
+      return res.status(400).json({ error: 'quantity, price, and order_threshold cannot be a negative number!' })
+    }
+    let quantity = 0
     const result = await instance.transaction(async (t) => {
-      const snack = req.body
-      if (snack.quantity < 0) {
-        return res.status(400).json({ error: 'quantity must be greater than 0!' })
-      }
-      let quantity = 0
       const result = await Snacks.create(snack, { transaction: t })
       if (snack.quantity > 0) {
         quantity = snack.quantity
@@ -51,11 +51,14 @@ export const putSnacks = async(req, res) => {
     if (Object.keys(snack).length === 0) {
       return res.status(200).json(await Snacks.findByPk(snack_id))
     }
+    if (snack.snack_id !== undefined) {
+      return res.status(400).json({ error: 'snack_id cannot be changed for snacks.' })
+    }
     if (snack.order_threshold === 'null') {
       snack.order_threshold = null
     }
     const [found, result] = await Snacks.update(snack, { where: { snack_id }, returning: true })
-    const [data] = result.map(elem => elem.get())
+    const data = result[0].dataValues
     if (!found) {
       return res.status(404).json({ error: 'snack_id is not found on the snack table.' })
     }
@@ -98,7 +101,7 @@ export const getSnacks = async(req, res) => {
     const is_active = req.query.active !== 'false'
     const where = isFetchAll ? {} : { is_active }
     const data = await Snacks.findAll({
-      where, order: [['snack_type_id', 'ASC']]
+      where, order: [['snack_type_id', 'ASC'], ['snack_id', 'ASC']]
     })
     const snacks = await Promise.all(data.map(snack => addQuantityFromBatch(snack)))
     return res.status(200).json({ snacks })
