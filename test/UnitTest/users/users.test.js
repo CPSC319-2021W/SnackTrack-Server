@@ -1,5 +1,5 @@
 import { db } from '../../../src/db/index.js'
-import { getUser, getUsers } from '../../../src/user/controller.js'
+import { addUser, getUser, getUsers } from '../../../src/user/controller.js'
 
 const Users = db.users
 
@@ -245,6 +245,65 @@ describe ('GET /users/:user_id', () => {
     }
     await getUser(req, res)
     expect(res.status).toHaveBeenCalledWith(200)
+    expect(res.json).toHaveBeenCalledWith(expected)
+  })
+})
+
+describe ('POST /users', () => {
+  beforeAll (async () => {
+    jest.spyOn(Users, 'create').mockImplementation((user) => {
+      return Promise.resolve({
+        'user_id': 1,
+        'username': user.username,
+        'first_name': user.first_name,
+        'last_name': user.last_name,
+        'email_address': user.email_address,
+        'balance': 0,
+        'is_active': true,
+        'image_uri': user.image_uri,
+        'is_admin': false,
+        'deleted_at': null
+      })
+    })
+  })
+
+  afterAll (async () => jest.clearAllMocks())
+
+  it ('should create a new user', async () => {
+    const mockRequest = () => {
+      const req = {
+        'body': {
+          'username': 'test',
+          'first_name': 'test',
+          'last_name': 'test',
+          'email_address': 'test@gmail.com',
+          'image_uri': 'https://test.com'
+        }
+      }
+      return req
+    }
+    const mockResponse = () => {
+      const res = {}
+      res.status = jest.fn().mockReturnValue(res)
+      res.json = jest.fn().mockReturnValue(res)
+      return res
+    }
+    const req = mockRequest()
+    const res = mockResponse()
+    const expected = {
+      'user_id': 1,
+      'username': 'test',
+      'first_name': 'test',
+      'last_name': 'test',
+      'email_address': 'test@gmail.com',
+      'balance': 0,
+      'is_active': true,
+      'image_uri': 'https://test.com',
+      'is_admin': false,
+      'deleted_at': null
+    }
+    await addUser(req, res)
+    expect(res.status).toHaveBeenCalledWith(201)
     expect(res.json).toHaveBeenCalledWith(expected)
   })
 })
