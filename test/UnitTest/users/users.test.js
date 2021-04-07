@@ -1,7 +1,8 @@
 import { db } from '../../../src/db/index.js'
-import { addUser, getUser, getUsers, putUsers } from '../../../src/user/controller.js'
+import { addUser, deleteUser, getUser, getUsers, putUsers } from '../../../src/user/controller.js'
 
 const Users = db.users
+const instance = db.dbInstance
 
 describe ('GET /users', () => {
   beforeAll (async () => {
@@ -408,6 +409,98 @@ describe ('PUT /users/:user_id', () => {
       'deleted_at': null
     }
     await putUsers(req, res)
+    expect(res.status).toHaveBeenCalledWith(200)
+    expect(res.json).toHaveBeenCalledWith(expected)
+  })
+})
+
+describe ('DELETE /users/:user_id', () => {
+  let req, res
+  beforeAll (async () => {
+    jest.spyOn(instance, 'transaction').mockImplementation(() => {
+      const user_id = req.params.user_id
+      let result
+      if (user_id === 1) {
+        result = [
+          {
+            'user_id': 1,
+            'username': 'test',
+            'first_name': 'test',
+            'last_name': 'test',
+            'email_address': 'test@gmail.com',
+            'balance': 0,
+            'is_active': false,
+            'image_uri': 'https://test.com',
+            'is_admin': false,
+            'deleted_at': null
+          }
+        ]
+      } else {
+        result = []
+      }
+      if (!result[0]) {
+        return res.status(404).json({ error: 'user_id is not found on the users table' })
+      }
+      result[0].deleted_at = '2012-03-19T07:22Z'
+      return Promise.resolve(result[0])
+    })
+  })
+
+  afterAll (async () => jest.clearAllMocks())
+
+  it ('should reject with 404 - user_id not found', async () => {
+    const mockRequest = () => {
+      const req = {
+        'params': {
+          'user_id': 999
+        }
+      }
+      return req
+    }
+    const mockResponse = () => {
+      const res = {}
+      res.status = jest.fn().mockReturnValue(res)
+      res.json = jest.fn().mockReturnValue(res)
+      return res
+    }
+    req = mockRequest()
+    res = mockResponse()
+    const expected = { error: 'user_id is not found on the users table' }
+    await deleteUser(req, res)
+    expect(res.status).toHaveBeenCalledWith(404)
+    expect(res.json).toHaveBeenCalledWith(expected)
+  })
+
+  it ('should reject with 404 - user_id not found', async () => {
+    const mockRequest = () => {
+      const req = {
+        'params': {
+          'user_id': 1
+        }
+      }
+      return req
+    }
+    const mockResponse = () => {
+      const res = {}
+      res.status = jest.fn().mockReturnValue(res)
+      res.json = jest.fn().mockReturnValue(res)
+      return res
+    }
+    req = mockRequest()
+    res = mockResponse()
+    const expected = {
+      'user_id': 1,
+      'username': 'test',
+      'first_name': 'test',
+      'last_name': 'test',
+      'email_address': 'test@gmail.com',
+      'balance': 0,
+      'is_active': false,
+      'image_uri': 'https://test.com',
+      'is_admin': false,
+      'deleted_at': '2012-03-19T07:22Z'
+    }
+    await deleteUser(req, res)
     expect(res.status).toHaveBeenCalledWith(200)
     expect(res.json).toHaveBeenCalledWith(expected)
   })
