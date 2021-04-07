@@ -30,9 +30,6 @@ export const updateTransaction = async (req, res) => {
       }
       const snack_name = transaction.snack_name
       const snack = await Snacks.findOne({ where: { snack_name } })
-      if (!snack) {
-        return res.status(404).json({ error: 'snack with the snack_name does not exist in the snacks table' })
-      }
       const from = transaction.transaction_type_id
       const to = req.body.transaction_type_id
       const balance = transaction.transaction_amount
@@ -44,13 +41,13 @@ export const updateTransaction = async (req, res) => {
         return transaction
       } else if (from === PURCHASE && to === CANCEL) {
         handleNonNullPaymentId(transaction.payment_id)
-        await increaseQuantityInSnackBatch(transaction.quantity, snack.snack_id, t)
+        if (snack) await increaseQuantityInSnackBatch(transaction.quantity, snack.snack_id, t)
         await Users.decrement({ balance }, selector)
       } else if (from === PENDING && to === PURCHASE) {
         await Users.increment({ balance }, selector)
       } else if (from === PENDING && to === PENDING_CANCEL) {
         handleNonNullPaymentId(transaction.payment_id)
-        await increaseQuantityInSnackBatch(transaction.quantity, snack.snack_id, t)
+        if (snack) await increaseQuantityInSnackBatch(transaction.quantity, snack.snack_id, t)
       } else {
         throw Error('Bad Request: This update is not allowed.')
       }
