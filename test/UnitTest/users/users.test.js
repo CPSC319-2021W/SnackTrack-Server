@@ -1,5 +1,5 @@
 import { db } from '../../../src/db/index.js'
-import { addUser, getUser, getUsers } from '../../../src/user/controller.js'
+import { addUser, getUser, getUsers, putUsers } from '../../../src/user/controller.js'
 
 const Users = db.users
 
@@ -304,6 +304,111 @@ describe ('POST /users', () => {
     }
     await addUser(req, res)
     expect(res.status).toHaveBeenCalledWith(201)
+    expect(res.json).toHaveBeenCalledWith(expected)
+  })
+})
+
+describe ('PUT /users/:user_id', () => {
+  beforeAll (async () => {
+    jest.spyOn(Users, 'findByPk').mockImplementation(() => {
+      return Promise.resolve({
+        'user_id': 1,
+        'username': 'test',
+        'first_name': 'test',
+        'last_name': 'test',
+        'email_address': 'test@gmail.com',
+        'balance': 0,
+        'is_active': true,
+        'image_uri': 'https://test.com',
+        'is_admin': false,
+        'deleted_at': null
+      })
+    })
+    jest.spyOn(Users, 'update').mockImplementation(({ balance, is_admin }, condition) => {
+      if (condition.where.user_id === 1) {
+        const user = {
+          'user_id': 1,
+          'username': 'test',
+          'first_name': 'test',
+          'last_name': 'test',
+          'email_address': 'test@gmail.com',
+          'balance': balance,
+          'is_active': true,
+          'image_uri': 'https://test.com',
+          'is_admin': is_admin,
+          'deleted_at': null
+        }
+        return Promise.resolve([1, [user]])
+      } else {
+        return Promise.resolve([0, []])
+      }
+    })
+  })
+
+  afterAll (async () => jest.clearAllMocks())
+
+  it ('should reject with 404 - user_id not found', async () => {
+    const mockRequest = () => {
+      const req = {
+        'params': {
+          'user_id': 999
+        },
+        'body': {
+          'balance': 1000,
+          'is_admin': true
+        }
+      }
+      return req
+    }
+    const mockResponse = () => {
+      const res = {}
+      res.status = jest.fn().mockReturnValue(res)
+      res.json = jest.fn().mockReturnValue(res)
+      return res
+    }
+    const req = mockRequest()
+    const res = mockResponse()
+    const expected = { error: 'user_id is not found on the users table' }
+    await putUsers(req, res)
+    expect(res.status).toHaveBeenCalledWith(404)
+    expect(res.json).toHaveBeenCalledWith(expected)
+  })
+
+  it ('should get the original user information back - no updates', async () => {
+    const mockRequest = () => {
+      const req = {
+        'params': {
+          'user_id': 1
+        },
+        'body': {
+          'balance': undefined,
+          'is_admin': undefined
+        }
+      }
+      return req
+    }
+    const mockResponse = () => {
+      const res = {}
+      res.status = jest.fn().mockReturnValue(res)
+      res.json = jest.fn().mockReturnValue(res)
+      return res
+    }
+    const req = mockRequest()
+    const res = mockResponse()
+    const expected = {
+      'user_id': 1,
+      'username': 'test',
+      'first_name': 'test',
+      'last_name': 'test',
+      'email_address': 'test@gmail.com',
+      'balance': 0,
+      'is_active': true,
+      'image_uri': 'https://test.com',
+      'is_admin': false,
+      'deleted_at': null
+    }
+    await putUsers(req, res)
+    expect(res.status).toHaveBeenCalledWith(200)
     expect(res.json).toHaveBeenCalledWith(expected)
   })
 })
