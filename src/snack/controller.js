@@ -114,10 +114,13 @@ export const getSnackBatches = async(req, res) => {
   try {
     const isFetchAll = req.query.snack_id === undefined
     const snack_id = req.query.snack_id
-    const where = isFetchAll ? {} : { snack_id }
-    const snack_batches = await SnackBatches.findAll({
-      where, order: [['snack_batch_id', 'ASC']]
-    })
+    let options
+    if (isFetchAll) {
+      options = { where: {}, order: [['snack_batch_id', 'ASC']] }
+    } else {
+      options = { where: { snack_id }, order: [['expiration_dtm', 'ASC'], ['snack_batch_id', 'ASC']] }
+    }
+    const snack_batches = await SnackBatches.findAll(options)
     return res.status(200).json({ snack_batches })
   } catch (err) {
     return res.status(errorCode(err)).json({ error: err.message })
