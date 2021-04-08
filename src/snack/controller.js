@@ -126,11 +126,15 @@ export const getSnackBatches = async(req, res) => {
 
 export const deleteSnacks = async(req, res) => {
   try {
-    const snack_id = req.params.snack_id
-    const rows = await Snacks.destroy({ where: { snack_id } })
-    if (!rows) {
-      return res.status(404).json({ error: 'snack_id is not found on the snack table.' })
-    }
+    await instance.transaction(async (t) => {
+      const snack_id = req.params.snack_id
+      await SnackBatches.destroy({ where: { snack_id }, transaction: t })
+      const rows = await Snacks.destroy({ where: { snack_id }, transaction: t })
+      if (!rows) {
+        return res.status(404).json({ error: 'snack_id is not found on the snack table.' })
+      }
+      return
+    })
     return res.status(204).json()
   } catch (err) {
     return res.status(errorCode(err)).json({ error: err.message })

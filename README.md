@@ -9,6 +9,7 @@
 * `yarn install` to get all of the dependency packages
 * Spawn a local node server with `yarn run start`
 * For developmenet(nodemon), run server with `yarn run dev`
+* `yarn test` to launch test.
 
 #### Making Changes
 1. Create a new feature branch off of the `dev` branch and name it with the number of the Jira ticket you'll be working on (e.g. `SNAK-101`).
