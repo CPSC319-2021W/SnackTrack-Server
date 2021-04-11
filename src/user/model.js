@@ -5,9 +5,6 @@ export default (db, DataTypes) => {
       primaryKey: true,
       autoIncrement: true
     },
-    username: {
-      type: DataTypes.STRING
-    },
     first_name: {
       type: DataTypes.STRING
     },

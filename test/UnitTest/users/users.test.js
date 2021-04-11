@@ -11,7 +11,6 @@ describe ('GET /users', () => {
         return Promise.resolve([
           {
             'user_id': 1,
-            'username': 'test1',
             'first_name': 'test',
             'last_name': 'one',
             'email_address': condition.where.email_address,
@@ -26,7 +25,6 @@ describe ('GET /users', () => {
         return Promise.resolve([
           {
             'user_id': 1,
-            'username': 'test1',
             'first_name': 'test',
             'last_name': 'one',
             'email_address': 'test1@gmail.com',
@@ -38,7 +36,6 @@ describe ('GET /users', () => {
           },
           {
             'user_id': 2,
-            'username': 'test2',
             'first_name': 'test',
             'last_name': 'two',
             'email_address': 'test2@gmail.com',
@@ -50,7 +47,6 @@ describe ('GET /users', () => {
           },
           {
             'user_id': 3,
-            'username': 'test3',
             'first_name': 'test',
             'last_name': 'three',
             'email_address': 'test3@gmail.com',
@@ -88,7 +84,6 @@ describe ('GET /users', () => {
       'users': [
         {
           'user_id': 1,
-          'username': 'test1',
           'first_name': 'test',
           'last_name': 'one',
           'email_address': 'test1@gmail.com',
@@ -100,7 +95,6 @@ describe ('GET /users', () => {
         },
         {
           'user_id': 2,
-          'username': 'test2',
           'first_name': 'test',
           'last_name': 'two',
           'email_address': 'test2@gmail.com',
@@ -112,7 +106,6 @@ describe ('GET /users', () => {
         },
         {
           'user_id': 3,
-          'username': 'test3',
           'first_name': 'test',
           'last_name': 'three',
           'email_address': 'test3@gmail.com',
@@ -150,7 +143,6 @@ describe ('GET /users', () => {
       'users': [
         {
           'user_id': 1,
-          'username': 'test1',
           'first_name': 'test',
           'last_name': 'one',
           'email_address': 'test1@gmail.com',
@@ -174,7 +166,6 @@ describe ('GET /users/:user_id', () => {
       if (user_id === 1) {
         return Promise.resolve({
           'user_id': 1,
-          'username': 'test1',
           'first_name': 'test',
           'last_name': 'one',
           'email_address': 'test1@gmail.com',
@@ -234,7 +225,6 @@ describe ('GET /users/:user_id', () => {
     const res = mockResponse()
     const expected = {
       'user_id': 1,
-      'username': 'test1',
       'first_name': 'test',
       'last_name': 'one',
       'email_address': 'test1@gmail.com',
@@ -255,7 +245,6 @@ describe ('POST /users', () => {
     jest.spyOn(Users, 'create').mockImplementation((user) => {
       return Promise.resolve({
         'user_id': 1,
-        'username': user.username,
         'first_name': user.first_name,
         'last_name': user.last_name,
         'email_address': user.email_address,
@@ -274,7 +263,6 @@ describe ('POST /users', () => {
     const mockRequest = () => {
       const req = {
         'body': {
-          'username': 'test',
           'first_name': 'test',
           'last_name': 'test',
           'email_address': 'test@gmail.com',
@@ -293,7 +281,6 @@ describe ('POST /users', () => {
     const res = mockResponse()
     const expected = {
       'user_id': 1,
-      'username': 'test',
       'first_name': 'test',
       'last_name': 'test',
       'email_address': 'test@gmail.com',
@@ -314,7 +301,6 @@ describe ('PUT /users/:user_id', () => {
     jest.spyOn(Users, 'findByPk').mockImplementation(() => {
       return Promise.resolve({
         'user_id': 1,
-        'username': 'test',
         'first_name': 'test',
         'last_name': 'test',
         'email_address': 'test@gmail.com',
@@ -329,7 +315,6 @@ describe ('PUT /users/:user_id', () => {
       if (condition.where.user_id === 1) {
         const user = {
           'user_id': 1,
-          'username': 'test',
           'first_name': 'test',
           'last_name': 'test',
           'email_address': 'test@gmail.com',
@@ -398,7 +383,6 @@ describe ('PUT /users/:user_id', () => {
     const res = mockResponse()
     const expected = {
       'user_id': 1,
-      'username': 'test',
       'first_name': 'test',
       'last_name': 'test',
       'email_address': 'test@gmail.com',
@@ -424,7 +408,6 @@ describe ('DELETE /users/:user_id', () => {
         result = [
           {
             'user_id': 1,
-            'username': 'test',
             'first_name': 'test',
             'last_name': 'test',
             'email_address': 'test@gmail.com',
@@ -490,7 +473,6 @@ describe ('DELETE /users/:user_id', () => {
     res = mockResponse()
     const expected = {
       'user_id': 1,
-      'username': 'test',
       'first_name': 'test',
       'last_name': 'test',
       'email_address': 'test@gmail.com',

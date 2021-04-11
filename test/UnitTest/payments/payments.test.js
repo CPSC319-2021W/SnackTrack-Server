@@ -104,7 +104,6 @@ describe ('POST /payments', () => {
     const user1 = {
       'user_id': 1,
       'is_admin': true,
-      'username': 'testone',
       'balance': 1000
     }
     jest.spyOn(instance, 'transaction').mockImplementation(() => {
@@ -267,7 +266,6 @@ describe ('POST /payments/all', () => {
     const user1 = {
       'user_id': 1,
       'is_admin': true,
-      'username': 'testone',
       'balance': 1000
     }
     jest.spyOn(instance, 'transaction').mockImplementation(() => {

@@ -20,7 +20,6 @@ const testSnackData = {
 }
 
 const testUserData = {
-  username: 'testUser',
   first_name: 'test',
   last_name: 'test',
   email_address: 'test_user_email@gmail.com',
