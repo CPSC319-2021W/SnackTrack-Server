@@ -17,10 +17,7 @@ export const verifyAndCreateToken = async (req, res) => {
     const payload = ticket.getPayload()
     let user = await Users.findOne({ where: { email_address: payload.email }, paranoid: false })
     if (!user) {
-      const randomInt = Math.floor((Math.random() * 1000) + 1)
-      const username = payload.given_name + payload.family_name + randomInt.toString()
       const newUser = {
-        username: username,
         first_name: payload.given_name,
         last_name: payload.family_name,
         email_address: payload.email,

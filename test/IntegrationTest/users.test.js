@@ -5,7 +5,6 @@ import axios from 'axios'
 const Users = db.users 
 const inValidToken = 'inValid'
 const testUserData = {
-  username: 'test',
   first_name: 'test',
   last_name: 'test',
   email_address: 'test_email@gmail.com',
@@ -77,7 +76,6 @@ describe('GET /users', () => {
     const response = await axios.get(`https://snacktrack-back-stg.herokuapp.com/api/v1/users/${testUserId}`, authHeader)
     expect(response.status).toBe(200)
     const data = response.data
-    expect(data.username).toMatch(testUserData.username)
     expect(data.first_name).toMatch(testUserData.first_name)
     expect(data.last_name).toMatch(testUserData.last_name)
     expect(data.email_address).toMatch(testUserData.email_address)
@@ -100,7 +98,6 @@ describe('GET /users', () => {
     const response = await axios.get(`https://snacktrack-back-stg.herokuapp.com/api/v1/users/?email_address=${testUserData.email_address}`, authHeader)
     expect(response.status).toBe(200)
     const data = response.data.users[0]
-    expect(data.username).toMatch(testUserData.username)
     expect(data.first_name).toMatch(testUserData.first_name)
     expect(data.last_name).toMatch(testUserData.last_name)
     expect(data.email_address).toMatch(testUserData.email_address)
@@ -115,13 +112,6 @@ describe('GET /users', () => {
     expect(response.status).toBe(200)
     const data = response.data.users
 
-    expect(data).toEqual(          
-      expect.arrayContaining([      
-        expect.objectContaining({   
-          username: testUserData.username             
-        })
-      ])
-    )
     expect(data).toEqual(          
       expect.arrayContaining([      
         expect.objectContaining({   
