@@ -17,11 +17,13 @@ export const verifyAndCreateToken = async (req, res) => {
     const payload = ticket.getPayload()
     let user = await Users.findOne({ where: { email_address: payload.email }, paranoid: false })
     if (!user) {
+      const adminsInDB = await Users.findOne({ where: { is_admin: true }, paranoid: false })
       const newUser = {
         first_name: payload.given_name,
         last_name: payload.family_name,
         email_address: payload.email,
         image_uri: payload.picture,
+        is_admin: !Boolean(adminsInDB)
       }
       const result = await Users.create(newUser)
       user = result.toJSON()
