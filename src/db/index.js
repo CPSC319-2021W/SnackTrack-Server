@@ -12,11 +12,11 @@ import dotenv from 'dotenv'
 dotenv.config()
 
 export const dbInstance = new Sequelize(
-  process.env.DB_TABLENAME,
+  process.env.DB_NAME,
   process.env.DB_USERID,
   process.env.DB_PASSWORD,
   {
-    host: process.env.HOST,
+    host: process.env.DB_HOST,
     dialect: process.env.DB_DIALECT,
     protocol: process.env.DB_PROTOCOL,
     dialectOptions: {
