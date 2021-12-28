@@ -1,5 +1,12 @@
 # SnackTrack-Server
 
+## [SnackTrack Client repo](https://github.com/CPSC319-2021W/SnackTrack-Client)
+
+## [Production link](https://snacktrack.herokuapp.com/)
+
+Note: The project is hosted on Heroku's free tier, so the links sleep after one hour. If you see an 'Application error', please be patient and refresh the link 3-4 times to wake up the project.
+
+---
 
 ### :gear:&nbsp;&nbsp;Development Workflow
 
@@ -15,7 +22,7 @@
 1. Create a new feature branch off of the `dev` branch and name it with the number of the Jira ticket you'll be working on (e.g. `SNAK-101`).
 2. Make changes and commit your changes to your feature branch with [Conventional Commit Messages](https://gist.github.com/qoomon/5dfcdf8eec66a051ecd85625518cfd13) 
 3. Once you're satisfied that your changes address the ticket, open a new pull request for your feature branch with the corresponding Jira ticket number and title as the PR title (e.g. SNAK-61: Implement POST/api/v1/payments) 
-4. Fill out [PR template](https://github.com/CPSC319-Galvanize/SnackTrack-Server/blob/dev/.github/pull_request_template.md) when you post a PR
+4. Fill out [PR template](https://github.com/CPSC319-2021W/SnackTrack-Server/blob/dev/.github/pull_request_template.md) when you post a PR
 5. Resolve all merge conflicts as needed.
 6. Assign two other BE team members to review your PR and be open and available to address feedback.
 7. Comment the PR link in the Jira ticket.
@@ -28,7 +35,7 @@ At the end of every sprint (tentatively), we'll do a code freeze and merge the `
 1. Follow [Conventional Commit Messages](https://gist.github.com/qoomon/5dfcdf8eec66a051ecd85625518cfd13) 
 2. Use ticket number as branch name. (Ex. SNAK-61)
 3. Use ticket number + title as a PR title (Ex. SNAK-61-Implement POST/api/v1/payments)
-4. Fill out [PR template](https://github.com/CPSC319-Galvanize/SnackTrack-Server/blob/dev/.github/pull_request_template.md) when you post a PR
+4. Fill out [PR template](https://github.com/CPSC319-2021W/SnackTrack-Server/blob/dev/.github/pull_request_template.md) when you post a PR
 
 #### Branches
 | Branch | Description |
